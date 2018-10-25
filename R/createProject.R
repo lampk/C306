@@ -15,7 +15,7 @@ createProject <- function(dir, structure = c("OUCRU_RCT_wInterim")){
   dir.create(dir)
 
   ## copy folder structure into destination folder
-  file.copy(from = file.path(system.file(package = "Lmisc"), "structure", structure, "."),
+  file.copy(from = file.path(system.file(package = "C306"), "structure", structure, "."),
             to = dir, recursive = TRUE)
 
   # inform
