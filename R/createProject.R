@@ -17,6 +17,7 @@ createProject <- function(dir, structure = c("OUCRU_RCT_wInterim")){
   ## copy folder structure into destination folder
   file.copy(from = file.path(system.file(package = "C306"), "structure", structure, "."),
             to = dir, recursive = TRUE)
+  file.rename(from = file.path(dir, "OUCRU_RCT_wInterim.Rproj"), to = file.path(dir, paste0(basename(dir), ".Rproj")))
 
   # inform
   cat(paste("Project", basename(dir), "was created in", dirname(dir), "\n", sep = " "))
