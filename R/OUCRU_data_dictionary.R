@@ -9,7 +9,7 @@ import.info <- function(table_name, input, output) {
   input_sheet <- readxl::excel_sheets(input)
   grid_id <- grep(pattern = "grids", x = input_sheet, ignore.case = TRUE)
   if (length(grid_id) > 0) {
-    grids <- read_excel(path = input, sheet = grid_id)
+    grids <- readxl::read_excel(path = input, sheet = grid_id)
     sheet_grid <- grids$sheet_grid <- with(grids, paste(CRF, Grid, sep = "_"))
   } else {
     sheet_grid <- NULL
@@ -21,7 +21,7 @@ import.info <- function(table_name, input, output) {
   #### no-grid sheets
   for (i in sheet_final[!sheet_final %in% sheet_grid] ) {
     assign(paste(i, "info", sep = "_"),
-           subset(read_excel(path = input, sheet = i), (!`Data type` %in% "Title")))
+           subset(readxl::read_excel(path = input, sheet = i), (!`Data type` %in% "Title")))
   }
   #### grid sheets
   #browser()
