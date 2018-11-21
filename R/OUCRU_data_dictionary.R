@@ -44,6 +44,7 @@ import.info <- function(table_name, input, output) {
 }
 
 ## function to convert imported data dictionary (OUCRU format) into simpler format that works with myformat.* functions
+#' @import dplyr
 #' @export
 convert.info <- function(oucru_info, oucru_category) {
   requireNamespace("dplyr")
@@ -51,22 +52,22 @@ convert.info <- function(oucru_info, oucru_category) {
 
   ## get value & level for factors
   cat_tmp <- distinct(oucru_category) %>%
-    dplyr::rename(Category = category) %>%
-    dplyr::mutate(submissionvalue = ifelse(is.na(suppressWarnings(as.numeric(submissionvalue))),
+    rename(Category = category) %>%
+    mutate(submissionvalue = ifelse(is.na(suppressWarnings(as.numeric(submissionvalue))),
                                     paste0("'", submissionvalue, "'", sep = ""),
                                     submissionvalue),
            text = paste0("'", gsub(pattern = "=", replacement = " equal ",
                                    x = gsub(pattern = "[\x01-\x1f\x7f-\xff:]", replacement = "",
                                             x = gsub(pattern = ";", replacement = ",", x = text))), "'")) %>%
-    dplyr::group_by(Category) %>%
-    dplyr::summarise(value = paste(submissionvalue, text, sep = "=", collapse = ";"),
+    group_by(Category) %>%
+    summarise(value = paste(submissionvalue, text, sep = "=", collapse = ";"),
               level = paste(text, collapse = ";")) %>%
-    dplyr::ungroup()
+    ungroup()
 
   ## convert
   output <- merge(oucru_info, cat_tmp, by = "Category", all.x = TRUE) %>%
-    dplyr::mutate(Format = tolower(Format)) %>%
-    dplyr::transmute(varname = Variable,
+    mutate(Format = tolower(Format)) %>%
+    transmute(varname = Variable,
               label   = Caption,
               type    = car::Recode(`Data type`,
                                recodes = "c('Category', 'ExCategory', 'RadioList') = 'factor';
