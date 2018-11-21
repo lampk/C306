@@ -1,27 +1,3 @@
-#' Summarise dataset
-#'
-#' @param formula Specification of dependent and independent variables
-#' @param data Data to summarise
-#' @param bycol Summary by column or by row?
-#' @param pooledGroup Pooling all subgroups of dependent variable?
-#' @param statistics Summary statistics for continuous variables?
-#' @param continuous Independent variables are continuous variables?
-#' @param test Display p values from statistical test comparing independent variables between sub-group of dependent variable?
-#' @param digits Number of decimal digit number
-#' @param pdigits Number of decimal digit number for p values
-#' @param pcutoff Cut-off to display p values
-#' @param chisq.test Use Chi-squared test rather than Fisher's exact test for categorical variables
-#' @param correct Correction for Chi-squared test
-#' @param workspace Parameter for Fisher's exact test
-#' @param hybrid Parameter for Fisher's exact test
-#' @param simulate.p.value Parameter for Fisher's exact test
-#' @param B Parameter for Fisher's exact test
-#' @param footer Footer(s) for table
-#' @param flextable Create output as a flextable-type table
-#' @param bg Background color for odd rows of table
-#'
-#' @return a flextable-type table or a list with values/headers/footers
-
 getxs <- function(xformula) {
   if (!is.call(xformula)) {
     deparse(xformula)
@@ -78,6 +54,30 @@ sstable.formula <- function(formula) {
                            z = if (zlen == 0) 0 else (xlen + 2)),
               formula1 = formula1))
 }
+
+#' Summarise dataset
+#'
+#' @param formula Specification of dependent and independent variables
+#' @param data Data to summarise
+#' @param bycol Summary by column or by row?
+#' @param pooledGroup Pooling all subgroups of dependent variable?
+#' @param statistics Summary statistics for continuous variables?
+#' @param continuous Independent variables are continuous variables?
+#' @param test Display p values from statistical test comparing independent variables between sub-group of dependent variable?
+#' @param digits Number of decimal digit number
+#' @param pdigits Number of decimal digit number for p values
+#' @param pcutoff Cut-off to display p values
+#' @param chisq.test Use Chi-squared test rather than Fisher's exact test for categorical variables
+#' @param correct Correction for Chi-squared test
+#' @param workspace Parameter for Fisher's exact test
+#' @param hybrid Parameter for Fisher's exact test
+#' @param simulate.p.value Parameter for Fisher's exact test
+#' @param B Parameter for Fisher's exact test
+#' @param footer Footer(s) for table
+#' @param flextable Create output as a flextable-type table
+#' @param bg Background color for odd rows of table
+#'
+#' @return a flextable-type table or a list with values/headers/footers
 
 sstable.baseline.each <- function(varname, x, y, z, bycol = TRUE, pooledGroup = FALSE,
                                   statistics = "med.IQR", continuous = NA, test = FALSE,
@@ -353,7 +353,7 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
 
   #### summary statistics
   if ((is.null(z) & any(continuous)) | (!is.null(z) & !is.factor(z))) {
-    footer.con <- paste0(switch(contSummary,
+    footer.con <- paste0(switch(statistics,
                                 med.IQR = "median (IQR)",
                                 med.90  = "median (90% range)",
                                 med.range = "median (range)",
