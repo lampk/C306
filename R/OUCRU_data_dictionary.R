@@ -4,9 +4,9 @@ import.info <- function(table_name, input, output) {
   requireNamespace("readxl")
 
   ### get all available sheets
-  crfs <- read_excel(path = input, sheet = "CRFs")
+  crfs <- readxl::read_excel(path = input, sheet = "CRFs")
   ### check Grids table
-  input_sheet <- excel_sheets(input)
+  input_sheet <- readxl::excel_sheets(input)
   grid_id <- grep(pattern = "grids", x = input_sheet, ignore.case = TRUE)
   if (length(grid_id) > 0) {
     grids <- read_excel(path = input, sheet = grid_id)
