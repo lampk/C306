@@ -1,11 +1,18 @@
 Package: C306
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
+Title: Collection of useful R codes for data analysis from the Biostatistics group at OUCRU
+Version: 0.1.0.9000
+Author: Lam Phung Khanh
+Maintainer: Lam Phung Khanh <phungkhanhlam@gmail.com>
+Description: Collection of useful R codes for data analysis from the Biostatistics group at OUCRU
     Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+License: The MIT License (MIT)
 Encoding: UTF-8
 LazyData: true
+Imports: lubridate,
+    car,
+    readxl,
+    dplyr,
+    flextable,
+    officer
+RoxygenNote: 6.1.1
