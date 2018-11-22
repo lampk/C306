@@ -199,23 +199,23 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
     if (length(digits) != ncol(x)) stop("digits argument must have length 1 or similar length as number of row-wise variables !!!")
   }
 
-
-
   ## if pooledGroup
   if (pooledGroup) {
+    tmp <- x
     x <- rbind(x, x)
     ypool <- ifelse("total" %in% tolower(levels(y)), "pooledGroup", "Total")
     y <- factor(c(as.character(y), rep(ypool, nrow(dat))), levels = c(levels(y), ypool), exclude = NULL)
     z <- if (!is.null(z)) factor(c(z, z), levels = unique(na.omit(z))) else NULL
   }
 
+
   ## get variable name
-  varname <- getlabel(x)
+  varname <- getlabel(tmp)
 
   ## get summary
   value <- do.call(rbind,
                    lapply(1:ncol(x), function(i) {
-                     sstable.baseline.each(varname = varname[i],
+                     sstable.baseline.each(varname = varname[i][[1]],
                                            x = x[, i], y = y, z = z, bycol = bycol,
                                            pooledGroup = pooledGroup, statistics = statistics,
                                            continuous = continuous[i], test = test,
