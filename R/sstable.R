@@ -144,7 +144,6 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
   x <- dat[, info$index$x, drop = FALSE]
   y <- if (info$index$y > 0) dat[, info$index$y] else NULL
   z <- if (info$index$z > 0) dat[, info$index$z] else NULL
-  browser()
 
   ## y must be categorical variable
   if (!is.null(y)) {
