@@ -144,11 +144,12 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
   x <- dat[, info$index$x, drop = FALSE]
   y <- if (info$index$y > 0) dat[, info$index$y] else NULL
   z <- if (info$index$z > 0) dat[, info$index$z] else NULL
+  browser()
 
   ## y must be categorical variable
   if (!is.null(y)) {
-    if ((!class(y) %in% c("character", "factor", "logical")) |
-        ((class(y) %in% c("numeric", "integer")) & length(unique(na.omit(y))) > 5)) {
+    if (all(!c("character", "factor", "logical") %in% class(y)) |
+        (any(c("numeric", "integer") %in% class(y)) & length(unique(na.omit(y))) > 5)) {
       stop("Colum-wise variable must be categorical !!!")
     }
     y <- factor(as.character(y), levels = sort(unique(as.character(y)), na.last = TRUE), exclude = NULL)
@@ -167,8 +168,8 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
 
   continuous <- sapply(1:ncol(x), function(i) {
     out <- ifelse(is.na(continuous[i]),
-                  ifelse((class(x[, i]) %in% c("factor", "character", "logical")) |
-                           ((class(x[, i]) %in% c("numeric", "integer")) & length(unique(na.omit(x[, i]))) <= 5), FALSE, TRUE),
+                  ifelse(any(c("factor", "character", "logical") %in% class(x[, i])) |
+                           (any(c("numeric", "integer") %in% class(x[, i])) & length(unique(na.omit(x[, i]))) <= 5), FALSE, TRUE),
                   continuous[i])
     return(out)
   })
@@ -187,8 +188,8 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
 
   ## determine type of z
   if (!is.null(z)) {
-    zcontinuous <- ifelse((class(z) %in% c("factor", "character", "logical")) |
-                            ((class(z) %in% c("numeric", "integer")) & length(unique(na.omit(z))) <= 5), FALSE, TRUE)
+    zcontinuous <- ifelse(any(c("factor", "character", "logical") %in% class(z)) |
+                            (any(c("numeric", "integer") %in% class(z)) & length(unique(na.omit(z))) <= 5), FALSE, TRUE)
     if (zcontinuous == FALSE & !is.factor(z)) z <- factor(z, levels = unique(na.omit(z)))
   }
 
