@@ -1,3 +1,53 @@
+#' Format data based on pre-defined information
+#'
+#' @description A function to format each variable in data frame based on pre-defined information.
+#'
+#' @param data a data frame contains variables to be formatted
+#' @param info a data frame specifies how variables will be formatted. This data frame should have the following columns: varname (character variable specifies name of each variable), label (character variable specifies label of each variables), type (character variable specifies type of each variable [numeric, factor, character, datetime], unit (character variable specifies units of each continuous variable), value (character variable specifies values of each variable [format of datetime variables/values of categorical variables], levels (character variable specifies order of levels of each categorical variable), missing (character variable specifies coding for missing values for each variable).
+#'
+#' @return a data frame with variables are formatted according information specified in info
+#' @export
+myformat.data <- function(data, info){
+  # info should have these columns
+  #- varname: name of variables
+  #- label: label of variables
+  #- type: type of variables (numeric, factor, character, datetime)
+  #- unit: units of variables
+  #- value: values of variables (format of datetime variables/values of categorical variables)
+  #- levels: order of levels of categorical variables
+  #- missing: coding for missing values
+
+  ## recognize variable in data
+  allvars <- tolower(names(data))
+  flag <- names(data)[tolower(names(data)) %in% tolower(na.omit(info$varname))]
+  if (length(flag) == 0){stop("No variable in this data present in info !!!")}
+  info <- info[na.omit(match(tolower(flag), tolower(info$varname))),]
+
+  ## select variables mentioned in info
+  tmp <- data[, flag]
+
+  ## if scale & center are missing --> using NA
+  if (!"scale" %in% names(info)){info$scale <- NA}
+  if (!"center" %in% names(info)){info$center <- NA}
+
+  ## set type to lower case and no space
+  info$type <- gsub(" ", "", tolower(info$type))
+
+  ## perform formating
+  return(data.frame(mapply(myformat.each,
+                           x = as.list(tmp),
+                           label = info$label,
+                           type = info$type,
+                           unit = info$unit,
+                           scale = info$scale,
+                           center = info$center,
+                           value = info$value,
+                           levels = info$levels,
+                           missing = info$missing,
+                           SIMPLIFY = FALSE),
+                    stringsAsFactors = FALSE))
+}
+
 myformat.each <- function(x, label = NA, type, unit = NA, scale = NA, center = NA, value = NA, levels = NA, missing = NA){
   type <- tolower(type)
   ## missing data
@@ -53,46 +103,4 @@ myformat.each <- function(x, label = NA, type, unit = NA, scale = NA, center = N
 
   ## return
   return(tmp)
-}
-
-#' @export
-myformat.data <- function(data, info){
-  # info should have these columns
-  #- varname: name of variables
-  #- label: label of variables
-  #- type: type of variables (numeric, factor, character, datetime)
-  #- unit: units of variables
-  #- value: values of variables (format of datetime variables/values of categorical variables)
-  #- levels: order of levels of categorical variables
-  #- missing: coding for missing values
-
-  ## recognize variable in data
-  allvars <- tolower(names(data))
-  flag <- names(data)[tolower(names(data)) %in% tolower(na.omit(info$varname))]
-  if (length(flag) == 0){stop("No variable in this data present in info !!!")}
-  info <- info[na.omit(match(tolower(flag), tolower(info$varname))),]
-
-  ## select variables mentioned in info
-  tmp <- data[, flag]
-
-  ## if scale & center are missing --> using NA
-  if (!"scale" %in% names(info)){info$scale <- NA}
-  if (!"center" %in% names(info)){info$center <- NA}
-
-  ## set type to lower case and no space
-  info$type <- gsub(" ", "", tolower(info$type))
-
-  ## perform formating
-  return(data.frame(mapply(myformat.each,
-                           x = as.list(tmp),
-                           label = info$label,
-                           type = info$type,
-                           unit = info$unit,
-                           scale = info$scale,
-                           center = info$center,
-                           value = info$value,
-                           levels = info$levels,
-                           missing = info$missing,
-                           SIMPLIFY = FALSE),
-                    stringsAsFactors = FALSE))
 }

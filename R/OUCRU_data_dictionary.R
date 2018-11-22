@@ -1,4 +1,15 @@
-## function to import Data dictionary (OUCRU format) into R
+
+# import OUCRU data dictionary --------------------------------------------
+
+#' Import OUCRU's data dictionary into R
+#'
+#' @description A function to import OUCRU's data dictionary into R.
+#'
+#' @param table_name a character vector specifies names of Excel sheets (in OUCRU's data dictionary) to be imported.
+#' @param input a character value specifies path to the OUCRU's data dictionary file (in Excel format).
+#' @param output a character value specifies where to save imported data.
+#'
+#' @return Nothing (imported data will be saved in the pre-defined output directory)
 #' @export
 import.info <- function(table_name, input, output) {
   requireNamespace("readxl")
@@ -43,7 +54,16 @@ import.info <- function(table_name, input, output) {
   save(list = c(sheet_info_name, "sheet_info_name"), file = output)
 }
 
-## function to convert imported data dictionary (OUCRU format) into simpler format that works with myformat.* functions
+# convert OUCRU’s data dictionary to a general data dictionary -----------------
+
+#' Convert imported OUCRU's data dictionary into a general data dictionary
+#'
+#' @description A function to convert imported OUCRU's data dictionary into a general data dictionary.
+#'
+#' @param oucru_info a data frame contains imported data of a sheet from OUCRU's data dictionary.
+#' @param oucru_category a data frame specifies how categorical variables are coded in OUCRU's database.
+#'
+#' @return A data frame contains data dictionary information in a general format.
 #' @import dplyr
 #' @export
 convert.info <- function(oucru_info, oucru_category) {
@@ -85,6 +105,7 @@ convert.info <- function(oucru_info, oucru_category) {
               levels  = ifelse(is.na(type), NA,
                                ifelse(type != "factor", NA, level)),
               missing = NA,
+              scale = NA,
               condition = NA,
               strict = "Yes")
   return(subset(output, !is.na(varname)))

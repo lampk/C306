@@ -1,9 +1,11 @@
-################################################################################
-# to create project directory
-# by: Lam PK
-# version: 23 July 2015
-################################################################################
-
+#' Create project's folder based on pre-defined folder structure
+#'
+#' @description A generic function to create a project's folder based on pre-defined folder structure.
+#'
+#' @param dir a character specifies where to create the project's folder.
+#' @param structure a character specifies the pre-defined folder structure to be used.
+#'
+#' @return A message to confirm that the project's folder is created at the designed place.
 #' @export
 createProject <- function(dir, structure = c("OUCRU_RCT_wInterim")){
   ## to create project directory

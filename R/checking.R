@@ -1,4 +1,6 @@
-## function to find, match and correct variable names
+
+# find, match and correct variable names ----------------------------------
+
 find_match_correct_var <- function(x, realvar) {
   if (is.atomic(x) || is.name(x)) {
     x
@@ -24,43 +26,22 @@ find_match_correct_var_final <- function(cond, realvar) {
   return(gsub(pattern = "[\"]", replacement = "'", x = out))
 }
 
-## functions to check data
-inspect.each <- function (x, varname, type, value = NA, check_missing = TRUE) {
-  tmp <- NULL
-  if (check_missing) {
-    if (anyNA(x) | any(as.character(x) == "")) {
-      tmp <- rbind(tmp, data.frame(index = which(is.na(x) |
-                                                   as.character(x) == ""), error = paste("Missing value for",
-                                                                                         varname)))
-    }
-  }
-  if (type == "numeric" & (!is.na(value) & value != "")) {
-    range <- as.numeric(unlist(strsplit(value, split = ";")))
-    if (any(x < range[1] & !is.na(x))) {
-      tmp <- rbind(tmp, data.frame(index = which(!is.na(x) &
-                                                   x < range[1]), error = paste("Out of range:",
-                                                                                varname, "<", range[1])))
-    }
-    if (any(x > range[2] & !is.na(x))) {
-      tmp <- rbind(tmp, data.frame(index = which(!is.na(x) &
-                                                   x > range[2]), error = paste("Out of range:",
-                                                                                varname, ">", range[2])))
-    }
-  }
-  if (type == "factor" & !is.na(value)) {
-    range <- sapply(unlist(strsplit(value, split = ";")),
-                    function(x) gsub("[']", "", unlist(strsplit(x, split = "="))[2]),
-                    USE.NAMES = FALSE)
-    if (any(!x %in% range & !is.na(x))) {
-      xx <- x[!is.na(x) & !x %in% range]
-      tmp <- rbind(tmp, data.frame(index = which(!is.na(x) &
-                                                   !x %in% range), error = paste("Out of range:",
-                                                                                 varname, "=", xx)))
-    }
-  }
-  return(tmp)
-}
 
+# check data --------------------------------------------------------------
+
+#' Check formatted data based on a pre-defined information
+#'
+#' @description A function to check a formatted data frame based on a pre-defined information.
+#'
+#' @param data a formatted data frame to be checked.
+#' @param info a data frame specifies how variables will be formatted. This data frame should have the following columns: varname (character variable specifies name of each variable), label (character variable specifies label of each variables), type (character variable specifies type of each variable [numeric, factor, character, datetime], unit (character variable specifies units of each continuous variable), value (character variable specifies values of each variable [format of datetime variables/values of categorical variables], levels (character variable specifies order of levels of each categorical variable), missing (character variable specifies coding for missing values for each variable), condition (character variable specifies conditional checking), strict (a character variable [Yes, No] specifies whether missing data should be checked for each variable).
+#' @param id a character specifies name of subject id variable.
+#' @param check_missing a logical value specifies whether missing data should be checked.
+#' @param plot a logical value specifies whether plot (bar plot for categorical variables, boxplot for continuous variables) should be produced.
+#' @param prefix a character to be appended as prefix of all output files.
+#' @param outdir a character specifies where to save output files.
+#'
+#' @return A data frame lists all identified potential data errors.
 #' @export
 inspect.data <- function (data, info, id, check_missing = c(TRUE, FALSE), plot = FALSE, prefix = "", outdir) {
   requireNamespace("lubridate")
@@ -154,4 +135,40 @@ inspect.data <- function (data, info, id, check_missing = c(TRUE, FALSE), plot =
   else {
     cat("No error was found !")
   }
+}
+
+inspect.each <- function (x, varname, type, value = NA, check_missing = TRUE) {
+  tmp <- NULL
+  if (check_missing) {
+    if (anyNA(x) | any(as.character(x) == "")) {
+      tmp <- rbind(tmp, data.frame(index = which(is.na(x) |
+                                                   as.character(x) == ""), error = paste("Missing value for",
+                                                                                         varname)))
+    }
+  }
+  if (type == "numeric" & (!is.na(value) & value != "")) {
+    range <- as.numeric(unlist(strsplit(value, split = ";")))
+    if (any(x < range[1] & !is.na(x))) {
+      tmp <- rbind(tmp, data.frame(index = which(!is.na(x) &
+                                                   x < range[1]), error = paste("Out of range:",
+                                                                                varname, "<", range[1])))
+    }
+    if (any(x > range[2] & !is.na(x))) {
+      tmp <- rbind(tmp, data.frame(index = which(!is.na(x) &
+                                                   x > range[2]), error = paste("Out of range:",
+                                                                                varname, ">", range[2])))
+    }
+  }
+  if (type == "factor" & !is.na(value)) {
+    range <- sapply(unlist(strsplit(value, split = ";")),
+                    function(x) gsub("[']", "", unlist(strsplit(x, split = "="))[2]),
+                    USE.NAMES = FALSE)
+    if (any(!x %in% range & !is.na(x))) {
+      xx <- x[!is.na(x) & !x %in% range]
+      tmp <- rbind(tmp, data.frame(index = which(!is.na(x) &
+                                                   !x %in% range), error = paste("Out of range:",
+                                                                                 varname, "=", xx)))
+    }
+  }
+  return(tmp)
 }
