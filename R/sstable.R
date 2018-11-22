@@ -541,7 +541,8 @@ sstable.baseline.each <- function(varname, x, y, z, bycol = TRUE, pooledGroup = 
 #' @param bg a character specifies color of the odd rows in the body of flextable-type table.
 #'
 #' @return a flextable-type table or a list with values/headers/footers
-#' @import dplyr, tidyr
+#' @import dplyr
+#' @import tidyr
 #' @export
 sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, arm.var, digits = 0,
                        test = TRUE, pdigits = 3, pcutoff = 0.0001, chisq.test = FALSE, correct = FALSE,
