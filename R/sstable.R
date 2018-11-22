@@ -141,7 +141,7 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
 
   ## get data
   dat <- model.frame(info$formula0, data = data, na.action = NULL)
-  x <- dat[, info$index$x, drop = FALSE]
+  x <- xlabel <- dat[, info$index$x, drop = FALSE]
   y <- if (info$index$y > 0) dat[, info$index$y] else NULL
   z <- if (info$index$z > 0) dat[, info$index$z] else NULL
 
@@ -201,7 +201,6 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
 
   ## if pooledGroup
   if (pooledGroup) {
-    tmp <- x
     x <- rbind(x, x)
     ypool <- ifelse("total" %in% tolower(levels(y)), "pooledGroup", "Total")
     y <- factor(c(as.character(y), rep(ypool, nrow(dat))), levels = c(levels(y), ypool), exclude = NULL)
@@ -210,7 +209,7 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
 
 
   ## get variable name
-  varname <- getlabel(tmp)
+  varname <- getlabel(xlabel)
 
   ## get summary
   value <- do.call(rbind,
