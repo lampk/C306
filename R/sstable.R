@@ -514,7 +514,7 @@ sstable.baseline.each <- function(varname, x, y, z, bycol = TRUE, pooledGroup = 
   return(out)
 }
 
-# adverse event table -----------------------------------------------------
+# create adverse event table ---------------------------------------------------
 
 #' Create an adverse event summary table
 #'
@@ -714,3 +714,261 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, arm.var, digits
   }
   return(tab)
 }
+
+# create survival comparison table ----------------------------------------
+
+#' Summarize results for a Cox survival model with the treatment arm (variable "arm") as the main covariate
+#'
+#' @description A function to summarize results for a Cox survival model with the treatment arm (variable "arm") as the main covariate
+#'
+#' @param model a formula which can be used to fit the Cox survival model. This formula can include other covariates than arm BUT arm must be the first covariate in the model.
+#' @param data a data frame to fir the Cox survival model.
+#' @param add.risk a logical value specifies whether the event probability ("absolute risk") at time "infinity" should be displayed.
+#' @param add.prop.haz.test a logical value specifies whether a test for proportional hazards should be added.
+#' @param medsum a logical value specifies whether median (IQR) of time to event should be described.
+#' @param digits a number specifies number of significant digits for numeric statistics.
+#' @param pdigits a number specifies number of significant digits for p value.
+#' @param pcutoff a number specifies threshold value of p value to be displayed as "< pcutoff".
+#' @param footer a vector of strings to be used as footnote of table.
+#' @param flextable a logical value specifies whether output will be a flextable-type table.
+#' @param bg a character specifies color of the odd rows in the body of flextable-type table.
+#'
+#' @return a flextable-type table or a list with values/headers/footers
+#'
+#' @author This function was originally written by Marcel Wolbers. Lam Phung Khanh did some modification.
+#' @import survival
+#' @export
+sstable.survcomp <- function(model, data, add.risk = TRUE, add.prop.haz.test = TRUE, medsum = TRUE,
+                            digits = 2, pdigits = 3, pcutoff = 0.001, footer = NULL, flextable = TRUE, bg = "#F2EFEE"){
+  requireNamespace("survival")
+
+  arm.var <- if (length(model[[3]]) > 1) {deparse(model[[3]][[2]])} else {deparse(model[[3]])}
+  arm.names <- levels(data[, arm.var])
+
+  # Table header
+  header1 <- c(paste(arm.names, " (n=", table(data[, arm.var]), ")", sep = ""), "Comparison")
+  header2 <- c(rep(ifelse(add.risk, "events/n (risk [%])", "events/n"), length(arm.names)), "HR (95%CI); p-value")
+  header <- rbind(header1, header2)
+  result <- rbind(header, "")
+
+  ## footer
+  footer <- c("HR = hazard ratio; IQR = interquartile range.", footer)
+
+  # add number of events and risks
+  fit.surv0 <- survival::survfit(update(model, new = as.formula(paste0(". ~ ", arm.var))), data = data)
+  fit.surv <- summary(fit.surv0, time = Inf, extend = TRUE)
+
+  if (length(unique(data[, arm.var])) < length(arm.names)) {
+    tmp <- fit.surv$table
+    dim(tmp) <- c(length(unique(data[, arm.var])), length(tmp))
+    colnames(tmp) <- names(fit.surv$table)
+  } else {
+    tmp <- fit.surv$table
+  }
+  events.n <- paste(tmp[, "events"], tmp[, "n.max"], sep = "/")
+  if (add.risk) events.n <- paste(events.n, " (", formatC(100*(1 - fit.surv$surv), digits, format = "f"), ")", sep="")
+  idx <- which(arm.names %in% unique(data[, arm.var]))
+  result[3, 1:length(arm.names)] <- rep("-", length(arm.names))
+  result[3, idx] <- events.n
+
+  # add HR, CI, p-value
+  fit.coxph <- survival::coxph(model, data)
+  sum.fit.coxph <- summary(fit.coxph)
+  hr <- formatC(sum.fit.coxph$coef[1, "exp(coef)"], digits, format = "f")
+  pval <- format.pval(sum.fit.coxph$coef[1, "Pr(>|z|)"], eps = pcutoff, digits = pdigits)
+  ci <- paste(formatC(sum.fit.coxph$conf.int[1, c("lower .95")], digits, format = "f"),
+              formatC(sum.fit.coxph$conf.int[1, c("upper .95")], digits, format = "f"),
+              sep = ", ")
+  hr.ci.p <- paste(hr, " (", ci, "); p=", pval, sep = "")
+  result[3, length(arm.names) + 1] <- hr.ci.p
+
+  # add test for proportional hazards
+  if (add.prop.haz.test){
+    attr(model, ".Environment") <- environment() # needed for cox.zph to work
+    p.prop.haz <- survival::cox.zph(survival::coxph(model, data))$table[1, "p"]
+    result <- cbind(result, c("Test for proportional hazards", "p-value", format.pval(p.prop.haz, eps = pcutoff, digits = pdigits)))
+  }
+  rownames(result) <- NULL
+
+  # add label
+  #browser()
+  varname <- all.vars(model)[2:1]
+  varlabel <- sapply(varname, function(x){
+    ifelse(is.null(attr(data[, x], "label")), x, attr(data[, x], "label"))
+  })
+  # output
+  output <- if (medsum) {
+    result <- rbind(result, "", "", "", "")
+    # add median (IQR) of time-to-event
+    qfit <- as.matrix(do.call(cbind, quantile(fit.surv0, probs = c(0.5, 0.25, 0.75))))
+    result[5:7, 1:length(arm.names)] <- apply(formatC(qfit, digits, format = "f"), 1, function(x){
+      sapply(1:3, function(z) paste(x[z], " (", x[z + 3], ", ", x[z + 6], ")", sep = ""))
+    })
+    cbind(c("Endpoint", "", varlabel, "- Median (95%CI)", "- Lower IQR (95%CI)", "- Upper IQR (95%CI)"), result)
+  } else {
+    output <- cbind(c("Endpoint", "", varlabel[1]), result)
+  }
+  rownames(output) <- NULL
+  value <- output[-c(1:2), , drop = FALSE]
+  #browser()
+  ## flextable
+  if (flextable) {
+    requireNamespace("flextable")
+    requireNamespace("officer")
+
+    ## main table
+    tab <- flextable::flextable(as.data.frame(value))
+
+    ## header
+    header1 <- output[1, ]; header2 <- output[2, ]
+    header2[1] <- header1[1]
+
+    assign("tab",
+           eval(parse(text = paste0("flextable::set_header_labels(tab,",
+                                    paste(paste0("V", 1:length(header1)), paste0("'", header1, "'"), sep = "=", collapse = ","),
+                                    ")"))))
+
+    assign("tab",
+           eval(parse(text = paste0("flextable::add_header(tab,",
+                                    paste(paste0("V", 1:length(header1)), paste0("'", header2, "'"), sep = "=", collapse = ","),
+                                    ", top = FALSE)"))))
+    tab <- flextable::merge_v(tab, part = "header")
+
+    for (k in (1:length(footer))) {
+      tab <- flextable::add_footer(tab, V1 = footer[k], top = FALSE)
+      tab <- flextable::merge_at(tab, i = k, j = 1:length(header1), part = "footer")
+    }
+
+    ## format
+    ### width
+    tab <- flextable::autofit(tab)
+    ### alignment
+    tab <- flextable::align(tab, j = 1, align = "left", part = "all")
+    ### faces of header
+    tab <- flextable::bold(tab, part = "header")
+    ### background
+    tab <- flextable::bg(tab, i = seq(from = 1, to = nrow(value), by = 2), j = 1:length(header1), bg = bg, part = "body")
+    ### border
+    tabbd <- officer::fp_border(color="black", width = 1.5)
+    tab <- border_remove(tab)
+    tab <- hline(tab, border = tabbd, part = "header")
+    tab <- hline_top(tab, border = tabbd, part = "all")
+    tab <- hline_bottom(tab, border = tabbd, part = "body")
+
+  } else {
+    tab <- list(table = output,
+                footer = footer)
+  }
+  return(tab)
+}
+
+#' Summarize results for a Cox survival model by treatment arm (variable "arm") and subgroup
+#'
+#' @description A function to summarize results for a Cox survival model by treatment arm (variable "arm") and subgroup.
+#'
+#' @param base.model a formula from which sub-group specific estimates are extracted (!! arm must be the first covariate in the model).
+#' @param subgroup.model a formula of the form "~subgrouping.variable1+subgrouping.variable2" (!! subgrouping.variable must be factors and there should be nothing on the left-hand side of the formula).
+#' @param data a data frame to fir the Cox survival model.
+#' @param ... arguments that are passed to sstable.survcomp.
+#' @param digits a number specifies number of significant digits for numeric statistics.
+#' @param pdigits a number specifies number of significant digits for p value.
+#' @param pcutoff a number specifies threshold value of p value to be displayed as "< pcutoff".
+#' @param footer a vector of strings to be used as footnote of table.
+#' @param flextable a logical value specifies whether output will be a flextable-type table.
+#' @param bg a character specifies color of the odd rows in the body of flextable-type table.
+#'
+#' @return a flextable-type table or a list with values/headers/footers
+#'
+#' @author This function was originally written by Marcel Wolbers. Lam Phung Khanh did some modification.
+#' @import survival
+#' @export
+sstable.survcomp.subgroup <- function(base.model, subgroup.model, data, digits = 2, pdigits = 3, pcutoff = 0.001, footer = NULL, flextable = TRUE, bg = "#F2EFEE", ...){
+  requireNamespace("survival")
+
+  # result in entire population
+  result <- sstable.survcomp(model = base.model, data = data, medsum = FALSE, digits = digits,
+                            pdigits = 3, pcutoff = pcutoff, flextable = FALSE, ...)$table[,-1]
+  result <- cbind(c("Subgroup", "", "All patients"), result, c("Test for heterogeneity", "p-value", ""))
+
+  # Preparation of models and data
+  subgroup.char <- all.vars(subgroup.model)
+
+  for (k in 1:length(subgroup.char)){
+    main.model <- update(base.model, as.formula(paste(". ~ . +", subgroup.char[k], sep = "")))
+    ia.model <- update(base.model, as.formula(paste(". ~ . + arm *", subgroup.char[k], sep = "")))
+    data$.subgroup.var <- data[, subgroup.char[k]]
+    factor.levels <- levels(data[, subgroup.char[k]])
+
+    # Add interaction test for heterogeneity
+    result <- rbind(result, "")
+    result[nrow(result), 1] <- ifelse(is.null(attr(data[, subgroup.char[k]], "label")),
+                                      subgroup.char[k], attr(data[, subgroup.char[k]], "label"))
+    ia.pval <- anova(survival::coxph(ia.model, data = data), survival::coxph(main.model, data = data), test = "Chisq")[2, "P(>|Chi|)"]
+    result[nrow(result), ncol(result)] <- format.pval(ia.pval, digits = pdigits, eps = pcutoff)
+
+    # Add results for each subgroup level
+    for (j in 1:length(factor.levels)){
+      result <- rbind(result, "")
+      result[nrow(result), 1] <- paste("-", factor.levels[j])
+      d.subgroup <- subset(data, .subgroup.var == factor.levels[j])
+      result[nrow(result), 2:(ncol(result) - 1)] <- sstable.survcomp(model = base.model, data = d.subgroup,
+                                                                    medsum = FALSE, digits = digits, pdigits = pdigits, pcutoff = pcutoff,
+                                                                    flextable = FALSE, ...)$table[3,-1]
+    }
+  }
+  ## footer
+  footer <- c("HR = hazard ratio.",
+              "Test for heterogeneity is an interaction test between treatment effect and each subgroup in a Cox regression model (not include other variables).",
+              footer)
+
+  # flextable
+  if (flextable) {
+    requireNamespace("flextable")
+    requireNamespace("officer")
+
+    ## main table
+    tab <- flextable::flextable(as.data.frame(result[-c(1, 2), ]))
+
+    ## header
+    header1 <- result[1, ]; header2 <- result[2, ]
+    header2[1] <- header1[1]
+
+    assign("tab",
+           eval(parse(text = paste0("flextable::set_header_labels(tab,",
+                                    paste(paste0("V", 1:length(header1)), paste0("'", header1, "'"), sep = "=", collapse = ","),
+                                    ")"))))
+
+    assign("tab",
+           eval(parse(text = paste0("flextable::add_header(tab,",
+                                    paste(paste0("V", 1:length(header1)), paste0("'", header2, "'"), sep = "=", collapse = ","),
+                                    ", top = FALSE)"))))
+    tab <- flextable::merge_v(tab, part = "header")
+
+    for (k in (1:length(footer))) {
+      tab <- flextable::add_footer(tab, V1 = footer[k], top = FALSE)
+      tab <- flextable::merge_at(tab, i = k, j = 1:length(header1), part = "footer")
+    }
+
+    ## format
+    ### width
+    tab <- flextable::autofit(tab)
+    ### alignment
+    tab <- flextable::align(tab, j = 1, align = "left", part = "all")
+    ### faces of header
+    tab <- flextable::bold(tab, part = "header")
+    ### background
+    tab <- flextable::bg(tab, i = seq(from = 1, to = nrow(result[-c(1:2), ]), by = 2), j = 1:length(header1), bg = bg, part = "body")
+    ### border
+    tabbd <- officer::fp_border(color="black", width = 1.5)
+    tab <- border_remove(tab)
+    tab <- hline(tab, border = tabbd, part = "header")
+    tab <- hline_top(tab, border = tabbd, part = "all")
+    tab <- hline_bottom(tab, border = tabbd, part = "body")
+
+  } else {
+    tab <- list(table = result,
+                footer = footer)
+  }
+  return(tab)
+}
+

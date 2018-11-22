@@ -14,5 +14,6 @@ Imports: lubridate,
     readxl,
     dplyr,
     flextable,
-    officer
+    officer,
+    survival
 RoxygenNote: 6.1.1
