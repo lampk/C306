@@ -556,7 +556,7 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, arm.var, digits
   if (!id.var %in% names(ae_data)){stop(paste(tmp[[4]], "does not exist in", deparse(tmp[[2]]), "!!!"))}
   if (!id.var %in% names(fullid_data)){stop(paste(tmp[[4]], "does not exist in", deparse(tmp[[3]]), "!!!"))}
   if (!aetype.var %in% names(ae_data)){stop(paste(tmp[[5]], "does not exist in", deparse(tmp[[2]]), "!!!"))}
-  if (!arm.var %in% names(ae_data)){stop(paste(tmp[[6]], "does not exist in", deparse(tmp[[3]]), "!!!"))}
+  if (!arm.var %in% names(fullid_data)){stop(paste(tmp[[6]], "does not exist in", deparse(tmp[[3]]), "!!!"))}
 
   ## format study arms
   idarm <- fullid_data[, c(id.var, arm.var)]; colnames(idarm) <- c("id", "arm")
