@@ -570,7 +570,7 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, grade.var = NUL
 
   ## add aetype of "Any selected AE" & format aetype
   ae_any <- ae_data; ae_any[, aetype.var] <- "Any selected adverse event"
-  ae <- rbind(ae_data, ae_any)[, c(id.var, aetype.var)]; colnames(ae) <- c("id", "aetype")
+  ae <- rbind(ae_data, ae_any)
   aetype_lev <- c("Any selected adverse event", unique(as.character(ae_data[, aetype.var])))
   #browser()
 
@@ -583,9 +583,11 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, grade.var = NUL
                           tmpdat[, aetype.var] <- paste("-", grade2[i])
                           return(tmpdat)
                         }))
-    ae <- rbind(ae, ae_grade[, c(id.var, aetype.var)])
+    ae <- rbind(ae, ae_grade)
     aetype_lev <- c("Any selected adverse event", unique(ae_grade[, aetype.var]), unique(as.character(ae_data[, aetype.var])))
   }
+  ae <- ae[, c(id.var, aetype.var)]; colnames(ae) <- c("id", "aetype")
+  #browser()
 
   ae$aetype <- addNA(factor(as.character(ae$aetype), levels = aetype_lev, exclude = NULL), ifany = TRUE)
 
