@@ -549,7 +549,7 @@ sstable.baseline.each <- function(varname, x, y, z, bycol = TRUE, pooledGroup = 
 #' @import tidyr
 #' @export
 sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, grade.var = NULL, arm.var, digits = 0,
-                       test = TRUE, pdigits = 3, pcutoff = 0.0001, chisq.test = FALSE, correct = FALSE,
+                       test = TRUE, pdigits = 3, pcutoff = 0.001, chisq.test = FALSE, correct = FALSE,
                        simulate.p.value = FALSE, B = 2000, workspace = 1000000, hybrid = FALSE,
                        footer = NULL, flextable = TRUE, bg = "#F2EFEE"){
   requireNamespace("dplyr")
