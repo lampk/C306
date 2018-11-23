@@ -572,15 +572,15 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, grade.var = NUL
   ae_any <- ae_data; ae_any[, aetype.var] <- "Any selected adverse event"
   ae <- rbind(ae_data, ae_any)[, c(id.var, aetype.var)]; colnames(ae) <- c("id", "aetype")
   aetype_lev <- c("Any selected adverse event", unique(as.character(ae_data[, aetype.var])))
-  browser()
+  #browser()
 
   if (!is.null(grade.var)) {
     grade <- unique(na.omit(ae_data[, grade.var]))
-    grade <- ifelse(grepl(pattern = "grade", ignore.case = TRUE, x = grade), grade, paste("Grade", grade))
+    grade2 <- ifelse(grepl(pattern = "grade", ignore.case = TRUE, x = grade), grade, paste("Grade", grade))
     ae_grade <- do.call(rbind,
                         lapply(1:length(grade), function(i) {
                           tmpdat <- ae_data[ae_data[, grade.var] == grade[i], ]
-                          tmpdat[, aetype.var] <- paste("-", grade[i])
+                          tmpdat[, aetype.var] <- paste("-", grade2[i])
                           return(tmpdat)
                         }))
     ae <- rbind(ae, ae_grade[, c(id.var, aetype.var)])
