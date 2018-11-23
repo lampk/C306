@@ -287,7 +287,6 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
     }
     footer4 <- paste("p-values were based on", footer4.after)
   }
-  browser()
 
   ### flextable
   if (flextable) {
