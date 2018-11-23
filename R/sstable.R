@@ -208,8 +208,7 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
 
 
   ## get variable name
-  varname <- getlabel(xlabel)
-  browser()
+  varname <- if (ncol(xlabel) == 1) getlabel(xlabel[, 1]) else getlabel(xlabel)
 
   ## get summary
   value <- do.call(rbind,
