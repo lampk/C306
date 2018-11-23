@@ -420,10 +420,15 @@ sstable.baseline.each <- function(varname, x, y, z, bycol = TRUE, pooledGroup = 
 
     if (is.null(z)) {
       ta <- table(x, y)
-      ta.prop <- if (bycol) {
-        unclass(ta/rep(apply(ta, 2, sum), each = length(levels(x))))
+      n <- if (bycol) {
+        apply(ta, 2, sum)
       } else {
-        unclass(ta/rep(apply(ta, 1, sum), ngroup))
+        if (pooledGroup) {apply(ta[, -ncol(ta)], 1, sum)} else {apply(ta, 1, sum)}
+      }
+      ta.prop <- if (bycol) {
+        unclass(ta/rep(n, each = length(levels(x))))
+      } else {
+        unclass(ta/rep(n, ngroup))
       }
 
       ta.nice <- matrix(paste0(" (", formatC(100 * unclass(ta.prop), digits, format = "f"), "%)"),
@@ -431,10 +436,9 @@ sstable.baseline.each <- function(varname, x, y, z, bycol = TRUE, pooledGroup = 
       result[2:nrow(result), 1] <- paste0("- ", levels(x))
       if (bycol) {
         #browser()
-        result[1, seq(2, ncol(result), by = 2)] <- apply(ta, 2, sum)
+        result[1, seq(2, ncol(result), by = 2)] <- n
         result[2:nrow(result), seq(3, ncol(result), by = 2)] <- paste0(ta, "/", rep(apply(ta, 2, sum), each = length(levels(x))), ta.nice)
       } else {
-        n <- if (pooledGroup) {apply(ta[, -ncol(ta)], 1, sum)} else {apply(ta, 1, sum)}
         result[2:nrow(result), 1] <- paste0(result[2:nrow(result), 1], " (n=", n, ")")
         result[2:nrow(result), seq(3, ncol(result), by = 2)] <- paste0(ta, "/", rep(n, ngroup), ta.nice)
       }
