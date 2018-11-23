@@ -528,8 +528,8 @@ sstable.baseline.each <- function(varname, x, y, z, bycol = TRUE, pooledGroup = 
 #' @param fullid_data a data frame contains treatment arm data of all participants (not just those had adverse event).
 #' @param id.var a character specifies name of study id variable (exists in both adverse event data and treatment arm data).
 #' @param aetype.var a character specifies name of adverse event type variable (exists in adverse event data).
+#' @param grade.var a character specifies name of adverse event grade variable (exists in adverse event data).
 #' @param arm.var a character specifies name of treatment arm variable (exists in treatment arm data).
-#' @param grade.var
 #' @param digits a number specifies number of significant digits for numeric statistics.
 #' @param test a logical value specifies whether a statistical test will be performed to compare between treatment arms.
 #' @param pdigits a number specifies number of significant digits for p value.
@@ -548,7 +548,7 @@ sstable.baseline.each <- function(varname, x, y, z, bycol = TRUE, pooledGroup = 
 #' @import dplyr
 #' @import tidyr
 #' @export
-sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, arm.var, grade.var = NULL, digits = 0,
+sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, grade.var = NULL, arm.var, digits = 0,
                        test = TRUE, pdigits = 3, pcutoff = 0.0001, chisq.test = FALSE, correct = FALSE,
                        simulate.p.value = FALSE, B = 2000, workspace = 1000000, hybrid = FALSE,
                        footer = NULL, flextable = TRUE, bg = "#F2EFEE"){
@@ -560,7 +560,8 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, arm.var, grade.
   if (!id.var %in% names(ae_data)){stop(paste(tmp[[4]], "does not exist in", deparse(tmp[[2]]), "!!!"))}
   if (!id.var %in% names(fullid_data)){stop(paste(tmp[[4]], "does not exist in", deparse(tmp[[3]]), "!!!"))}
   if (!aetype.var %in% names(ae_data)){stop(paste(tmp[[5]], "does not exist in", deparse(tmp[[2]]), "!!!"))}
-  if (!arm.var %in% names(fullid_data)){stop(paste(tmp[[6]], "does not exist in", deparse(tmp[[3]]), "!!!"))}
+  if (!is.null(grade.var) & (!grade.var %in% names(ae_data))){stop(paste(tmp[[6]], "does not exist in", deparse(tmp[[2]]), "!!!"))}
+  if (!arm.var %in% names(fullid_data)){stop(paste(tmp[[7]], "does not exist in", deparse(tmp[[3]]), "!!!"))}
 
   ## format study arms
   idarm <- fullid_data[, c(id.var, arm.var)]; colnames(idarm) <- c("id", "arm")
@@ -571,6 +572,7 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, arm.var, grade.
   ae_any <- ae_data; ae_any[, aetype.var] <- "Any selected adverse event"
   ae <- rbind(ae_data, ae_any)[, c(id.var, aetype.var)]; colnames(ae) <- c("id", "aetype")
   aetype_lev <- c("Any selected adverse event", unique(as.character(ae_data[, aetype.var])))
+  browser()
 
   if (!is.null(grade.var)) {
     grade <- unique(na.omit(ae_data[, grade.var]))

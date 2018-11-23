@@ -4,10 +4,10 @@
 \alias{sstable.ae}
 \title{Create an adverse event summary table}
 \usage{
-sstable.ae(ae_data, fullid_data, id.var, aetype.var, arm.var, digits = 0,
-  test = TRUE, pdigits = 3, pcutoff = 1e-04, chisq.test = FALSE,
-  correct = FALSE, simulate.p.value = FALSE, B = 2000,
-  workspace = 1e+06, hybrid = FALSE, footer = NULL,
+sstable.ae(ae_data, fullid_data, id.var, aetype.var, grade.var = NULL,
+  arm.var, digits = 0, test = TRUE, pdigits = 3, pcutoff = 1e-04,
+  chisq.test = FALSE, correct = FALSE, simulate.p.value = FALSE,
+  B = 2000, workspace = 1e+06, hybrid = FALSE, footer = NULL,
   flextable = TRUE, bg = "#F2EFEE")
 }
 \arguments{
@@ -18,6 +18,8 @@ sstable.ae(ae_data, fullid_data, id.var, aetype.var, arm.var, digits = 0,
 \item{id.var}{a character specifies name of study id variable (exists in both adverse event data and treatment arm data).}
 
 \item{aetype.var}{a character specifies name of adverse event type variable (exists in adverse event data).}
+
+\item{grade.var}{a character specifies name of adverse event grade variable (exists in adverse event data).}
 
 \item{arm.var}{a character specifies name of treatment arm variable (exists in treatment arm data).}
 
