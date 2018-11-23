@@ -560,7 +560,9 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, grade.var = NUL
   if (!id.var %in% names(ae_data)){stop(paste(tmp[[4]], "does not exist in", deparse(tmp[[2]]), "!!!"))}
   if (!id.var %in% names(fullid_data)){stop(paste(tmp[[4]], "does not exist in", deparse(tmp[[3]]), "!!!"))}
   if (!aetype.var %in% names(ae_data)){stop(paste(tmp[[5]], "does not exist in", deparse(tmp[[2]]), "!!!"))}
-  if (!is.null(grade.var) & (!grade.var %in% names(ae_data))){stop(paste(tmp[[6]], "does not exist in", deparse(tmp[[2]]), "!!!"))}
+  if (!is.null(grade.var)) {
+    if (!grade.var %in% names(ae_data)){stop(paste(tmp[[6]], "does not exist in", deparse(tmp[[2]]), "!!!"))}
+  }
   if (!arm.var %in% names(fullid_data)){stop(paste(tmp[[7]], "does not exist in", deparse(tmp[[3]]), "!!!"))}
 
   ## format study arms
