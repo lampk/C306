@@ -1,18 +1,17 @@
 
 # extract x variables from formula for sstable ----------------------------
 
-getxs <- function(xformula) {
-  if (!is.call(xformula)) {
-    deparse(xformula)
+getvar <- function(formula) {
+  if (!is.call(formula)) {
+    deparse(formula)
   } else {
-    if (identical(xformula[[1]], quote(`+`))) {
-      unlist(lapply(c(xformula[[2]], xformula[[3]]), getxs))
+    if (identical(formula[[1]], quote(`I`))) {
+      deparse(formula)
     } else {
-      deparse(xformula)
+      unlist(lapply(c(formula[[2]], formula[[3]]), getvar))
     }
   }
 }
-
 
 # extract information from formula for sstable ----------------------------
 
@@ -25,7 +24,7 @@ sstable.formula <- function(formula) {
   formula0 <- if (identical(formula[[3]], 1)) {
     as.formula(paste("~", deparse(formula[[2]])))
   } else {
-    as.formula(paste("~", gsub(pattern = "[~|]", replacement = "+", x = deparse(formula))))
+    as.formula(paste("~", paste(getvar(formula), collapse = "+")))
   }
 
 
@@ -50,7 +49,7 @@ sstable.formula <- function(formula) {
   if (zlen > 1) {stop("Only 1 third dimension variable is allowed !!!")}
 
   ## get all formulas required for tabulation
-  xs <- getxs(formula[[2]])
+  xs <- getvar(formula[[2]])
   formula1 <- sapply(xs, function(x) update.formula(old = formula, new = paste(x, " ~ .")))
 
   ## output
@@ -288,6 +287,7 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
     }
     footer4 <- paste("p-values were based on", footer4.after)
   }
+  browser()
 
   ### flextable
   if (flextable) {
