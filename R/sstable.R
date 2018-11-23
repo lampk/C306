@@ -434,8 +434,9 @@ sstable.baseline.each <- function(varname, x, y, z, bycol = TRUE, pooledGroup = 
         result[1, seq(2, ncol(result), by = 2)] <- apply(ta, 2, sum)
         result[2:nrow(result), seq(3, ncol(result), by = 2)] <- paste0(ta, "/", rep(apply(ta, 2, sum), each = length(levels(x))), ta.nice)
       } else {
-        result[2:nrow(result), 1] <- paste0(result[2:nrow(result), 1], " (n = ", apply(ta, 1, sum), ")")
-        result[2:nrow(result), seq(3, ncol(result), by = 2)] <- paste0(ta, "/", rep(apply(ta, 1, sum), ngroup), ta.nice)
+        n <- if (pooledGroup) {apply(ta[, -ncol(ta)], 1, sum)} else {apply(ta, 1, sum)}
+        result[2:nrow(result), 1] <- paste0(result[2:nrow(result), 1], " (n=", n, ")")
+        result[2:nrow(result), seq(3, ncol(result), by = 2)] <- paste0(ta, "/", rep(n, ngroup), ta.nice)
       }
     } else {
       tn <- table(x, y)
