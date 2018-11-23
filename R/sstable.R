@@ -529,6 +529,7 @@ sstable.baseline.each <- function(varname, x, y, z, bycol = TRUE, pooledGroup = 
 #' @param id.var a character specifies name of study id variable (exists in both adverse event data and treatment arm data).
 #' @param aetype.var a character specifies name of adverse event type variable (exists in adverse event data).
 #' @param arm.var a character specifies name of treatment arm variable (exists in treatment arm data).
+#' @param grade.var
 #' @param digits a number specifies number of significant digits for numeric statistics.
 #' @param test a logical value specifies whether a statistical test will be performed to compare between treatment arms.
 #' @param pdigits a number specifies number of significant digits for p value.
@@ -547,7 +548,7 @@ sstable.baseline.each <- function(varname, x, y, z, bycol = TRUE, pooledGroup = 
 #' @import dplyr
 #' @import tidyr
 #' @export
-sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, arm.var, digits = 0,
+sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, arm.var, grade.var = NULL, digits = 0,
                        test = TRUE, pdigits = 3, pcutoff = 0.0001, chisq.test = FALSE, correct = FALSE,
                        simulate.p.value = FALSE, B = 2000, workspace = 1000000, hybrid = FALSE,
                        footer = NULL, flextable = TRUE, bg = "#F2EFEE"){
@@ -569,9 +570,22 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, arm.var, digits
   ## add aetype of "Any selected AE" & format aetype
   ae_any <- ae_data; ae_any[, aetype.var] <- "Any selected adverse event"
   ae <- rbind(ae_data, ae_any)[, c(id.var, aetype.var)]; colnames(ae) <- c("id", "aetype")
-  ae$aetype <- addNA(factor(as.character(ae$aetype),
-                            levels = c("Any selected adverse event", sort(unique(as.character(ae_data[, aetype.var])))),
-                            exclude = NULL), ifany = TRUE)
+  aetype_lev <- c("Any selected adverse event", unique(as.character(ae_data[, aetype.var])))
+
+  if (!is.null(grade.var)) {
+    grade <- unique(na.omit(ae_data[, grade.var]))
+    grade <- ifelse(grepl(pattern = "grade", ignore.case = TRUE, x = grade), grade, paste("Grade", grade))
+    ae_grade <- do.call(rbind,
+                        lapply(1:length(grade), function(i) {
+                          tmpdat <- ae_data[ae_data[, grade.var] == grade[i], ]
+                          tmpdat[, aetype.var] <- paste("-", grade[i])
+                          return(tmpdat)
+                        }))
+    ae <- rbind(ae, ae_grade[, c(id.var, aetype.var)])
+    aetype_lev <- c("Any selected adverse event", unique(ae_grade[, aetype.var]), unique(as.character(ae_data[, aetype.var])))
+  }
+
+  ae$aetype <- addNA(factor(as.character(ae$aetype), levels = aetype_lev, exclude = NULL), ifany = TRUE)
 
   ## add randomized arm to AE
   ae_arm <- merge(idarm, ae, by = "id", all.y = TRUE)
