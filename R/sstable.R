@@ -209,6 +209,7 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
 
   ## get variable name
   varname <- getlabel(xlabel)
+  browser()
 
   ## get summary
   value <- do.call(rbind,
