@@ -577,7 +577,7 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, grade.var = NUL
   #browser()
 
   if (!is.null(grade.var)) {
-    grade <- unique(na.omit(ae_data[, grade.var]))
+    grade <- sort(unique(na.omit(ae_data[, grade.var])))
     grade2 <- ifelse(grepl(pattern = "grade", ignore.case = TRUE, x = grade), grade, paste("Grade", grade))
     ae_grade <- do.call(rbind,
                         lapply(1:length(grade), function(i) {
@@ -586,15 +586,15 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, grade.var = NUL
                           return(tmpdat)
                         }))
     ae <- rbind(ae, ae_grade)
-    aetype_lev <- c("Any selected adverse event", unique(ae_grade[, aetype.var]), unique(as.character(ae_data[, aetype.var])))
+    aetype_lev <- c("Any selected adverse event", paste("-", grade2), unique(as.character(ae_data[, aetype.var])))
   }
   ae <- ae[, c(id.var, aetype.var)]; colnames(ae) <- c("id", "aetype")
   #browser()
 
-  ae$aetype <- addNA(factor(as.character(ae$aetype), levels = aetype_lev, exclude = NULL), ifany = TRUE)
-
   ## add randomized arm to AE
-  ae_arm <- merge(idarm, ae, by = "id", all.y = TRUE)
+  ae_arm <- merge(idarm, ae, by = "id", all.y = TRUE) %>%
+    mutate(arm = addNA(factor(as.character(arm), levels = arm_lev, exclude = NULL), ifany = TRUE),
+           aetype = addNA(factor(as.character(aetype), levels = aetype_lev, exclude = NULL), ifany = TRUE))
 
   ## calculate episodes and patients
   ae_count <- ae_arm %>%
@@ -613,6 +613,7 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, grade.var = NUL
   patient_p <- patient_n/patient_N
 
   ## table
+  #browser()
   value <- matrix(ncol = nlevels(ae_arm$arm) * 2, nrow = nlevels(ae_arm$aetype))
   value[, seq(from = 1, to = ncol(value), by = 2)] <- episode_n
   value[, seq(from = 2, to = ncol(value), by = 2)] <- paste0(patient_n, "/", patient_N,
