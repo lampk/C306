@@ -239,11 +239,7 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
   }
 
   ### footer
-  footer1 <- footer2 <- footer3 <- footer4 <- footer.con <- footer.cat <- NULL
-
-  #### n
-  footer1 <- "N is number of all patients, n is number of patients with non-missing value."
-
+  footer1 <- footer1.after <- footer.con <- footer.cat <- NULL
   #### summary statistics
   if ((is.null(z) & any(continuous)) | (!is.null(z) & !is.factor(z))) {
     footer.con <- paste0(switch(statistics,
@@ -256,7 +252,7 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
   if ((is.null(z) & any(continuous == FALSE)) | (!is.null(z) & is.factor(z))) {
     footer.cat <- paste0("absolute count (%) for categorical variable(s)")
   }
-  footer2.after <- if (is.null(footer.con)) {
+  footer1.after <- if (is.null(footer.con)) {
     paste0(footer.cat, ".")
   } else {
     if (is.null(footer.cat)) {
@@ -265,28 +261,29 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
       paste0(footer.cat, " and ", footer.con)
     }
   }
-  footer2 <- paste("Summary statistic is", footer2.after)
-
-  #### unestimatable values
-  if (any(value == "-")) {
-    footer3 <- "- : value cannot be estimated."
-  }
+  footer1 <- paste("Summary statistic is", footer1.after)
 
   #### test
   if (test) {
-    footer4.cat <- paste(ifelse(chisq.test == FALSE, "Fisher's exact test", "Chi-squared test"), "for categorical variable(s)")
-    footer4.con <- "Kruskal-Wallis/Mann-Whitney U-test for continuous variable(s)."
-    footer4.after <- if (is.null(footer.con)) {
-      paste0(footer4.cat, ".")
+    footer2.cat <- paste(ifelse(chisq.test == FALSE, "Fisher's exact test", "Chi-squared test"), "for categorical variable(s)")
+    footer2.con <- "Kruskal-Wallis/Mann-Whitney U-test for continuous variable(s)."
+    footer2.after <- if (is.null(footer.con)) {
+      paste0(footer2.cat, ".")
     } else {
       if (is.null(footer.cat)) {
-        footer4.con
+        footer2.con
       } else {
-        paste0(footer4.cat, " and ", footer4.con)
+        paste0(footer2.cat, " and ", footer2.con)
       }
     }
-    footer4 <- paste("p-values were based on", footer4.after)
+    footer2 <- paste("p-values were based on", footer2.after)
   }
+
+  footer <- c("N is number of all patients, n is number of patients with non-missing value.",
+              footer1,
+              if (any(value == "-")) {"- : value cannot be estimated."} else NULL,
+              footer2,
+              footer)
 
   ### flextable
   if (flextable) {
@@ -300,36 +297,21 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
     header1[1] <- header2[1]
     header1[seq(from = 2, to = 2 * length(gr.lev), by = 2)] <- header1[seq(from = 2, to = 2 * length(gr.lev), by = 2) + 1]
     if (test) header2[length(header1)] <- header1[length(header1)]
+    header <- c(header1, header2)
+    for (i in c(1:2)) {
+      assign("tab",
+             eval(parse(text = paste0("flextable::add_header(tab,",
+                                      paste(paste0("V", 1:length(header1)), paste0("'", header[i], "'"), sep = "=", collapse = ","),
+                                      ", top = FALSE)"))))
+    }
 
-    assign("tab",
-           eval(parse(text = paste0("flextable::set_header_labels(tab,",
-                                    paste(paste0("V", 1:length(header1)), paste0("'", header1, "'"), sep = "=", collapse = ","),
-                                    ")"))))
-    assign("tab",
-           eval(parse(text = paste0("flextable::add_header(tab,",
-                                    paste(paste0("V", 1:length(header1)), paste0("'", header2, "'"), sep = "=", collapse = ","),
-                                    ", top = FALSE)"))))
     tab <- flextable::merge_h(tab, part = "header")
     tab <- flextable::merge_v(tab, part = "header")
 
     ## footer
-    tab <- flextable::add_footer(tab, V1 = footer1)
-    tab <- flextable::merge_at(tab, i = 1, j = 1:length(header1), part = "footer")
-    tab <- flextable::add_footer(tab, V1 = footer2, top = FALSE)
-    tab <- flextable::merge_at(tab, i = 2, j = 1:length(header1), part = "footer")
-    if (!is.null(footer3)) {
-      tab <- flextable::add_footer(tab, V1 = footer3, top = FALSE)
-      tab <- flextable::merge_at(tab, i = 3, j = 1:length(header1), part = "footer")
-    }
-    if (!is.null(footer4)) {
-      tab <- flextable::add_footer(tab, V1 = footer4, top = FALSE)
-      tab <- flextable::merge_at(tab, i = 3 + as.numeric(!is.null(footer3)), j = 1:length(header1), part = "footer")
-    }
-    if (!is.null(footer)) {
-      for (k in (1:length(footer))) {
-        tab <- flextable::add_footer(tab, V1 = footer[k], top = FALSE)
-        tab <- flextable::merge_at(tab, i = 2 + as.numeric(!is.null(footer3)) + as.numeric(!is.null(footer4)) + k, j = 1:length(header1), part = "footer")
-      }
+    for (k in (1:length(footer))) {
+      tab <- flextable::add_footer(tab, V1 = footer[k], top = FALSE)
+      tab <- flextable::merge_at(tab, i = k, j = 1:length(header1), part = "footer")
     }
 
     ## format
@@ -349,10 +331,8 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
     tab <- hline_bottom(tab, border = tabbd, part = "body")
 
   } else {
-    tab <- list(value = value,
-                header = list(header1, header2),
-                footer = c(footer1, footer2, footer3, footer4, footer),
-                table = rbind(header1, header2, value))
+    tab <- list(table = rbind(header1, header2, value),
+                footer = footer)
   }
   ## output
   return(tab)
@@ -653,23 +633,13 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, grade.var = NUL
   }
 
   ### footer
-  footer1 <- footer2 <- footer3 <- footer4 <- NULL
-
-  #### n
-  footer1 <- "n episode refer to the number of adverse events in each study arm."
-  footer2 <- "n patient refer to the number of patients with at least one event in each study arm."
-
-  #### unestimatable values
-  if (any(value == "-")) {
-    footer3 <- "- : value cannot be estimated."
-  }
-
-  #### test
-  if (test) {
-    footer4 <- paste("p-values were based on",
-                     ifelse(chisq.test == FALSE, "Fisher's exact test", "Chi-squared test"),
-                     "comparing n patient between study arms for each type of adverse event.")
-  }
+  footer <- c("n episode refer to the number of adverse events in each study arm.",
+              "n patient refer to the number of patients with at least one event in each study arm.",
+              if (any(value == "-")) "- : value cannot be estimated." else NULL,
+              if (test) {paste("p-values were based on",
+                               ifelse(chisq.test == FALSE, "Fisher's exact test", "Chi-squared test"),
+                               "comparing n patient between study arms for each type of adverse event.")} else NULL,
+              footer)
 
   ### flextable
   if (flextable) {
@@ -685,35 +655,22 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, grade.var = NUL
     header1[seq(from = 2, to = 2 * length(gr.lev), by = 2)] <- header1[seq(from = 2, to = 2 * length(gr.lev), by = 2) + 1]
 
     if (test) header2[length(header1)] <- header1[length(header1)]
-    assign("tab",
-           eval(parse(text = paste0("flextable::set_header_labels(tab,",
-                                    paste(paste0("V", 1:length(header1)), paste0("'", header1, "'"), sep = "=", collapse = ","),
-                                    ")"))))
-    assign("tab",
-           eval(parse(text = paste0("flextable::add_header(tab,",
-                                    paste(paste0("V", 1:length(header1)), paste0("'", header2, "'"), sep = "=", collapse = ","),
-                                    ", top = FALSE)"))))
+
+    header <- c(header1, header2)
+    for (i in c(1:2)) {
+      assign("tab",
+             eval(parse(text = paste0("flextable::add_header(tab,",
+                                      paste(paste0("V", 1:length(header1)), paste0("'", header[i], "'"), sep = "=", collapse = ","),
+                                      ", top = FALSE)"))))
+    }
+
     tab <- flextable::merge_h(tab, part = "header")
     tab <- flextable::merge_v(tab, part = "header")
 
     ## footer
-    tab <- flextable::add_footer(tab, V1 = footer1)
-    tab <- flextable::merge_at(tab, i = 1, j = 1:length(header1), part = "footer")
-    tab <- flextable::add_footer(tab, V1 = footer2, top = FALSE)
-    tab <- flextable::merge_at(tab, i = 2, j = 1:length(header1), part = "footer")
-    if (!is.null(footer3)) {
-      tab <- flextable::add_footer(tab, V1 = footer3, top = FALSE)
-      tab <- flextable::merge_at(tab, i = 3, j = 1:length(header1), part = "footer")
-    }
-    if (!is.null(footer4)) {
-      tab <- flextable::add_footer(tab, V1 = footer4, top = FALSE)
-      tab <- flextable::merge_at(tab, i = 3 + as.numeric(!is.null(footer3)), j = 1:length(header1), part = "footer")
-    }
-    if (!is.null(footer)) {
-      for (k in (1:length(footer))) {
-        tab <- flextable::add_footer(tab, V1 = footer[k], top = FALSE)
-        tab <- flextable::merge_at(tab, i = 2 + as.numeric(!is.null(footer3)) + as.numeric(!is.null(footer4)) + k, j = 1:length(header1), part = "footer")
-      }
+    for (k in (1:length(footer))) {
+      tab <- flextable::add_footer(tab, V1 = footer[k], top = FALSE)
+      tab <- flextable::merge_at(tab, i = k, j = 1:length(header1), part = "footer")
     }
 
     ## format
@@ -733,10 +690,8 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, grade.var = NUL
     tab <- hline_bottom(tab, border = tabbd, part = "body")
 
   } else {
-    tab <- list(value = ae_value,
-                header = list(header1, header2),
-                footer = c(footer1, footer2, footer3, footer4, footer),
-                table = rbind(header1, header2, ae_value))
+    tab <- list(table = rbind(header1, header2, ae_value),
+                footer = footer)
   }
   return(tab)
 }
@@ -778,7 +733,7 @@ sstable.survcomp <- function(model, data, add.risk = TRUE, add.prop.haz.test = T
   result <- rbind(header, "")
 
   ## footer
-  footer <- c("HR = hazard ratio; IQR = interquartile range.", footer)
+  footer <- c("HR = hazard ratio; IQR = interquartile range.", "HR and p value were based on Cox proportional hazard models.", footer)
 
   # add number of events and risks
   fit.surv0 <- survival::survfit(update(model, new = as.formula(paste0(". ~ ", arm.var))), data = data)
@@ -848,16 +803,14 @@ sstable.survcomp <- function(model, data, add.risk = TRUE, add.prop.haz.test = T
     ## header
     header1 <- output[1, ]; header2 <- output[2, ]
     header2[1] <- header1[1]
+    header <- c(header1, header2)
+    for (i in c(1:2)) {
+      assign("tab",
+             eval(parse(text = paste0("flextable::add_header(tab,",
+                                      paste(paste0("V", 1:length(header1)), paste0("'", header[i], "'"), sep = "=", collapse = ","),
+                                      ", top = FALSE)"))))
+    }
 
-    assign("tab",
-           eval(parse(text = paste0("flextable::set_header_labels(tab,",
-                                    paste(paste0("V", 1:length(header1)), paste0("'", header1, "'"), sep = "=", collapse = ","),
-                                    ")"))))
-
-    assign("tab",
-           eval(parse(text = paste0("flextable::add_header(tab,",
-                                    paste(paste0("V", 1:length(header1)), paste0("'", header2, "'"), sep = "=", collapse = ","),
-                                    ", top = FALSE)"))))
     tab <- flextable::merge_v(tab, part = "header")
 
     for (k in (1:length(footer))) {
@@ -944,7 +897,8 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, data, digits =
   }
   ## footer
   footer <- c("HR = hazard ratio.",
-              "Test for heterogeneity is an interaction test between treatment effect and each subgroup in a Cox regression model (not include other variables).",
+              "HR and p value were based on Cox proportional hazard models.",
+              "Test for heterogeneity is an interaction test between treatment effect and each subgroup in a Cox proportional hazard model (not include other variables).",
               footer)
 
   # flextable
@@ -958,18 +912,17 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, data, digits =
     ## header
     header1 <- result[1, ]; header2 <- result[2, ]
     header2[1] <- header1[1]
+    header <- c(header1, header2)
+    for (i in c(1:2)) {
+      assign("tab",
+             eval(parse(text = paste0("flextable::add_header(tab,",
+                                      paste(paste0("V", 1:length(header1)), paste0("'", header[i], "'"), sep = "=", collapse = ","),
+                                      ", top = FALSE)"))))
+    }
 
-    assign("tab",
-           eval(parse(text = paste0("flextable::set_header_labels(tab,",
-                                    paste(paste0("V", 1:length(header1)), paste0("'", header1, "'"), sep = "=", collapse = ","),
-                                    ")"))))
-
-    assign("tab",
-           eval(parse(text = paste0("flextable::add_header(tab,",
-                                    paste(paste0("V", 1:length(header1)), paste0("'", header2, "'"), sep = "=", collapse = ","),
-                                    ", top = FALSE)"))))
     tab <- flextable::merge_v(tab, part = "header")
 
+    ## footer
     for (k in (1:length(footer))) {
       tab <- flextable::add_footer(tab, V1 = footer[k], top = FALSE)
       tab <- flextable::merge_at(tab, i = k, j = 1:length(header1), part = "footer")
