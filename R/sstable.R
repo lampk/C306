@@ -239,7 +239,7 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
   }
 
   ### footer
-  footer1 <- footer1.after <- footer.con <- footer.cat <- NULL
+  footer2 <- footer1 <- footer1.after <- footer.con <- footer.cat <- NULL
   #### summary statistics
   if ((is.null(z) & any(continuous)) | (!is.null(z) & !is.factor(z))) {
     footer.con <- paste0(switch(statistics,
