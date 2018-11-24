@@ -297,13 +297,14 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
     header1[1] <- header2[1]
     header1[seq(from = 2, to = 2 * length(gr.lev), by = 2)] <- header1[seq(from = 2, to = 2 * length(gr.lev), by = 2) + 1]
     if (test) header2[length(header1)] <- header1[length(header1)]
-    header <- c(header1, header2)
-    for (i in c(1:2)) {
-      assign("tab",
-             eval(parse(text = paste0("flextable::add_header(tab,",
-                                      paste(paste0("V", 1:length(header1)), paste0("'", header[i], "'"), sep = "=", collapse = ","),
-                                      ", top = FALSE)"))))
-    }
+    assign("tab",
+           eval(parse(text = paste0("flextable::set_header_labels(tab,",
+                                    paste(paste0("V", 1:length(header1)), paste0("'", header1, "'"), sep = "=", collapse = ","),
+                                    ")"))))
+    assign("tab",
+           eval(parse(text = paste0("flextable::add_header(tab,",
+                                    paste(paste0("V", 1:length(header1)), paste0("'", header2, "'"), sep = "=", collapse = ","),
+                                    ", top = FALSE)"))))
 
     tab <- flextable::merge_h(tab, part = "header")
     tab <- flextable::merge_v(tab, part = "header")
@@ -656,13 +657,14 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, grade.var = NUL
 
     if (test) header2[length(header1)] <- header1[length(header1)]
 
-    header <- c(header1, header2)
-    for (i in c(1:2)) {
-      assign("tab",
-             eval(parse(text = paste0("flextable::add_header(tab,",
-                                      paste(paste0("V", 1:length(header1)), paste0("'", header[i], "'"), sep = "=", collapse = ","),
-                                      ", top = FALSE)"))))
-    }
+    assign("tab",
+           eval(parse(text = paste0("flextable::set_header_labels(tab,",
+                                    paste(paste0("V", 1:length(header1)), paste0("'", header1, "'"), sep = "=", collapse = ","),
+                                    ")"))))
+    assign("tab",
+           eval(parse(text = paste0("flextable::add_header(tab,",
+                                    paste(paste0("V", 1:length(header1)), paste0("'", header2, "'"), sep = "=", collapse = ","),
+                                    ", top = FALSE)"))))
 
     tab <- flextable::merge_h(tab, part = "header")
     tab <- flextable::merge_v(tab, part = "header")
@@ -803,13 +805,14 @@ sstable.survcomp <- function(model, data, add.risk = TRUE, add.prop.haz.test = T
     ## header
     header1 <- output[1, ]; header2 <- output[2, ]
     header2[1] <- header1[1]
-    header <- c(header1, header2)
-    for (i in c(1:2)) {
-      assign("tab",
-             eval(parse(text = paste0("flextable::add_header(tab,",
-                                      paste(paste0("V", 1:length(header1)), paste0("'", header[i], "'"), sep = "=", collapse = ","),
-                                      ", top = FALSE)"))))
-    }
+    assign("tab",
+           eval(parse(text = paste0("flextable::set_header_labels(tab,",
+                                    paste(paste0("V", 1:length(header1)), paste0("'", header1, "'"), sep = "=", collapse = ","),
+                                    ")"))))
+    assign("tab",
+           eval(parse(text = paste0("flextable::add_header(tab,",
+                                    paste(paste0("V", 1:length(header1)), paste0("'", header2, "'"), sep = "=", collapse = ","),
+                                    ", top = FALSE)"))))
 
     tab <- flextable::merge_v(tab, part = "header")
 
@@ -912,13 +915,14 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, data, digits =
     ## header
     header1 <- result[1, ]; header2 <- result[2, ]
     header2[1] <- header1[1]
-    header <- c(header1, header2)
-    for (i in c(1:2)) {
-      assign("tab",
-             eval(parse(text = paste0("flextable::add_header(tab,",
-                                      paste(paste0("V", 1:length(header1)), paste0("'", header[i], "'"), sep = "=", collapse = ","),
-                                      ", top = FALSE)"))))
-    }
+    assign("tab",
+           eval(parse(text = paste0("flextable::set_header_labels(tab,",
+                                    paste(paste0("V", 1:length(header1)), paste0("'", header1, "'"), sep = "=", collapse = ","),
+                                    ")"))))
+    assign("tab",
+           eval(parse(text = paste0("flextable::add_header(tab,",
+                                    paste(paste0("V", 1:length(header1)), paste0("'", header2, "'"), sep = "=", collapse = ","),
+                                    ", top = FALSE)"))))
 
     tab <- flextable::merge_v(tab, part = "header")
 
