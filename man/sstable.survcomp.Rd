@@ -2,7 +2,7 @@
 % Please edit documentation in R/sstable.R
 \name{sstable.survcomp}
 \alias{sstable.survcomp}
-\title{Summarize results for a Cox survival model with the treatment arm (variable "arm") as the main covariate}
+\title{Summarize results for a Cox survival model with the treatment arm as the main covariate}
 \usage{
 sstable.survcomp(model, data, add.risk = TRUE,
   add.prop.haz.test = TRUE, medsum = TRUE, digits = 2, pdigits = 3,

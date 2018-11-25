@@ -432,7 +432,7 @@ sstable.baseline.each <- function(varname, x, y, z, bycol = TRUE, pooledGroup = 
         return(paste0(ta, "/", n,
                       " (", formatC(100 * (ta/n), digits, format = "f"), "%)"))
       }), ncol = ngroup)
-      result[2:nrow(result), 1] <- paste0("- ", levels(x), " (n = ", apply(tn2, 1, sum), ")")
+      result[2:nrow(result), 1] <- paste0("- ", levels(x), " (n=", apply(tn2, 1, sum), ")")
       result[2:nrow(result), seq(3, ncol(result), by = 2)] <- ta.nice
       result[1, seq(2, ncol(result), by = 2)] <- apply(tn, 2, sum)
       result[2:nrow(result), seq(2, ncol(result), by = 2)] <- tn
@@ -700,7 +700,7 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, grade.var = NUL
 
 # create survival comparison table ----------------------------------------
 
-#' Summarize results for a Cox survival model with the treatment arm (variable "arm") as the main covariate
+#' Summarize results for a Cox survival model with the treatment arm as the main covariate
 #'
 #' @description A function to summarize results for a Cox survival model with the treatment arm (variable "arm") as the main covariate
 #'
@@ -844,7 +844,7 @@ sstable.survcomp <- function(model, data, add.risk = TRUE, add.prop.haz.test = T
   return(tab)
 }
 
-#' Summarize results for a Cox survival model by treatment arm (variable "arm") and subgroup
+#' Summarize results for a Cox survival model by treatment arm and subgroup
 #'
 #' @description A function to summarize results for a Cox survival model by treatment arm (variable "arm") and subgroup.
 #'

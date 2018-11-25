@@ -5,7 +5,7 @@
 \title{Create an adverse event summary table}
 \usage{
 sstable.ae(ae_data, fullid_data, id.var, aetype.var, grade.var = NULL,
-  arm.var, digits = 0, test = TRUE, pdigits = 3, pcutoff = 1e-04,
+  arm.var, digits = 0, test = TRUE, pdigits = 3, pcutoff = 0.001,
   chisq.test = FALSE, correct = FALSE, simulate.p.value = FALSE,
   B = 2000, workspace = 1e+06, hybrid = FALSE, footer = NULL,
   flextable = TRUE, bg = "#F2EFEE")

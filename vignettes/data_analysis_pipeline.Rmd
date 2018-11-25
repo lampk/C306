@@ -1,0 +1,21 @@
+---
+title: "Data analysis pipeline"
+author: "Lam Phung Khanh"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This vignette summarise one approach to data analysis pipeline and layouts how functions in this package fit to this pipeline.
+
+![](figures/C306.png){width=100%}

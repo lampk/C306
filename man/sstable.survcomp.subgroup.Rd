@@ -2,7 +2,7 @@
 % Please edit documentation in R/sstable.R
 \name{sstable.survcomp.subgroup}
 \alias{sstable.survcomp.subgroup}
-\title{Summarize results for a Cox survival model by treatment arm (variable "arm") and subgroup}
+\title{Summarize results for a Cox survival model by treatment arm and subgroup}
 \usage{
 sstable.survcomp.subgroup(base.model, subgroup.model, data, digits = 2,
   pdigits = 3, pcutoff = 0.001, footer = NULL, flextable = TRUE,
