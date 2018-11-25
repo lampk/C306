@@ -18,4 +18,4 @@ devtools::install_github("lampk/C306")
 ## Website
 
 Documentation of this package can be found at:
-<http://lampk.github.io/C306/index.html>
+<http://lampk.github.io/C306/>
