@@ -584,11 +584,12 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, grade.var = NUL
               n_patient = length(unique(id))) %>%
     ungroup() %>%
     complete(aetype, arm)
+  if (!is.factor(ae_count$aetype)) {ae_count$aetype <- factor(ae_count$aetype, levels = levels(ae_arm$aetype))}
+  if (!is.factor(ae_count$arm)) {ae_count$arm <- factor(ae_count$arm, levels = levels(ae_arm$arm))}
 
-  ordertype <- order(order(levels(ae_arm$aetype)))
-  episode_n <- unlist(spread(select(as.data.frame(ae_count), -n_patient), key = arm, value = n_episode)[ordertype, -1])
+  episode_n <- unlist(spread(select(as.data.frame(ae_count), -n_patient), key = arm, value = n_episode)[, -1])
   episode_n[is.na(episode_n)] <- 0
-  patient_n <- unlist(spread(select(ae_count, -n_episode), key = arm, value = n_patient)[ordertype, -1])
+  patient_n <- unlist(spread(select(ae_count, -n_episode), key = arm, value = n_patient)[, -1])
   patient_n[is.na(patient_n)] <- 0
   patient_N <- rep(table(idarm$arm), each = nlevels(ae_arm$aetype))
   patient_p <- patient_n/patient_N
