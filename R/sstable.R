@@ -736,7 +736,7 @@ sstable.survcomp <- function(model, data, add.risk = TRUE, add.prop.haz.test = T
   result <- rbind(header, "")
 
   ## footer
-  footer <- c("HR = hazard ratio; IQR = interquartile range.", "HR and p value were based on Cox proportional hazard models.", footer)
+  footer <- c("HR = hazard ratio; IQR = interquartile range.", "HR and p value were based on Cox proportional hazards models.", footer)
 
   # add number of events and risks
   fit.surv0 <- survival::survfit(update(model, new = as.formula(paste0(". ~ ", arm.var))), data = data)
@@ -901,7 +901,7 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, data, digits =
   }
   ## footer
   footer <- c("HR = hazard ratio.",
-              "HR and p value were based on Cox proportional hazard models.",
+              "HR and p value were based on Cox proportional hazards models.",
               "Test for heterogeneity is an interaction test between treatment effect and each subgroup in a Cox proportional hazard model (not include other variables).",
               footer)
 
