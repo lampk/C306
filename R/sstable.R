@@ -761,21 +761,22 @@ sstable.survcomp <- function(model, data, add.risk = TRUE, add.prop.haz.test = T
   } else {
     # add HR, CI, p-value
     fit.coxph <- survival::coxph(model, data)
-    hr <- formatC(exp(coef(fit.coxph)), digits, format = "f")
+    est <- coef(fit.coxph)
+    hr <- formatC(exp(est), digits, format = "f")
     result[3, length(arm.names) + 1] <- if (is.na(coef(fit.coxph))) {
       "-"
     } else {
       se <- sqrt(fit.coxph$var)
-      z <- abs(coef(fit.coxph)/se)
+      z <- abs(est/se)
       pval <- format.pval((1 - pnorm(z)) * 2, eps = pcutoff, digits = pdigits)
-      ci <- paste(formatC(exp(c(z - qnorm(0.975) * se, z = qnorm(0.975) * se)), digits, format = "f"), collapse = ", ")
+      ci <- paste(formatC(exp(c(est - qnorm(0.975) * se, est + qnorm(0.975) * se)), digits, format = "f"), collapse = ", ")
       hr.ci.p <- paste(hr, " (", ci, "); p=", pval, sep = "")
       result[3, length(arm.names) + 1] <- hr.ci.p
     }
 
     # add test for proportional hazards
     if (add.prop.haz.test){
-      if (is.na(coef(fit.coxph))) {
+      if (is.na(est)) {
         result <- cbind(result, c("Test for proportional hazards", "p-value", "-"))
       } else {
         attr(model, ".Environment") <- environment() # needed for cox.zph to work
