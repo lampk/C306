@@ -931,7 +931,8 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, data, digits =
     requireNamespace("officer")
 
     ## main table
-    tab <- flextable::flextable(as.data.frame(result[-c(1, 2), ]))
+    value <- result[-c(1, 2), ]
+    tab <- flextable::flextable(as.data.frame(value))
 
     ## header
     header1 <- result[1, ]; header2 <- result[2, ]
