@@ -723,7 +723,7 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, grade.var = NUL
 #' @import survival
 #' @export
 sstable.survcomp <- function(model, data, add.risk = TRUE, add.prop.haz.test = TRUE, medsum = TRUE,
-                            digits = 2, pdigits = 3, pcutoff = 0.001, footer = NULL, flextable = TRUE, bg = "#F2EFEE"){
+                             digits = 2, pdigits = 3, pcutoff = 0.001, footer = NULL, flextable = TRUE, bg = "#F2EFEE"){
   requireNamespace("survival")
 
   arm.var <- if (length(model[[3]]) > 1) {deparse(model[[3]][[2]])} else {deparse(model[[3]])}
@@ -754,27 +754,39 @@ sstable.survcomp <- function(model, data, add.risk = TRUE, add.prop.haz.test = T
   idx <- which(arm.names %in% unique(data[, arm.var]))
   result[3, 1:length(arm.names)] <- rep("-", length(arm.names))
   result[3, idx] <- events.n
-
+  #browser()
   if (length(events.n) < length(arm.names)) {
     result[3, length(arm.names) + 1] <- "-"
     if (add.prop.haz.test){result <- cbind(result, c("Test for proportional hazards", "p-value", "-"))}
   } else {
     # add HR, CI, p-value
     fit.coxph <- survival::coxph(model, data)
-    sum.fit.coxph <- summary(fit.coxph)
-    hr <- formatC(sum.fit.coxph$coef[1, "exp(coef)"], digits, format = "f")
-    pval <- format.pval(sum.fit.coxph$coef[1, "Pr(>|z|)"], eps = pcutoff, digits = pdigits)
-    ci <- paste(formatC(sum.fit.coxph$conf.int[1, c("lower .95")], digits, format = "f"),
-                formatC(sum.fit.coxph$conf.int[1, c("upper .95")], digits, format = "f"),
-                sep = ", ")
-    hr.ci.p <- paste(hr, " (", ci, "); p=", pval, sep = "")
-    result[3, length(arm.names) + 1] <- hr.ci.p
+    hr <- formatC(exp(coef(fit.coxph)), digits, format = "f")
+    result[3, length(arm.names) + 1] <- if (is.na(coef(fit.coxph))) {
+      "-"
+    } else {
+      se <- sqrt(fit.coxph$var)
+      z <- abs(coef(fit.coxph)/se)
+      pval <- format.pval((1 - pnorm(z)) * 2, eps = pcutoff, digits = pdigits)
+      ci <- paste(formatC(c(z - qnorm(0.975) * se, z = qnorm(0.975) * se), digits, format = "f"), collapse = ", ")
+      hr.ci.p <- paste(hr, " (", ci, "); p=", pval, sep = "")
+      result[3, length(arm.names) + 1] <- hr.ci.p
+    }
 
     # add test for proportional hazards
     if (add.prop.haz.test){
-      attr(model, ".Environment") <- environment() # needed for cox.zph to work
-      p.prop.haz <- survival::cox.zph(survival::coxph(model, data))$table[1, "p"]
-      result <- cbind(result, c("Test for proportional hazards", "p-value", format.pval(p.prop.haz, eps = pcutoff, digits = pdigits)))
+      if (is.na(coef(fit.coxph))) {
+        result <- cbind(result, c("Test for proportional hazards", "p-value", "-"))
+      } else {
+        attr(model, ".Environment") <- environment() # needed for cox.zph to work
+        p.prop.haz <- survival::cox.zph(survival::coxph(model, data))$table[1, "p"]
+        if (is.na(p.prop.haz)) {
+          p.prop.haz <- "-"
+        } else {
+          p.prop.haz <- format.pval(p.prop.haz, eps = pcutoff, digits = pdigits)
+        }
+        result <- cbind(result, c("Test for proportional hazards", "p-value", p.prop.haz))
+      }
     }
   }
   rownames(result) <- NULL
@@ -875,12 +887,12 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, data, digits =
 
   # result in entire population
   result <- sstable.survcomp(model = base.model, data = data, medsum = FALSE, digits = digits,
-                            pdigits = 3, pcutoff = pcutoff, flextable = FALSE, ...)$table[,-1]
+                             pdigits = 3, pcutoff = pcutoff, flextable = FALSE, ...)$table[,-1]
   result <- cbind(c("Subgroup", "", "All patients"), result, c("Test for heterogeneity", "p-value", ""))
 
   # Preparation of models and data
   subgroup.char <- all.vars(subgroup.model)
-
+  #browser()
   for (k in 1:length(subgroup.char)){
     main.model <- update(base.model, as.formula(paste(". ~ . +", subgroup.char[k], sep = "")))
     ia.model <- update(base.model, as.formula(paste(". ~ . + arm *", subgroup.char[k], sep = "")))
@@ -900,8 +912,8 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, data, digits =
       result[nrow(result), 1] <- paste("-", factor.levels[j])
       d.subgroup <- subset(data, .subgroup.var == factor.levels[j])
       result[nrow(result), 2:(ncol(result) - 1)] <- sstable.survcomp(model = base.model, data = d.subgroup,
-                                                                    medsum = FALSE, digits = digits, pdigits = pdigits, pcutoff = pcutoff,
-                                                                    flextable = FALSE, ...)$table[3,-1]
+                                                                     medsum = FALSE, digits = digits, pdigits = pdigits, pcutoff = pcutoff,
+                                                                     flextable = FALSE, ...)$table[3,-1]
     }
   }
   ## footer
@@ -960,4 +972,3 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, data, digits =
   }
   return(tab)
 }
-
