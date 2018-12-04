@@ -835,6 +835,8 @@ sstable.survcomp <- function(model, data, add.risk = TRUE, add.prop.haz.test = T
 
     tab <- flextable::merge_v(tab, part = "header")
 
+    if (any(value == "-")) footer <- c(footer, "- : value cannot be estimated.")
+
     for (k in (1:length(footer))) {
       tab <- flextable::add_footer(tab, V1 = footer[k], top = FALSE)
       tab <- flextable::merge_at(tab, i = k, j = 1:length(header1), part = "footer")
@@ -946,6 +948,7 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, data, digits =
     tab <- flextable::merge_v(tab, part = "header")
 
     ## footer
+    if (any(value == "-")) footer <- c(footer, "- : value cannot be estimated.")
     for (k in (1:length(footer))) {
       tab <- flextable::add_footer(tab, V1 = footer[k], top = FALSE)
       tab <- flextable::merge_at(tab, i = k, j = 1:length(header1), part = "footer")
