@@ -768,7 +768,7 @@ sstable.survcomp <- function(model, data, add.risk = TRUE, add.prop.haz.test = T
       se <- sqrt(fit.coxph$var)
       z <- abs(coef(fit.coxph)/se)
       pval <- format.pval((1 - pnorm(z)) * 2, eps = pcutoff, digits = pdigits)
-      ci <- paste(formatC(c(z - qnorm(0.975) * se, z = qnorm(0.975) * se), digits, format = "f"), collapse = ", ")
+      ci <- paste(formatC(exp(c(z - qnorm(0.975) * se, z = qnorm(0.975) * se)), digits, format = "f"), collapse = ", ")
       hr.ci.p <- paste(hr, " (", ci, "); p=", pval, sep = "")
       result[3, length(arm.names) + 1] <- hr.ci.p
     }
