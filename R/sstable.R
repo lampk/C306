@@ -755,22 +755,27 @@ sstable.survcomp <- function(model, data, add.risk = TRUE, add.prop.haz.test = T
   result[3, 1:length(arm.names)] <- rep("-", length(arm.names))
   result[3, idx] <- events.n
 
-  # add HR, CI, p-value
-  fit.coxph <- survival::coxph(model, data)
-  sum.fit.coxph <- summary(fit.coxph)
-  hr <- formatC(sum.fit.coxph$coef[1, "exp(coef)"], digits, format = "f")
-  pval <- format.pval(sum.fit.coxph$coef[1, "Pr(>|z|)"], eps = pcutoff, digits = pdigits)
-  ci <- paste(formatC(sum.fit.coxph$conf.int[1, c("lower .95")], digits, format = "f"),
-              formatC(sum.fit.coxph$conf.int[1, c("upper .95")], digits, format = "f"),
-              sep = ", ")
-  hr.ci.p <- paste(hr, " (", ci, "); p=", pval, sep = "")
-  result[3, length(arm.names) + 1] <- hr.ci.p
+  if (length(events.n) < length(arm.names)) {
+    result[3, length(arm.names) + 1] <- "-"
+    if (add.prop.haz.test){result <- cbind(result, c("Test for proportional hazards", "p-value", "-"))}
+  } else {
+    # add HR, CI, p-value
+    fit.coxph <- survival::coxph(model, data)
+    sum.fit.coxph <- summary(fit.coxph)
+    hr <- formatC(sum.fit.coxph$coef[1, "exp(coef)"], digits, format = "f")
+    pval <- format.pval(sum.fit.coxph$coef[1, "Pr(>|z|)"], eps = pcutoff, digits = pdigits)
+    ci <- paste(formatC(sum.fit.coxph$conf.int[1, c("lower .95")], digits, format = "f"),
+                formatC(sum.fit.coxph$conf.int[1, c("upper .95")], digits, format = "f"),
+                sep = ", ")
+    hr.ci.p <- paste(hr, " (", ci, "); p=", pval, sep = "")
+    result[3, length(arm.names) + 1] <- hr.ci.p
 
-  # add test for proportional hazards
-  if (add.prop.haz.test){
-    attr(model, ".Environment") <- environment() # needed for cox.zph to work
-    p.prop.haz <- survival::cox.zph(survival::coxph(model, data))$table[1, "p"]
-    result <- cbind(result, c("Test for proportional hazards", "p-value", format.pval(p.prop.haz, eps = pcutoff, digits = pdigits)))
+    # add test for proportional hazards
+    if (add.prop.haz.test){
+      attr(model, ".Environment") <- environment() # needed for cox.zph to work
+      p.prop.haz <- survival::cox.zph(survival::coxph(model, data))$table[1, "p"]
+      result <- cbind(result, c("Test for proportional hazards", "p-value", format.pval(p.prop.haz, eps = pcutoff, digits = pdigits)))
+    }
   }
   rownames(result) <- NULL
 
