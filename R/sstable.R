@@ -5,10 +5,10 @@ getvar <- function(formula) {
   if (!is.call(formula)) {
     deparse(formula)
   } else {
-    if (identical(formula[[1]], quote(`I`))) {
-      deparse(formula)
-    } else {
+    if (identical(formula[[1]], quote(`~`)) | identical(formula[[1]], quote(`+`))) {
       unlist(lapply(c(formula[[2]], formula[[3]]), getvar))
+    } else {
+      deparse(formula)
     }
   }
 }
@@ -129,7 +129,7 @@ contSummary <- function(x, statistics = c("med.IQR", "med.90", "med.range", "mea
 #' @return a flextable-type table or a list with values/headers/footers
 #' @export
 sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
-                             statistics = "med.IQR", continuous = NA, digits = 1,
+                             statistics = "med.IQR", continuous = NA, fullfreq = TRUE, digits = 1,
                              test = FALSE, pdigits = 3, pcutoff = 0.0001,
                              chisq.test = FALSE, correct = FALSE, simulate.p.value = FALSE, B = 2000,
                              workspace = 1000000, hybrid = FALSE,
@@ -216,7 +216,7 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
                      sstable.baseline.each(varname = varname[i][[1]],
                                            x = x[, i], y = y, z = z, bycol = bycol,
                                            pooledGroup = pooledGroup, statistics = statistics,
-                                           continuous = continuous[i], test = test,
+                                           continuous = continuous[i], fullfreq = fullfreq, test = test,
                                            digits = digits[i], pdigits = pdigits, pcutoff = pcutoff,
                                            chisq.test = chisq.test, correct = correct,
                                            workspace = workspace, hybrid = hybrid,
@@ -340,7 +340,7 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
 }
 
 sstable.baseline.each <- function(varname, x, y, z, bycol = TRUE, pooledGroup = FALSE,
-                                  statistics = "med.IQR", continuous = NA, test = FALSE,
+                                  statistics = "med.IQR", continuous = NA, fullfreq = TRUE, test = FALSE,
                                   digits = 1, pdigits = pdigits, pcutoff = 0.0001, chisq.test = FALSE, correct = FALSE, workspace = 1000000,
                                   hybrid = FALSE, simulate.p.value = FALSE, B = 2000) {
 
@@ -395,7 +395,7 @@ sstable.baseline.each <- function(varname, x, y, z, bycol = TRUE, pooledGroup = 
     return(result)
   }
 
-  mycat.summary <- function(x, y, z) {
+  mycat.summary <- function(x, y, z, fullfreq = fullfreq) {
     ngroup <- length(levels(y))
     result <- matrix("", ncol = ngroup * 2 + 1, nrow = length(levels(x)) + 1)
 
@@ -418,10 +418,20 @@ sstable.baseline.each <- function(varname, x, y, z, bycol = TRUE, pooledGroup = 
       if (bycol) {
         #browser()
         result[1, seq(2, ncol(result), by = 2)] <- n
-        result[2:nrow(result), seq(3, ncol(result), by = 2)] <- paste0(ta, "/", rep(apply(ta, 2, sum), each = length(levels(x))), ta.nice)
+        if (fullfreq) {
+          result[2:nrow(result), seq(3, ncol(result), by = 2)] <- paste0(ta, "/", rep(apply(ta, 2, sum), each = length(levels(x))), ta.nice)
+        } else {
+          result[2:nrow(result), seq(3, ncol(result), by = 2)] <- paste0(ta, ta.nice)
+        }
+
       } else {
         result[2:nrow(result), 1] <- paste0(result[2:nrow(result), 1], " (n=", n, ")")
-        result[2:nrow(result), seq(3, ncol(result), by = 2)] <- paste0(ta, "/", rep(n, ngroup), ta.nice)
+        if (fullfreq) {
+          result[2:nrow(result), seq(3, ncol(result), by = 2)] <- paste0(ta, "/", rep(n, ngroup), ta.nice)
+        } else {
+          result[2:nrow(result), seq(3, ncol(result), by = 2)] <- paste0(ta, ta.nice)
+        }
+
       }
     } else {
       tn <- table(x, y)
@@ -429,8 +439,12 @@ sstable.baseline.each <- function(varname, x, y, z, bycol = TRUE, pooledGroup = 
       ta.nice <- matrix(by(z, list(x, y), function(z) {
         ta <- sum(z == TRUE, na.rm = TRUE)
         n <- length(na.omit(z))
-        return(paste0(ta, "/", n,
-                      " (", formatC(100 * (ta/n), digits, format = "f"), "%)"))
+        if (fullfreq) {
+          output <- paste0(ta, "/", n, " (", formatC(100 * (ta/n), digits, format = "f"), "%)")
+        } else {
+          output <- paste0(ta, " (", formatC(100 * (ta/n), digits, format = "f"), "%)")
+        }
+        return(output)
       }), ncol = ngroup)
       result[2:nrow(result), 1] <- paste0("- ", levels(x), " (n=", apply(tn2, 1, sum), ")")
       result[2:nrow(result), seq(3, ncol(result), by = 2)] <- ta.nice
