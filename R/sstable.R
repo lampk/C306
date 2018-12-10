@@ -499,11 +499,11 @@ sstable.baseline.each <- function(varname, x, y, z, bycol = TRUE, pooledGroup = 
     out <- if (continuous) {
       mycont.summary(x = x, y = y, z = NULL)
     } else {
-      mycat.summary(x = x, y = y, z = NULL)
+      mycat.summary(x = x, y = y, z = NULL, fullfreq = fullfreq)
     }
   } else {
     out <- if (is.factor(z)) {
-      mycat.summary(x = x, y = y, z = z)
+      mycat.summary(x = x, y = y, z = z, fullfreq = fullfreq)
     } else {
       mycont.summary(x = x, y = y, z = z)
     }
