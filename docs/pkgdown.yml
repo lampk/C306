@@ -1,0 +1,7 @@
+pandoc: '2.4'
+pkgdown: 1.2.0
+pkgdown_sha: ~
+articles:
+  data_analysis_pipeline: data_analysis_pipeline.html
+  sstable: sstable.html
+

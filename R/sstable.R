@@ -5,7 +5,7 @@ getvar <- function(formula) {
   if (!is.call(formula)) {
     deparse(formula)
   } else {
-    if (identical(formula[[1]], quote(`~`)) | identical(formula[[1]], quote(`+`))) {
+    if (identical(formula[[1]], quote(`~`)) | identical(formula[[1]], quote(`+`)) | identical(formula[[1]], quote(`|`))) {
       unlist(lapply(c(formula[[2]], formula[[3]]), getvar))
     } else {
       deparse(formula)
