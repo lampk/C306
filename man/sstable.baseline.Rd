@@ -5,10 +5,10 @@
 \title{Create baseline table}
 \usage{
 sstable.baseline(formula, data, bycol = TRUE, pooledGroup = FALSE,
-  statistics = "med.IQR", continuous = NA, digits = 1,
-  test = FALSE, pdigits = 3, pcutoff = 1e-04, chisq.test = FALSE,
-  correct = FALSE, simulate.p.value = FALSE, B = 2000,
-  workspace = 1e+06, hybrid = FALSE, footer = NULL,
+  statistics = "med.IQR", continuous = NA, fullfreq = TRUE,
+  digits = 1, test = FALSE, pdigits = 3, pcutoff = 1e-04,
+  chisq.test = FALSE, correct = FALSE, simulate.p.value = FALSE,
+  B = 2000, workspace = 1e+06, hybrid = FALSE, footer = NULL,
   flextable = FALSE, bg = "#F2EFEE")
 }
 \arguments{
