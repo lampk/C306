@@ -1,6 +1,10 @@
 #' Do a simple recode via pattern for data
 #'
-#' @description A function to re-encode x by using a map. Patterns are accepted.
+#' @description
+#' A function to re-encode data by using a map. Patterns are accepted. unmentioned data are left intact.
+#'
+#' Method for class data.frame supports a robust replacement for data by providing relevant map in the form of var = map.
+#'
 #' @param x a vector
 #' @param map
 #' A map.
@@ -11,11 +15,44 @@
 #'
 #' @param as A character string defining the post-recoded data type of x. Default is keeping as-is.
 #' @param ignore.case,perl Parameters passed to gsub().
-#' @param ... Additional parameters passed to factor().
+#' @param .data A data frame to modify
+#' @param ...
+#' For data.frame: Replacement in the form of var = map. Maps must follow the syntax stipulated in the map parameter.
 #'
-#' @return A vector or length == length(x)
+#' For default method: Additional parameters passed to factor()
+#'
+#' @param ignore.case Specify whether the pattern is case-insensitive. Default is FALSE (case sensitive)
+#' @param perl Are patterns follow the Perl-style regular expression.
+#' @return A data frame with recoded variables.
+#' @seealso \link{regex} \link{case_when}
+#'
+#' @return
+#' If input is a vector, return a vector of the same length.
+#'
+#' If input is a data frame, return a data frame with relevant variables recoded.
+#'
 #' @export
-simple_recode <- function(x, map, as = c('as_is', 'numeric', 'factor', 'character', 'logical'), ignore.case = FALSE, perl = TRUE, ...){
+simple_recode <- function(...){
+  UseMethod('simple_recode')
+}
+
+#' @rdname simple_recode
+#' @aliases recode_var var_recode
+#' @method simple_recode data.frame
+#' @export
+simple_recode.data.frame <- var_recode <- recode_var  <- function(.data, ..., ignore.case = FALSE, perl = TRUE){
+  .maps <- list(...)
+  .vars <- names(.maps)
+  for (.var in .vars){
+    .data[[.var]] <- simple_recode(x = .data[[.var]], map = .maps[[.var]], ignore.case = ignore.case, perl = perl)
+  }
+  return(.data)
+}
+
+#' @rdname simple_recode
+#' @method simple_recode default
+#' @export
+simple_recode.default <- function(x, map, as = c('as_is', 'numeric', 'factor', 'character', 'logical'), ignore.case = FALSE, perl = TRUE, ...){
   requireNamespace('tidyr')
   as <- match.arg(as)
   if (missing(map)) stop ('A conversion map should be provided!')
@@ -57,29 +94,6 @@ simple_recode <- function(x, map, as = c('as_is', 'numeric', 'factor', 'characte
     if (is.numeric(x)) try(x.recoded <- as.numeric(x.recoded))
   }
   return(x.recoded)
-}
-
-#' Recode values with regex patterns and pipe support
-#' @aliases recode_var
-#' @description This support a robust replacement for data by providing relevant map in the form of var = map
-#' @param .data A data frame to modify
-#' @param ...
-#' Replacement in the form of var = map. Maps will be passed to simple_recode().
-#'
-#' See simple_recode for more details
-#'
-#' @param ignore.case Specify whether the pattern is case-insensitive. Default is FALSE (case sensitive)
-#' @param perl Are patterns follow the Perl-style regular expression.
-#' @return A data frame with recoded variables.
-#' @seealso \link{simple_recode}
-#' @export
-var_recode <- recode_var <- function(.data, ..., ignore.case = FALSE, perl = TRUE){
-  .maps <- list(...)
-  .vars <- names(.maps)
-  for (.var in .vars){
-    .data[[.var]] <- simple_recode(x = .data[[.var]], map = .maps[[.var]], ignore.case = ignore.case, perl = perl)
-  }
-  return(.data)
 }
 
 
