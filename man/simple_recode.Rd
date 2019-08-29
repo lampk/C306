@@ -4,8 +4,8 @@
 \alias{simple_recode}
 \title{Do a simple recode via pattern for data}
 \usage{
-simple_recode(x, map, as = c("as_is", "numeric", "factor", "character"),
-  ignore.case = FALSE, perl = TRUE, ...)
+simple_recode(x, map, as = c("as_is", "numeric", "factor", "character",
+  "logical"), ignore.case = FALSE, perl = TRUE, ...)
 }
 \arguments{
 \item{x}{a vector}
