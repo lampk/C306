@@ -61,7 +61,7 @@ simple_recode.default <- function(x, map, as = c('as_is', 'numeric', 'factor', '
   else {
     Map <- data.frame(
       to = unlist(lapply(names(map),
-                  function(name) rep(name, length(map[[name]])))),
+                         function(name) rep(name, length(map[[name]])))),
       from = unlist(map),
       stringsAsFactors = FALSE
     )}
