@@ -40,11 +40,11 @@ simple_recode <- function(...){
 #' @aliases recode_var var_recode
 #' @method simple_recode data.frame
 #' @export
-simple_recode.data.frame <- var_recode <- recode_var  <- function(.data, ..., ignore.case = FALSE, perl = TRUE){
+simple_recode.data.frame <- function(.data, ..., ignore.case = FALSE, perl = TRUE){
   .maps <- list(...)
   .vars <- names(.maps)
   for (.var in .vars){
-    .data[[.var]] <- simple_recode(x = .data[[.var]], map = .maps[[.var]], ignore.case = ignore.case, perl = perl)
+    .data[[.var]] <- simple_recode.default(x = .data[[.var]], map = .maps[[.var]], ignore.case = ignore.case, perl = perl)
   }
   return(.data)
 }
@@ -100,3 +100,5 @@ simple_recode.default <- function(x, map, as = c('as_is', 'numeric', 'factor', '
 `do_to<-` <- function(x, value){
   match.fun(value)(x)
 }
+
+is_true
