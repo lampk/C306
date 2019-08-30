@@ -91,7 +91,7 @@ simple_recode.default <- function(x, map, as = c('as_is', 'numeric', 'factor', '
                  x.recoded <- factor(x.recoded, levels = levels.recoded)
                })
     }
-    if (is.numeric(x)) try(x.recoded <- as.numeric(x.recoded))
+    if (is.numeric(x)) x.recode <- tryCatch(as.numeric(x.recoded), warning = function(w) x.recoded)
   }
   return(x.recoded)
 }
