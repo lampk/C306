@@ -101,4 +101,3 @@ simple_recode.default <- function(x, map, as = c('as_is', 'numeric', 'factor', '
   match.fun(value)(x)
 }
 
-is_true
