@@ -204,8 +204,9 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
     ypool <- ifelse("total" %in% tolower(levels(y)), "pooledGroup", "Total")
     y <- factor(c(as.character(y), rep(ypool, nrow(dat))), levels = c(levels(y), ypool), exclude = NULL)
     z <- if (!is.null(z)) factor(c(z, z), levels = unique(na.omit(z))) else NULL
+  } else{
+    z <- if (!is.null(z)) factor(z, levels = unique(na.omit(z))) else NULL
   }
-
 
   ## get variable name
   varname <- if (ncol(xlabel) == 1) getlabel(xlabel[, 1]) else getlabel(xlabel)
