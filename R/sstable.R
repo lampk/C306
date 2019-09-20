@@ -551,7 +551,10 @@ sstable.baseline.each <- function(varname, x, y, z, bycol = TRUE, pooledGroup = 
 #' @param test a logical value specifies whether a statistical test will be performed to compare between treatment arms.
 #' @param pdigits a number specifies number of significant digits for p value.
 #' @param pcutoff a number specifies threshold value of p value to be displayed as "< pcutoff".
-#' @param chisq.test a logical value specifies whether Chi-squared test or Fisher's exact test will be used to compare between treatment arms.
+#' @param chisq.test
+#' a logical value specifies whether Chi-squared test or Fisher's exact test will be used to compare between treatment arms.
+#'
+#' Be aware that even when chisq.test==TRUE, if expected values are < 1, the later test will take over.
 #' @param correct a parameter for chisq.test().
 #' @param simulate.p.value a parameter for chisq.test() and fisher.test().
 #' @param B a parameter for chisq.test() and fisher.test().
@@ -593,7 +596,7 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
     sort.by <- enquo(sort.by)
     sort.vars <- all.vars(sort.by)
     sort.signs <- getsign(sort.by)
-    if (length(sort.signs) < length(sort.vars)) sort.signs <- prepend(sort.signs, quote(`+`))
+    if (length(sort.signs) < length(sort.vars)) sort.signs <- rlang::prepend(sort.signs, quote(`+`))
     if (length(setdiff(sort.vars, c('pt','ep','p'))))
       stop('Sorting can only apply to `pt`, `ep`, and `p`')
   }
@@ -710,25 +713,59 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
 
   ## test
   if (test) {
+    ## <trinhdhk:
+    ## - requested by Ronald, add the ability to override the chisq.test with fisher.test when the expected var is <1.
+    ## - this should work even when chisq.test == T
+    ## >
+
+    do_fisher <- function(mat, workspace = workspace, hybrid = hybrid,
+                          simulate.p.value = simulate.p.value, B = B){
+      tryCatch(format.pval(fisher.test(x = mat, workspace = workspace, hybrid = hybrid,
+                                       simulate.p.value = simulate.p.value, B = B)$p.value,
+                           eps = pcutoff, digits = pdigits, scientific = FALSE),
+               error = function(e) NA)
+    }
+
+    do_chisq <- function(mat, correct = correct,
+                         simulate.p.value = simulate.p.value, B = B,
+                         workspace = workspace, hybrid = hybrid){
+      chi.out <- tryCatch(suppressWarnings(chisq.test(x = mat, correct = correct,
+                                     simulate.p.value = simulate.p.value, B = B)),
+                          error = function(e) NA)
+      if (length(chi.out) == 1) # that implicits the NA value, so no more NA check here
+        return(chi.out)
+
+      if (any(chi.out$expected<1))
+        return(do_fisher(mat=mat, workspace = workspace, hybrid = hybrid,
+                         simulate.p.value = simulate.p.value, B = B))
+      #else
+      return(format.pval(chi.out$p.value,eps = pcutoff, digits = pdigits, scientific = FALSE))
+    }
+
     pval <- sapply(1:nrow(value), function(i) {
       idx <- seq(from = i, to = length(patient_n), by = nrow(value))
       mat <- matrix(c(patient_n[idx], patient_N[idx] - patient_n[idx]), nrow = 2, byrow = TRUE)
       out <- if (chisq.test) {
-        tryCatch(format.pval(chisq.test(x = mat, correct = correct,
-                                        simulate.p.value = simulate.p.value, B = B)$p.value,
-                             eps = pcutoff, digits = pdigits, scientific = FALSE),
-                 error = function(c) NA)
+        # tryCatch(format.pval(chisq.test(x = mat, correct = correct,
+        #                                 simulate.p.value = simulate.p.value, B = B)$p.value,
+        #                      eps = pcutoff, digits = pdigits, scientific = FALSE),
+        #          error = function(c) NA)
+        do_chisq(mat, correct = correct,
+                 simulate.p.value = simulate.p.value, B = B,
+                 workspace = workspace, hybrid = hybrid)
       } else {
-        tryCatch(format.pval(fisher.test(x = mat, workspace = workspace, hybrid = hybrid,
-                                         simulate.p.value = simulate.p.value, B = B)$p.value,
-                             eps = pcutoff, digits = pdigits, scientific = FALSE),
-                 error = function(c) NA)
+        # tryCatch(format.pval(fisher.test(x = mat, workspace = workspace, hybrid = hybrid,
+        #                                  simulate.p.value = simulate.p.value, B = B)$p.value,
+        #                      eps = pcutoff, digits = pdigits, scientific = FALSE),
+        #          error = function(c) NA)
+        do_fisher(mat, workspace = workspace, hybrid = hybrid,
+                  simulate.p.value = simulate.p.value, B = B)
       }
       return(out)
     })
     pval[is.na(pval)] <- "-"
 
-    ## add grouping row
+    ## add grouping row - trinhdhk
     ae_value <-
       left_join(
         ae_value,
