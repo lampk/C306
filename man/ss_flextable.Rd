@@ -21,3 +21,6 @@ an object of class flextable
 \description{
 This function generate a flextable from a sstable.
 }
+\seealso{
+\link[flextable]{flextable}
+}

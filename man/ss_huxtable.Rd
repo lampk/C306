@@ -4,13 +4,23 @@
 \alias{ss_huxtable}
 \title{Create summary table using huxtable package.}
 \usage{
-ss_huxtable(sstable, footer = NULL, bg = c(grey(0.95), "white"),
-  border_width = 0.8, border_color = grey(0.75), ...)
+ss_huxtable(sstable, footer = NULL, caption = NULL,
+  caption_pos = c("top", "bottom", "topleft", "topcenter", "topright",
+  "bottomleft", "bottomcenter", "bottomright"), bg = c(grey(0.95),
+  "white"), border_width = 0.8, border_color = grey(0.75), ...)
 }
 \arguments{
 \item{sstable}{a data frame following sstable's grammar}
 
 \item{footer}{a character vector each of which is the footnote of the flextable}
+
+\item{caption}{a string containing table caption. Default is NULL}
+
+\item{caption_pos}{A length-one character vector,
+one of "top", "bottom", "topleft", "topcenter", "topright", "bottomleft", "bottomcenter", "bottomright".
+Default is "bottomcenter".
+
+See also \link[huxtable]{caption_pos}}
 
 \item{bg}{a character vector that defines background color of the flextable. If length(bg) >= 2, the table will have stripped background, otherwise plain.}
 
@@ -25,4 +35,7 @@ an object of class huxtable
 }
 \description{
 This function generate a huxtable from a sstable.
+}
+\seealso{
+\link[huxtable]{huxtable}
 }

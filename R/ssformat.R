@@ -1,6 +1,7 @@
 ## Quick sstable drawing helpers
 ## Author: trinhdhk
 ## Day first written: Sep 20 2019
+## Latest build: Sep 27 2019
 ## Ver 0.1.0.092019
 
 ## Check legitibility
@@ -161,6 +162,7 @@ ss_guess_format.survcomp_tbl <- function(sstable){
 #' @param footer a character vector each of which is the footnote of the flextable
 #' @param bg a character string that defines stripped background color of the flextable
 #' @param ... additional parameters that will be passed to ss_format if the sstable has yet to be formatted.
+#' @seealso \link[flextable]{flextable}
 #' @return an object of class flextable
 #' @export
 ss_flextable <- function(sstable, footer = NULL, bg = "#F2EFEE", ...){
@@ -255,14 +257,26 @@ ss_flextable <- function(sstable, footer = NULL, bg = "#F2EFEE", ...){
 #' @description This function generate a huxtable from a sstable.
 #' @param sstable a data frame following sstable's grammar
 #' @param footer a character vector each of which is the footnote of the flextable
+#' @param caption a string containing table caption. Default is NULL
+#' @param caption_pos
+#' A length-one character vector,
+#' one of "top", "bottom", "topleft", "topcenter", "topright", "bottomleft", "bottomcenter", "bottomright".
+#' Default is "bottomcenter".
+#'
+#' See also \link[huxtable]{caption_pos}
 #' @param bg a character vector that defines background color of the flextable. If length(bg) >= 2, the table will have stripped background, otherwise plain.
 #' @param border_width a number that defines huxtable border width
 #' @param border_color a character string that defines huxtable border color
 #' @param ... additional parameters that will be passed to ss_format if the sstable has yet to be formatted.
 #' @return an object of class huxtable
+#' @seealso \link[huxtable]{huxtable}
 #' @export
-ss_huxtable <- function(sstable, footer = NULL, bg = c(grey(.95), 'white'), border_width=0.8, border_color = grey(.75),...){
+ss_huxtable <- function(sstable, footer = NULL,
+                        caption = NULL, caption_pos = c("top", "bottom", "topleft", "topcenter", "topright",
+                                                        "bottomleft", "bottomcenter", "bottomright"),
+                        bg = c(grey(.95), 'white'), border_width=0.8, border_color = grey(.75),...){
   requireNamespace('huxtable')
+  if (missing(caption_pos)) caption_pos <- 'bottomcenter' else caption_pos <- match.arg(caption_pos)
   sstable <- ss_format(sstable, ..., .guess = TRUE)
   header <- which(grepl("header", rownames(sstable)))
   body <- which(grepl("body", rownames(sstable)))
@@ -336,13 +350,19 @@ ss_huxtable <- function(sstable, footer = NULL, bg = c(grey(.95), 'white'), bord
   for (i in section){
     ht <- huxtable::set_bold(ht, i, huxtable::everywhere, value = TRUE)
     ### merging cells that from the left if the whole row is empty
-    if (all(sstable[k, -1] == ''))
-      ht <- huxtable::merge_cells(ht, i, everywhere)
+    if (all(sstable[i, -1] == ''))
+      ht <- huxtable::merge_cells(ht, i, huxtable::everywhere)
   }
 
   ## footer
   for (i in seq_along(footer)){
     ht <- huxtable::add_footnote(ht, footer[i], if (i>1) border = 0)
+  }
+
+  ## caption
+  if (length(caption)){
+    huxtable::caption(ht) <- caption
+    huxtable::caption_pos(ht) <- caption_pos
   }
 
   ## format huxtable
