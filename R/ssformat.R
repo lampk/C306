@@ -264,7 +264,7 @@ ss_flextable <- function(sstable, footer = NULL, bg = "#F2EFEE", ...){
 #' Default is "bottomcenter".
 #'
 #' See also \link[huxtable]{caption_pos}
-#' @param bg a character vector that defines background color of the flextable. If length(bg) >= 2, the table will have stripped background, otherwise plain.
+#' @param bg a character vector that defines background color of the flextable. If length(bg) >= 2, the table will have stripe background, otherwise plain.
 #' @param border_width a number that defines huxtable border width
 #' @param border_color a character string that defines huxtable border color
 #' @param ... additional parameters that will be passed to ss_format if the sstable has yet to be formatted.
@@ -377,12 +377,12 @@ ss_huxtable <- function(sstable, footer = NULL,
 }
 
 
-#' A stripping theme for huxtable object
+#' A stripe theme for huxtable object
 #'
 #' @description This function provides a stripped theme for huxtable object
 #' @param ht an object of class huxtable
 #' @param header_rows a numeric vector that delimits the header zone.
-#' @param bg a character vector that defines background color of the flextable. If length(bg) >= 2, the table will have stripped background, otherwise plain.
+#' @param bg a character vector that defines background color of the flextable. If length(bg) >= 2, the table will have stripe background, otherwise plain.
 #' @param border_width a number that defines huxtable border width
 #' @param border_color a character string that defines huxtable border color
 #' @return an object of class huxtable

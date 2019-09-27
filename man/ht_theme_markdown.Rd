@@ -2,7 +2,7 @@
 % Please edit documentation in R/ssformat.R
 \name{ht_theme_markdown}
 \alias{ht_theme_markdown}
-\title{A stripping theme for huxtable object}
+\title{A stripe theme for huxtable object}
 \usage{
 ht_theme_markdown(ht, header_rows = 1, header_cols = 1,
   border_width = 0.8, border_color = grey(0.75), bg = c(grey(0.95),
@@ -17,7 +17,7 @@ ht_theme_markdown(ht, header_rows = 1, header_cols = 1,
 
 \item{border_color}{a character string that defines huxtable border color}
 
-\item{bg}{a character vector that defines background color of the flextable. If length(bg) >= 2, the table will have stripped background, otherwise plain.}
+\item{bg}{a character vector that defines background color of the flextable. If length(bg) >= 2, the table will have stripe background, otherwise plain.}
 }
 \value{
 an object of class huxtable

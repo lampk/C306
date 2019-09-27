@@ -22,7 +22,7 @@ Default is "bottomcenter".
 
 See also \link[huxtable]{caption_pos}}
 
-\item{bg}{a character vector that defines background color of the flextable. If length(bg) >= 2, the table will have stripped background, otherwise plain.}
+\item{bg}{a character vector that defines background color of the flextable. If length(bg) >= 2, the table will have stripe background, otherwise plain.}
 
 \item{border_width}{a number that defines huxtable border width}
 
