@@ -349,6 +349,7 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
   } else {
     tab <- list(table = rbind(header1, header2, value),
                 footer = footer)
+    class(tab$table) <- c('baseline_tbl', 'ss_tbl', class(tab$table))
   }
   ## output
   return(tab)
@@ -593,10 +594,10 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
   }
   if (!arm.var %in% names(fullid_data)){stop(paste(tmp[[9]], "does not exist in", deparse(tmp[[3]]), "!!!"))}
   if (!missing(sort.by)){
-    sort.by <- enquo(sort.by)
+    sort.by <- rlang::enquo(sort.by)
     sort.vars <- all.vars(sort.by)
     sort.signs <- getsign(sort.by)
-    if (length(sort.signs) < length(sort.vars)) sort.signs <- rlang::prepend(sort.signs, quote(`+`))
+    if (length(sort.signs) < length(sort.vars)) sort.signs <- purrr::prepend(sort.signs, quote(`+`))
     if (length(setdiff(sort.vars, c('pt','ep','p'))))
       stop('Sorting can only apply to `pt`, `ep`, and `p`')
   }
@@ -691,7 +692,17 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
     rename({{aetype.var}} := 'V1') %>%
     right_join(group_data, by = aetype.var) %>%
     group_by(.tmp.group) %>%
-    group_modify(~ rbind(c(as.character(.y$.tmp.group), rep('', ncol(.x)-1)), .x))
+    group_modify(~ rbind(c(as.character(.y$.tmp.group),
+                           unlist(lapply(seq_along(arm_lev),
+                                         function(i){
+                                           return(c(
+                                             sum(as.numeric(unlist(.x[, 2*i]))),
+                                             ''))
+                                             # paste(sum(as.numeric(unlist(.x[, length(arm_lev)*2+i+1])))))
+                                         })),
+                           rep('',ncol(ae_value)-1-2*length(arm_lev))
+                           ),.x))
+  # browser()
 
   grouptitle_index <- ae_value.headless %>% group_rows() %>% sapply(., function(x) head(x, 1))
 
@@ -901,9 +912,8 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
 
   } else {
     tab <- list(table = rbind(header1, header2, ae_value),
-                                  # group.title = if(!is.null(group.var)) grouptitle_index else NULL,
-                                  # class = c('ae_tbl', 'sstable', 'matrix')),
                 footer = footer)
+    class(tab$table) <- c('ae_tbl', 'ss_tbl', class(tab$table))
   }
   return(tab)
 }
@@ -1070,6 +1080,7 @@ sstable.survcomp <- function(model, data, add.risk = TRUE, add.prop.haz.test = T
   } else {
     tab <- list(table = output,
                 footer = footer)
+    class(tab$table) <- c('survcomp_tbl', 'ss_tbl', class(tab$table))
   }
   return(tab)
 }
@@ -1183,6 +1194,13 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, data, digits =
   } else {
     tab <- list(table = result,
                 footer = footer)
+    class(tab$table) <- c('survcomp_tbl', 'ss_tbl', class(tab$table))
   }
   return(tab)
+}
+
+#' @export
+print.ss_tbl <- function(sstable){
+  class(sstable) <- 'matrix'
+  print(sstable)
 }

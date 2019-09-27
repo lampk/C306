@@ -1,0 +1,379 @@
+## Quick sstable drawing helpers
+## Author: trinhdhk
+## Day first written: Sep 20 2019
+## Ver 0.1.0.092019
+
+#' Set template for sstable
+#'
+#' @description This function set the template for sstable
+#' @param sstable a data frame following sstable's grammar
+#' @param template
+#' An accepted template for sstable: must be either 'baseline', 'survcomp', or 'ae'.
+#'
+#' If NA, the existing template in the sstable is kept as-is. It no template built-in, will return a no-template sstable instead.
+#' @return a matrix of class ss_tbl
+#' @export
+ss_template <- function(sstable, template =  c('baseline', 'survcomp', 'ae')){
+  ss.class <- class(sstable)
+  if (missing(template)) template <- NA
+  if (!is.na(template)) template <- match.arg(template)
+  if (is.na(template)){
+    template <- c('baseline', 'survcomp', 'ae')
+    template.match <- match(template, ss.class)
+    template.match <- template.match[!is.na(template.match)]
+    if (length(template.match) > 1) template.match <- template.match[[1]]
+    template <- template[template.match]
+  }
+
+  template <- paste0(template, '_tbl')
+  class(sstable) <- unique(c(template, 'ss_tbl', 'matrix', class(sstable)))
+  return(sstable)
+}
+
+#' Designation of header rows for custom sstable
+#'
+#' @description This function set the designated rows as header rows of a sstable
+#' @param sstable a data frame following sstable's grammar
+#' @param rows a numeric vector
+#' @return a matrix of class ss_tbl
+#' @export
+ss_header <- function(sstable, rows) {
+  if (!length(rownames(sstable))) rownames(sstable) <- 1:nrow(sstable)
+  rownames(sstable)[rows] <- paste("header", seq_along(rows), sep=".")
+  ss_table <- ss_template(sstable, template = NA)
+  sstable
+}
+
+#' Designation of body part for custom sstable
+#'
+#' @description This function set the designated rows as body part of a sstable
+#' @param sstable a data frame following sstable's grammar
+#' @param rows a numeric vector
+#' @return a matrix of class ss_tbl
+#' @export
+ss_body <- function(sstable, rows){
+  if (!length(rownames(sstable))) rownames(sstable) <- 1:nrow(sstable)
+  rownames(sstable)[rows] <- paste("body", seq_along(rows), sep=".")
+  ss_table <- ss_template(sstable, template = NA)
+  sstable
+}
+
+#' Designation of section title rows for custom sstable
+#'
+#' @description This function set the designated rows as section title rows of an sstable
+#' @param sstable a data frame following sstable's grammar
+#' @param rows a numeric vector
+#' @return a matrix of class ss_tbl
+#' @export
+ss_section <- function(sstable, rows){
+  if (!length(rownames(sstable))) rownames(sstable) <- 1:nrow(sstable)
+  rownames(sstable)[rows] <- paste("section", seq_along(rows), sep=".")
+  ss_table <- ss_template(sstable, template = NA)
+  sstable
+}
+
+#' Quick format a sstable in preparation for create flextable/huxtable
+#'
+#' @description This function is the combination of ss_header, ss_body, and ss_section.
+#' @param sstable a data frame following sstable's grammar
+#' @param header a numeric vector that will be passed to ss_header
+#' @param section a numeric vector that will be passed to ss_section
+#' @param body a numeric vector that will be passed to ss_body
+#' @param template
+#' An accepted template for sstable: must be either 'baseline', 'survcomp', or 'ae'.
+#'
+#' If NA, the existing template in the sstable is kept as-is. It no template built-in, will return a no-template sstable instead.
+#' @param .guess a logical value. If TRUE, the function will try to get each row belongs to which part.
+#' @return a matrix of class ss_tbl
+#' @export
+ss_format <- function(sstable, header = c(), section = c(), body = c(), template =  c('baseline', 'survcomp', 'ae'), .guess= TRUE){
+  if (missing(template)) template <- NA
+  if (!is.na(template)) template <- match.arg(template)
+  sstable <- ss_template(sstable, template = template)
+  if (.guess) {
+    no.guess <- na.omit(as.numeric(c(header, section, body)))
+    # filter out from guess what have been defined
+    guess <- ss_guess_format(sstable)
+    h <- which(guess == 'header')
+    s <- which(guess == 'section')
+    b <- which(guess == 'body')
+    # filling the undecided row with auto guess
+    header <- unique(c(h[!h %in% no.guess], header))
+    section <- unique(c(s[!s %in% no.guess], section))
+    body <- unique(c(b[!b %in% no.guess], body))
+  }
+  if (length(header)) sstable <- ss_header(sstable, rows = header)
+  if (length(body)) sstable <- ss_body(sstable, rows = body)
+  if (length(section)) sstable <- ss_section(sstable, rows = section)
+  sstable
+}
+
+# An incomplete algorithm to guess the format of each sstable row.
+ss_guess_format <- function(sstable){
+  UseMethod('ss_guess_format')
+}
+
+ss_guess_format.default <- function(sstable){
+  guess <- sapply(1:nrow(sstable),
+                  function(i){
+                    r <- sstable[i,]
+                    if (isTRUE(grepl("header", rownames(sstable)[i]))) return("header")
+                    if (all(is.na(suppressWarnings(as.numeric(r)))) && i <= 2) return("header")
+                    if (sum(r == '') == ncol(sstable)-1) return("section")
+                    return("body")
+                  })
+  return(guess)
+}
+
+ss_guess_format.ae_tbl <- function(sstable){
+  guess <- sapply(1:nrow(sstable),
+                  function(i){
+                    if (i <= 2) return('header')
+                    r <- sstable[i, ]
+                    if (sum(r == '') >= 2) return('section')
+                    return('body')
+                  })
+  return(guess)
+}
+
+ss_guess_format.baseline_tbl <- function(sstable){
+  guess <- c(rep('header',2), rep('body', nrow(sstable)-2))
+}
+
+ss_guess_format.survcomp_tbl <- function(sstable){
+  guess <- c(rep('header',2), rep('body', nrow(sstable)-2))
+}
+
+#' Create summary table using flextable package.
+#'
+#' @description This function generate a flextable from a sstable.
+#' @param sstable a data frame following sstable's grammar
+#' @param footer a character vector each of which is the footnote of the flextable
+#' @param bg a character string that defines stripped background color of the flextable
+#' @param ... additional parameters that will be passed to ss_format if the sstable has yet to be formatted.
+#' @return an object of class flextable
+#' @export
+ss_flextable <- function(sstable, footer = NULL, bg = "#F2EFEE", ...){
+  requireNamespace("flextable")
+  requireNamespace("officer")
+  sstable <- ss_format(sstable, ..., .guess = TRUE)
+  header <- which(grepl("header", rownames(sstable)))
+  body <- which(grepl("body", rownames(sstable)))
+  section <-  which(grepl("section", rownames(sstable)))
+
+  colnames(sstable) <- NULL
+  sstable <- as.data.frame(sstable, stringsAsFactors = FALSE)
+  col.even <- ncol(sstable) %% 2 == 0
+
+  ## headers
+  ss.header <- sstable[header,]
+  names(ss.header) <- colnames(sstable)
+  # browser()
+
+  ss.header2 <-
+      lapply(seq_along(header),
+             function(i){
+               h <- ss.header[i, ]
+               if (col.even) col <- 2:(ncol(sstable)-1)
+               else col <- 2:ncol(sstable)
+               right_fill <- h[[max(col)]] != "" & h[[1]] == ""
+
+               h <- sapply(seq_along(h),
+                      function(j){
+                        if (h[[j]] == "") {
+                          if (j == ncol(sstable) && i>1) return(ss.header[i-1,j])
+                          if (j == 1){
+                            if (i > 1) return(ss.header[i-1,j]) #lag 1 row
+                            return(h[[j]]) #return ""
+                          }
+                          if (right_fill) return(h[[j+1]])
+                          return(h[[j-1]])
+                        }
+                        return(h[[j]])
+                      })
+               names(h) <- paste0('V',1:ncol(sstable))
+               return(h)
+             }
+    )
+  # browser()
+
+  ## Create the flextable
+  ft <- flextable::flextable(sstable[-header,, drop = FALSE])
+  # browser()
+
+  ## header format
+  ft <- flextable::set_header_labels(ft, values = ss.header2[[1]])
+  ft <- flextable::add_header_row(ft, values = ss.header2[[2]], top = F)
+  ft <- flextable::merge_h(ft, part = "header")
+  ft <- flextable::merge_v(ft, part = "header")
+
+  ## footer format
+  for (k in (seq_along(footer))) {
+    ft <- flextable::add_footer(ft, V1 = footer[k], top = FALSE)
+    ft <- flextable::merge_at(ft, i = k, j = 1:ncol(sstable), part = "footer")
+  }
+
+  ## section format
+  for (k in section){
+    ft <- flextable::bold(ft, i = k-length(header), j = 1:ncol(sstable), part = 'body')
+    ### merging cells that from the left if the whole row is empty
+    if (all(sstable[k, -1] == ''))
+      ft <- flextable::merge_at(ft, i = k, j = 1:ncol(sstable), part = 'body')
+  }
+
+  ## format flextable
+  ## width
+  ft <- flextable::autofit(ft)
+  ### alignment
+  ft <- flextable::align(ft, j = 1, align = "left", part = "all")
+  ### faces of header
+  ft <- flextable::bold(ft, part = "header")
+  ### background
+  ft <- flextable::bg(ft, i = seq(from = 1, to = nrow(sstable[-header,]), by = 2), j = 1:length(ss.header2[[1]]),
+                      bg = bg, part = "body")
+  ### border
+  tabbd <- officer::fp_border(color="black", width = 1.5)
+  ft <- flextable::border_remove(ft)
+  ft <- flextable::hline(ft, border = tabbd, part = "header")
+  ft <- flextable::hline_top(ft, border = tabbd, part = "all")
+  ft <- flextable::hline_bottom(ft, border = tabbd, part = "body")
+  return(ft)
+}
+
+#' Create summary table using huxtable package.
+#'
+#' @description This function generate a huxtable from a sstable.
+#' @param sstable a data frame following sstable's grammar
+#' @param footer a character vector each of which is the footnote of the flextable
+#' @param bg a character vector that defines background color of the flextable. If length(bg) >= 2, the table will have stripped background, otherwise plain.
+#' @param border_width a number that defines huxtable border width
+#' @param border_color a character string that defines huxtable border color
+#' @param ... additional parameters that will be passed to ss_format if the sstable has yet to be formatted.
+#' @return an object of class huxtable
+#' @export
+ss_huxtable <- function(sstable, footer = NULL, bg = c(grey(.95), 'white'), border_width=0.8, border_color = grey(.75),...){
+  requireNamespace('huxtable')
+  sstable <- ss_format(sstable, ..., .guess = TRUE)
+  header <- which(grepl("header", rownames(sstable)))
+  body <- which(grepl("body", rownames(sstable)))
+  section <-  which(grepl("section", rownames(sstable)))
+
+  colnames(sstable) <- NULL
+  sstable <- as.data.frame(sstable, stringsAsFactors = FALSE)
+  col.even <- ncol(sstable) %% 2 == 0
+
+  ## headers pre-processing
+  ss.header <- sstable[header,]
+  names(ss.header) <- colnames(sstable)
+  # browser()
+
+  ss.header2 <-
+    lapply(seq_along(header),
+           function(i){
+             h <- ss.header[i, ]
+             if (col.even) col <- 2:(ncol(sstable)-1)
+             else col <- 2:ncol(sstable)
+             right_fill <- h[[max(col)]] != "" & h[[2]] == ""
+
+             h <- sapply(seq_along(h),
+                         function(j){
+                           if (h[[j]] == "") {
+                             if (j == ncol(sstable) && i>1) return(ss.header[i-1,j])
+                             if (j == 1){
+                               if (i > 1) return(ss.header[i-1,j]) #lag 1 row
+                               return(h[[j]]) #return ""
+                             }
+                             if (right_fill) return(h[[j+1]])
+                             return(h[[j-1]])
+                           }
+                           return(h[[j]])
+                         })
+             return(h)
+           }
+    )
+
+  sstable.headless <- sstable[-header,]
+  colnames(sstable.headless) <- ss.header2[[length(ss.header2)]]
+
+  ## create table
+  ht <- huxtable::as_hux(sstable.headless, add_colnames = TRUE, add_rownames = FALSE)
+
+  ## insert header
+  if (nrow(ss.header)>1){
+    for (i in seq_along(ss.header2)[-length(ss.header2)]){
+      ht <- huxtable::insert_row(ht, ss.header2[[i]])
+    }
+  }
+
+  ## format header
+  for (i in seq_along(ss.header2)){
+    for (j in seq_along(ss.header2[[i]])){
+      if (j>1){
+        if (ss.header2[[i]][[j-1]] == ss.header2[[i]][[j]]){
+          ht <- huxtable::merge_cells(ht, i, (j-1):j)
+        }
+      }
+      if (i>1){
+        if (ss.header2[[i-1]][[j]] == ss.header2[[i]][[j]]){
+          ht <- huxtable::merge_cells(ht, (i-1):i, j)
+        }
+      }
+      ht <- huxtable::set_align(ht, i, j, value = 'center')
+    }
+  }
+
+  ## format sections
+  for (i in section){
+    ht <- huxtable::set_bold(ht, i, huxtable::everywhere, value = TRUE)
+    ### merging cells that from the left if the whole row is empty
+    if (all(sstable[k, -1] == ''))
+      ht <- huxtable::merge_cells(ht, i, everywhere)
+  }
+
+  ## footer
+  for (i in seq_along(footer)){
+    ht <- huxtable::add_footnote(ht, footer[i], if (i>1) border = 0)
+  }
+
+  ## format huxtable
+  ht <- huxtable::set_width(ht, 1)
+
+  ht <- ht_theme_markdown(ht, header_rows = header, header_cols = 1,
+                          border_width = border_width,
+                          border_color = border_color,
+                          bg = bg)
+
+  return(ht)
+}
+
+
+#' A stripping theme for huxtable object
+#'
+#' @description This function provides a stripped theme for huxtable object
+#' @param ht an object of class huxtable
+#' @param header_rows a numeric vector that delimits the header zone.
+#' @param bg a character vector that defines background color of the flextable. If length(bg) >= 2, the table will have stripped background, otherwise plain.
+#' @param border_width a number that defines huxtable border width
+#' @param border_color a character string that defines huxtable border color
+#' @return an object of class huxtable
+#' @export
+ht_theme_markdown <- function(ht, header_rows = 1, header_cols=1,
+                              border_width=0.8, border_color = grey(0.75), bg = c(grey(.95),'white')){
+  huxtable::top_border(ht)[1, ] <- border_width
+  huxtable::bottom_border(ht)[nrow(ht),] <- border_width
+
+  for (header_row in header_rows){
+    huxtable::bold(ht)[header_row, ] <- TRUE
+  }
+
+  huxtable::bottom_border(ht)[max(header_rows), ] <- border_width
+
+  for (header_col in header_cols){
+    huxtable::bold(ht)[header_col, ] <- TRUE
+  }
+  ht <- huxtable::set_all_border_colors(ht, border_color)
+  if (length(bg > 1)) ht <- huxtable::map_background_color(ht, do.call(huxtable::by_rows, as.list(bg)))
+  else huxtable::background_color(ht) <- bg
+  ht
+}
+
