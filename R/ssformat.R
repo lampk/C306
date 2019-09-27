@@ -3,6 +3,12 @@
 ## Day first written: Sep 20 2019
 ## Ver 0.1.0.092019
 
+## Check legitibility
+ss_legit <- function(sstable){
+  requireNamespace('tibble')
+  if (!is.matrix(sstable) & !is.data.frame(sstable)) stop('sstable must be of type matrix or data frame.')
+  return(as.matrix(sstable))
+}
 #' Set template for sstable
 #'
 #' @description This function set the template for sstable
@@ -14,6 +20,7 @@
 #' @return a matrix of class ss_tbl
 #' @export
 ss_template <- function(sstable, template =  c('baseline', 'survcomp', 'ae')){
+  sstable <- ss_legit(sstable)
   ss.class <- class(sstable)
   if (missing(template)) template <- NA
   if (!is.na(template)) template <- match.arg(template)
@@ -38,6 +45,7 @@ ss_template <- function(sstable, template =  c('baseline', 'survcomp', 'ae')){
 #' @return a matrix of class ss_tbl
 #' @export
 ss_header <- function(sstable, rows) {
+  sstable <- ss_legit(sstable)
   if (!length(rownames(sstable))) rownames(sstable) <- 1:nrow(sstable)
   rownames(sstable)[rows] <- paste("header", seq_along(rows), sep=".")
   ss_table <- ss_template(sstable, template = NA)
@@ -52,6 +60,7 @@ ss_header <- function(sstable, rows) {
 #' @return a matrix of class ss_tbl
 #' @export
 ss_body <- function(sstable, rows){
+  sstable <- ss_legit(sstable)
   if (!length(rownames(sstable))) rownames(sstable) <- 1:nrow(sstable)
   rownames(sstable)[rows] <- paste("body", seq_along(rows), sep=".")
   ss_table <- ss_template(sstable, template = NA)
@@ -66,6 +75,7 @@ ss_body <- function(sstable, rows){
 #' @return a matrix of class ss_tbl
 #' @export
 ss_section <- function(sstable, rows){
+  sstable <- ss_legit(sstable)
   if (!length(rownames(sstable))) rownames(sstable) <- 1:nrow(sstable)
   rownames(sstable)[rows] <- paste("section", seq_along(rows), sep=".")
   ss_table <- ss_template(sstable, template = NA)
