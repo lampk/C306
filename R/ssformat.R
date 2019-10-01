@@ -397,6 +397,7 @@ ht_theme_markdown <- function(ht, header_rows = 1, header_cols=1,
   }
 
   huxtable::bottom_border(ht)[max(header_rows), ] <- border_width
+  huxtable::top_border(ht)[max(header_rows)+1, ] <- border_width
 
   for (header_col in header_cols){
     huxtable::bold(ht)[header_col, ] <- TRUE
