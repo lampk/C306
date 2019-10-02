@@ -124,6 +124,7 @@ contSummary <- function(x, statistics = c("med.IQR", "med.90", "med.range", "mea
 #' @param data a data frame to derive baseline table from.
 #' @param bycol a logical value specifies whether the summary will be by column or by row.
 #' @param pooledGroup a logical value specifies whether to pool all subgroups of column variable.
+#' @param keepEmptyGroup a logical value specifying whether should keep empty groups
 #' @param statistics a character specifies summary statistics for continuous row variables.
 #' @param continuous a logical vector specifies whether each row variables is continuous or categorical.
 #' @param digits a number specifies number of significant digits for numeric statistics.
@@ -142,7 +143,7 @@ contSummary <- function(x, statistics = c("med.IQR", "med.90", "med.range", "mea
 #'
 #' @return a flextable-type table or a list with values/headers/footers
 #' @export
-sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
+sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE, keepEmptyGroup = FALSE,
                              statistics = "med.IQR", continuous = NA, fullfreq = TRUE, digits = 1,
                              test = FALSE, pdigits = 3, pcutoff = 0.0001,
                              chisq.test = FALSE, correct = FALSE, simulate.p.value = FALSE, B = 2000,
@@ -162,9 +163,14 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
   if (!is.null(y)) {
     if (all(!c("character", "factor", "logical") %in% class(y)) |
         (any(c("numeric", "integer") %in% class(y)) & length(unique(na.omit(y))) > 5)) {
-      stop("Colum-wise variable must be categorical !!!")
+      stop("Column-wise variable must be categorical !!!")
     }
-    y <- factor(as.character(y), levels = sort(unique(as.character(y)), na.last = TRUE), exclude = NULL)
+    if (is.factor(y)){
+      if (!keepEmptyGroup) y <- droplevels(y)
+      y <- addNA(y, ifany = TRUE)
+    } else {
+      y <- factor(as.character(y), levels = sort(unique(as.character(y)), na.last = TRUE), exclude = NULL)
+    }
   } else {
     y <- factor(rep("Total", nrow(dat)))
   }
@@ -602,6 +608,8 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
       stop('Sorting can only apply to `pt`, `ep`, and `p`')
   }
 
+  is.grouped <- !missing(group.var)
+
   ## format study arms
   idarm <- fullid_data[, c(id.var, arm.var)]; colnames(idarm) <- c("id", "arm")
   arm_lev <- sort(unique(as.character(idarm$arm)), na.last = TRUE)
@@ -664,7 +672,10 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
                                                              " (", formatC(100 * patient_p, digits, format = "f"), "%)")
   ## add raw values to 2 dummy columns for sorting purpose
   value[, (nlevels(ae_arm$arm)*2 + 1):(nlevels(ae_arm$arm)*3)] <- patient_n
-  ae_value <- cbind(levels(ae_arm$aetype), value)
+  ae_value <- cbind(aename = levels(ae_arm$aetype), value)
+
+  ## get the aehead -trinhdhk
+  ae_value.head <- as.data.frame(ae_value, stringsAsFactors = FALSE) %>% filter(!aename %in% aetype_lev.raw)
 
   ## categorizing ae into groups
   ## author: trinhdhk
@@ -677,49 +688,47 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
     group_data <- group_data[, c(aetype.var, group.var)]
     group_data[,aetype.var] <- as.character(group_data[,aetype.var])
     names(group_data) <- c(aetype.var, '.tmp.group')
-  } else {
-    ## - create a fake grouping
-    group_data <- data.frame(ae = aetype_lev.raw, group=1, stringsAsFactors = FALSE)
-    names(group_data) <- c(aetype.var, '.tmp.group')
-  }
+  # } else {
+  #   ## - create a fake grouping
+  #   group_data <- data.frame(ae = aetype_lev.raw, group=1, stringsAsFactors = FALSE)
+  #   names(group_data) <- c(aetype.var, '.tmp.group')
+  # }
 
   # browser()
 
-  ### bind group back to summary table -trinhdhk
-  ae_value.headless <-
-    as.data.frame(ae_value, stringsAsFactors = FALSE) %>%
-    filter(V1 %in% aetype_lev.raw) %>%
-    rename({{aetype.var}} := 'V1') %>%
-    right_join(group_data, by = aetype.var) %>%
-    group_by(.tmp.group) %>%
-    group_modify(~ rbind(c(as.character(.y$.tmp.group),
-                           unlist(lapply(seq_along(arm_lev),
-                                         function(i){
-                                           return(c(
-                                             sum(as.numeric(unlist(.x[, 2*i]))),
-                                             ''))
+    ### bind group back to summary table -trinhdhk
+    ae_value.headless <-
+      as.data.frame(ae_value, stringsAsFactors = FALSE) %>%
+      filter(aename %in% aetype_lev.raw) %>%
+      rename({{aetype.var}} := aename) %>%
+      right_join(group_data, by = aetype.var) %>%
+      group_by(.tmp.group) %>%
+      group_modify(~ rbind(c(as.character(.y$.tmp.group),
+                             unlist(lapply(seq_along(arm_lev),
+                                           function(i){
+                                             return(c(
+                                               sum(as.numeric(unlist(.x[, 2*i]))),
+                                               ''))
                                              # paste(sum(as.numeric(unlist(.x[, length(arm_lev)*2+i+1])))))
-                                         })),
-                           rep('',ncol(ae_value)-1-2*length(arm_lev))
-                           ),.x))
-  # browser()
+                                           })),
+                             rep('',ncol(ae_value)-1-2*length(arm_lev))
+      ),.x))
+    # browser()
 
-  grouptitle_index <- ae_value.headless %>% group_rows() %>% sapply(., function(x) head(x, 1))
+    grouptitle_index <- ae_value.headless %>% group_rows() %>% sapply(., function(x) head(x, 1))
 
-  ae_value.headless <-
-    ae_value.headless %>%
-    ungroup %>%
-    select(-.tmp.group)
+    ae_value.headless <-
+      ae_value.headless %>%
+      ungroup %>%
+      select(-.tmp.group)
 
-  ae_value.head <- as.data.frame(ae_value, stringsAsFactors = FALSE) %>% filter(!V1 %in% aetype_lev.raw)
-
-  #adjust the row number of group title by combining with the head
-  grouptitle_index <- grouptitle_index + nrow(ae_value.head)
-  ae_value <-
-    ae_value.head %>%
-    `names<-`(names(ae_value.headless)) %>%
-    rbind(ae_value.headless)
-
+    #adjust the row number of group title by combining with the head
+    grouptitle_index <- grouptitle_index + nrow(ae_value.head)
+    ae_value <-
+      ae_value.head %>%
+      `names<-`(names(ae_value.headless)) %>%
+      rbind(ae_value.headless)
+  } else ae_value <- as.data.frame(ae_value, stringsAsFactors = FALSE)
   # browser()
 
   ## test
@@ -777,15 +786,16 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
     pval[is.na(pval)] <- "-"
 
     ## add grouping row - trinhdhk
-    ae_value <-
-      left_join(
-        ae_value,
-        cbind(aetype=aetype_lev, pval) %>%
-          as.data.frame(stringsAsFactors = FALSE) %>%
-          rename({{aetype.var}} := aetype),
-        by = aetype.var
-      ) %>%
-      mutate(pval = replace_na(pval, ''))
+    # browser()
+      ae_value <-
+        left_join(
+          ae_value,
+          cbind(aetype=aetype_lev, pval) %>%
+            as.data.frame(stringsAsFactors = FALSE) %>%
+            rename({{aetype.var}} := aetype),
+          by = aetype.var
+        ) %>%
+        mutate(pval = replace_na(pval, ''))
   }
 
   ae_value <- as.matrix(ae_value)
@@ -796,7 +806,7 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
   split.parts <- c(1, if(is.null(group.var)) (nrow(ae_value.head)+1) else grouptitle_index)
   col.name <- arrange(mutate(expand.grid(c('ep', 'n.pt'), 1:nlevels(ae_arm$arm)), out = paste(Var1, Var2, sep='.')), Var2)$out
   dummy.col.name <- paste('pt', 1:nlevels(ae_arm$arm), sep='.')
-  colnames(ae_value) <- c('aetype', col.name, dummy.col.name, 'p')
+  colnames(ae_value) <- c('aetype', col.name, dummy.col.name, if (test) 'p')
   ae_value <- mutate_at(as.data.frame(ae_value, stringsAsFactors = FALSE),
                         vars(matches('(^pt.\\d)|(^ep.\\d)'), dummy.col.name), as.numeric)
 
@@ -810,27 +820,65 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
 
   ## - convert the sign and var into arrange-friendly quosures.
   arrange.params <- rlang::as_quosures(
-    lapply(seq_along(sort.vars),
+    unlist(lapply(seq_along(sort.vars),
            function(i){
              sort.var <- sort.vars[[i]]
              sort.sign <- sort.signs[[i]]
              if (identical(sort.sign, quote(`+`)))
-                 as.formula(paste0('~', sort.var, if (sort.var != 'p') c('.1', '.2')), env = parent.frame())
+                 lapply(paste0('~', sort.var, if (sort.var != 'p') c('.1', '.2')), env = parent.frame(), as.formula)
              else
-               as.formula(paste0('~desc(', sort.var,if (sort.var != 'p') c('.1', '.2'), ')'), env = parent.frame())
+               lapply(paste0('~desc(', sort.var,if (sort.var != 'p') c('.1', '.2'), ')'), env = parent.frame(), as.formula)
            })
-    )
+    ))
 
   ae_value.sorted <- do.call(rbind,
                              lapply(ae_value.group.headless,
                                     function(grouped_ae){
-                                      rbind(
-                                        grouped_ae[1, ],
+                                      if (is.grouped){
+                                        rbind(
+                                          grouped_ae[1, ],
+                                          do.call(arrange, rlang::flatten(list(
+                                            .data=as.data.frame(grouped_ae, stringsAsFactors = FALSE)[-1, ],
+                                            unlist(arrange.params))))
+                                        )
+                                      } else {
                                         do.call(arrange, rlang::flatten(list(
-                                          .data=as.data.frame(grouped_ae, stringsAsFactors = FALSE)[-1, ],
+                                          .data=as.data.frame(grouped_ae, stringsAsFactors = FALSE),
                                           unlist(arrange.params))))
-                                      )
+                                      }
                                     }))
+
+  # The code below is experimental. I'm not really sure which perfoms faster?
+  # ae_value.sorted <-
+  #   do.call(rbind,
+  #           lapply(ae_value.group.headless,
+  #                  function(grouped_ae){
+  #                    sort.params <-
+  #                      lapply(seq_along(sort.vars),
+  #                             function(i){
+  #                               sort.var <- sort.vars[[i]]
+  #                               sort.sign <- sort.signs[[i]]
+  #                               sort.cols <- if (sort.var != 'p') paste0(sort.var, c('.1', '.2')) else sort.var
+  #
+  #                               if (identical(sort.sign, quote(`+`))){
+  #                                 if (is.grouped) lapply(sort.cols, function(sort.col) grouped_ae[-1, sort.col])
+  #                                 else lapply(sort.cols, function(sort.col) grouped_ae[, sort.col])
+  #                               }
+  #                               else{
+  #                                 if (is.grouped) lapply(sort.cols, function(sort.col) desc(grouped_ae[-1, sort.col]))
+  #                                 else lapply(sort.cols, function(sort.col) desc(grouped_ae[, sort.col]))
+  #                               }
+  #                             })
+  #                    if (is.grouped)
+  #                      rbind(
+  #                        grouped_ae[1,],
+  #                        do.call(arrange, append(list(.data=as.data.frame(grouped_ae, stringsAsFactors = FALSE)[-1, ]),
+  #                                                flatten(sort.params)))
+  #                      )
+  #                    else
+  #                      do.call(arrange, append(list(.data=as.data.frame(grouped_ae, stringsAsFactors = FALSE)),
+  #                                              flatten(sort.params)))
+  #                  }))
 
   ## - bind the head again
   ae_value <- rbind(ae_value.head, ae_value.sorted) %>% mutate_all(replace_na, '')
@@ -855,7 +903,7 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
               "n patient refer to the number of patients with at least one event in each study arm.",
               if (any(value == "-")) "- : value cannot be estimated." else NULL,
               if (test) {paste("p-values were based on",
-                               ifelse(chisq.test == FALSE, "Fisher's exact test", "Chi-squared test"),
+                               ifelse(chisq.test == FALSE, "Fisher's exact test", "Chi-squared test if applicable and Fisher's exact test otherwise "),
                                "comparing n patient between study arms for each type of adverse event.")} else NULL,
               footer)
 
