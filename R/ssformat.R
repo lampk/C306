@@ -267,6 +267,9 @@ ss_flextable <- function(sstable, footer = NULL, bg = "#F2EFEE", ...){
 #' @param bg a character vector that defines background color of the flextable. If length(bg) >= 2, the table will have stripe background, otherwise plain.
 #' @param border_width a number that defines huxtable border width
 #' @param border_color a character string that defines huxtable border color
+#' @param wrap a logical value. Default is FALSE. If TRUE, long texts would be wrapped, long lines would be broken.
+#' This applies to the whole table. Please use huxtable::set_wrap instead if you want a cell-wise approach.
+#' See also \link[huxtable]{wrap}
 #' @param ... additional parameters that will be passed to ss_format if the sstable has yet to be formatted.
 #' @return an object of class huxtable
 #' @seealso \link[huxtable]{huxtable}
@@ -274,7 +277,7 @@ ss_flextable <- function(sstable, footer = NULL, bg = "#F2EFEE", ...){
 ss_huxtable <- function(sstable, footer = NULL,
                         caption = NULL, caption_pos = c("top", "bottom", "topleft", "topcenter", "topright",
                                                         "bottomleft", "bottomcenter", "bottomright"),
-                        bg = c(grey(.95), 'white'), border_width=0.8, border_color = grey(.75),...){
+                        bg = c(grey(.95), 'white'), border_width=0.8, border_color = grey(.75), wrap = FALSE,...){
   requireNamespace('huxtable')
   if (missing(caption_pos)) caption_pos <- 'bottomcenter' else caption_pos <- match.arg(caption_pos)
   sstable <- ss_format(sstable, ..., .guess = TRUE)
@@ -372,6 +375,9 @@ ss_huxtable <- function(sstable, footer = NULL,
                           border_width = border_width,
                           border_color = border_color,
                           bg = bg)
+
+  ## format wrapping
+  huxtable::wrap(ht) <- wrap
 
   return(ht)
 }

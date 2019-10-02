@@ -7,7 +7,8 @@
 ss_huxtable(sstable, footer = NULL, caption = NULL,
   caption_pos = c("top", "bottom", "topleft", "topcenter", "topright",
   "bottomleft", "bottomcenter", "bottomright"), bg = c(grey(0.95),
-  "white"), border_width = 0.8, border_color = grey(0.75), ...)
+  "white"), border_width = 0.8, border_color = grey(0.75),
+  wrap = FALSE, ...)
 }
 \arguments{
 \item{sstable}{a data frame following sstable's grammar}
@@ -27,6 +28,10 @@ See also \link[huxtable]{caption_pos}}
 \item{border_width}{a number that defines huxtable border width}
 
 \item{border_color}{a character string that defines huxtable border color}
+
+\item{wrap}{a logical value. Default is FALSE. If TRUE, long texts would be wrapped, long lines would be broken.
+This applies to the whole table. Please use huxtable::set_wrap instead if you want a cell-wise approach.
+See also \link[huxtable]{wrap}}
 
 \item{...}{additional parameters that will be passed to ss_format if the sstable has yet to be formatted.}
 }

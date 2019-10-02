@@ -19,5 +19,6 @@ Imports: lubridate,
     tidyr
 RoxygenNote: 6.1.1
 Suggests: knitr,
-    rmarkdown
+    rmarkdown,
+    huxtable
 VignetteBuilder: knitr
