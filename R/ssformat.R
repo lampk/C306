@@ -356,7 +356,7 @@ ss_huxtable <- function(sstable, footer = NULL,
 
   ## footer
   for (i in seq_along(footer)){
-    ht <- huxtable::add_footnote(ht, footer[i], if (i>1) border = 0)
+    ht <- huxtable::add_footnote(ht, footer[i], border = if (i>1) 0 else border_width)
   }
 
   ## caption
