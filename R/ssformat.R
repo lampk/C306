@@ -371,7 +371,7 @@ ss_huxtable <- function(sstable, footer = NULL,
   ## format huxtable
   ht <- huxtable::set_width(ht, 1)
 
-  ht <- ht_theme_markdown(ht, header_rows = header, header_cols = 1,
+  ht <- ht_theme_markdown(ht, header_rows = header, header_cols = NULL,
                           border_width = border_width,
                           border_color = border_color,
                           bg = bg)
@@ -393,7 +393,7 @@ ss_huxtable <- function(sstable, footer = NULL,
 #' @param border_color a character string that defines huxtable border color
 #' @return an object of class huxtable
 #' @export
-ht_theme_markdown <- function(ht, header_rows = 1, header_cols=1,
+ht_theme_markdown <- function(ht, header_rows = 1:2, header_cols = NULL,
                               border_width=0.8, border_color = grey(0.75), bg = c(grey(.95),'white')){
   huxtable::top_border(ht)[1, ] <- border_width
   huxtable::bottom_border(ht)[nrow(ht),] <- border_width
@@ -406,7 +406,7 @@ ht_theme_markdown <- function(ht, header_rows = 1, header_cols=1,
   huxtable::top_border(ht)[max(header_rows)+1, ] <- border_width
 
   for (header_col in header_cols){
-    huxtable::bold(ht)[header_col, ] <- TRUE
+    huxtable::bold(ht)[, header_col] <- TRUE
   }
   ht <- huxtable::set_all_border_colors(ht, border_color)
   if (length(bg > 1)) ht <- huxtable::map_background_color(ht, do.call(huxtable::by_rows, as.list(bg)))
@@ -414,3 +414,42 @@ ht_theme_markdown <- function(ht, header_rows = 1, header_cols=1,
   ht
 }
 
+#' A kable-esque theme for huxtable object
+#'
+#' @description This function provides a kable-esque theme for huxtable object
+#' @param ht an object of class huxtable
+#' @param header_rows a numeric vector that delimits the header zone.
+#' @param bg a character vector that defines background color of the flextable. If length(bg) >= 2, the table will have stripe background, otherwise plain.
+#' @param border_width a number that defines huxtable border width
+#' @param border_color a character string that defines huxtable border color
+#' @return an object of class huxtable
+#' @export
+ht_theme_kable <- function(ht, header_rows = 1:2, header_cols = NULL,
+                           border_width = 1, border_color = '#dddddd', bg = c('white', '#f9f9f9')){
+  huxtable::top_border(ht)[1, ] <- 0
+  huxtable::bottom_border(ht)[nrow(ht),] <- border_width
+
+  for (header_row in header_rows){
+    huxtable::bold(ht)[header_row, ] <- TRUE
+    for (col in 1:ncol(ht)){
+      if (!is.na(ht[header_row, col]) & stringr::str_trim(ht[header_row, col]) != ''){
+        huxtable::bottom_border(ht)[header_row, col] <- border_width
+      }
+    }
+  }
+  # browser()
+
+  huxtable::bottom_border(ht)[max(header_rows):nrow(ht), ] <- border_width
+  huxtable::top_border(ht)[max(header_rows)+1, ] <- border_width*2
+
+  for (header_col in header_cols){
+    huxtable::bold(ht)[, header_col] <- TRUE
+  }
+
+  ht <- huxtable::set_all_border_colors(ht, border_color)
+  if (length(bg > 1)){
+    ht <- huxtable::map_background_color(ht, do.call(huxtable::by_rows, append(as.list(bg), c(from = max(header_rows)+1))))
+    huxtable::background_color(ht)[header_rows,] <- bg[[1]]
+  } else huxtable::background_color(ht) <- bg
+  ht
+}
