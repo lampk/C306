@@ -637,7 +637,7 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
   ae <- ae[, c(id.var, aetype.var)]; colnames(ae) <- c("id", "aetype")
   #browser()
 
-  aetype_lev.raw <- unique(as.character(ae_data[, aetype.var]))
+  aetype_lev.raw <- unique(as.character(ae_data[[aetype.var]]))
   aetype_lev <- c("Any selected adverse event",
                   if (!is.null(grade.var)) paste("-", grade2),
                   aetype_lev.raw)
