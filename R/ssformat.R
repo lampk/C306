@@ -333,19 +333,41 @@ ss_huxtable <- function(sstable, footer = NULL,
   }
 
   ## format header
+  # browser()
+
+  # merge cols that have same values
   for (i in seq_along(ss.header2)){
+    which.start <- 1
     for (j in seq_along(ss.header2[[i]])){
-      if (j>1){
-        if (ss.header2[[i]][[j-1]] == ss.header2[[i]][[j]]){
-          ht <- huxtable::merge_cells(ht, i, (j-1):j)
-        }
-      }
-      if (i>1){
-        if (ss.header2[[i-1]][[j]] == ss.header2[[i]][[j]]){
-          ht <- huxtable::merge_cells(ht, (i-1):i, j)
-        }
+      if (j > 1){
+        if (ss.header2[[i]][[j]] != ss.header2[[i]][[j-1]])  which.start <- c(which.start, j)
       }
       ht <- huxtable::set_align(ht, i, j, value = 'center')
+    }
+
+    which.start <- sort(unique(c(which.start, ncol(sstable)+1)))
+
+    for (k in seq_along(which.start)){
+      if (k < length(which.start) & which.start[k+1] - which.start[k] > 1){
+        ht <- huxtable::merge_cells(ht, i, which.start[k]:(which.start[k+1]-1))
+      }
+    }
+  }
+  # merge rows that have same values
+  for (i in 1:ncol(sstable)){
+    which.start <- 1
+    for (j in seq_along(ss.header2)){
+      if (j > 1){
+        if (ss.header2[[j]][[i]] != ss.header2[[j-1]][[i]]) which.start <- c(which.start, j)
+      }
+    }
+
+    which.start <- sort(unique(c(which.start, length(ss.header2)+1)))
+
+    for (k in seq_along(which.start)){
+      if (k < length(which.start) & which.start[k+1] - which.start[k] > 1){
+        ht <- huxtable::merge_cells(ht, which.start[k]:(which.start[k+1]-1), i)
+      }
     }
   }
 

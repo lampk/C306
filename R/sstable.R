@@ -206,11 +206,12 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE, k
 
   ## determine type of z
   if (!is.null(z)) {
-    zcontinuous <- ifelse(any(c("factor", "character", "logical") %in% class(z)) |
-                            (any(c("numeric", "integer") %in% class(z)) & length(unique(na.omit(z))) <= 5), FALSE, TRUE)
-    if (zcontinuous == FALSE & !is.factor(z)) z <- factor(z, levels = unique(na.omit(z)))
+    zdiscrete <- any(c("factor", "character", "logical") %in% class(unclass(z))) |
+                            (any(c("numeric", "integer") %in% class(unclass(z))) & length(unique(na.omit(z))) <= 5)
+    # if (zcontinuous == FALSE & !is.factor(z)) z <- factor(z, levels = unique(na.omit(z)))
+    if (zdiscrete) z <- factor(z, levels = unique(na.omit(z)))
   }
-
+  # browser()
   ## digits
   if (length(digits) == 1) {
     digits <- rep(digits, ncol(x))
@@ -224,9 +225,10 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE, k
     ypool <- ifelse("total" %in% tolower(levels(y)), "pooledGroup", "Total")
     y <- factor(c(as.character(y), rep(ypool, nrow(dat))), levels = c(levels(y), ypool), exclude = NULL)
     z <- if (!is.null(z)) factor(c(z, z), levels = unique(na.omit(z))) else NULL
-  } else{
-    z <- if (!is.null(z)) factor(z, levels = unique(na.omit(z))) else NULL
   }
+  # else{
+  #   z <- if (!is.null(z)) factor(z, levels = unique(na.omit(z))) else NULL
+  # }
 
   ## get variable name
   varname <- if (ncol(xlabel) == 1) getlabel(xlabel[, 1]) else getlabel(xlabel)
