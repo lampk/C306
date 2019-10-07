@@ -614,8 +614,13 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
 
   ## format study arms
   idarm <- fullid_data[, c(id.var, arm.var)]; colnames(idarm) <- c("id", "arm")
-  arm_lev <- sort(unique(as.character(idarm$arm)), na.last = TRUE)
-  idarm$arm <- with(idarm, factor(as.character(arm), levels = arm_lev, exclude = NULL))
+  if (is.factor(idarm$arm)){
+    idarm$arm <- addNA(idarm$arm, ifany = TRUE)
+    arm_lev <-levels(idarm$arm)
+  } else {
+    arm_lev <- sort(unique(as.character(idarm$arm)), na.last = TRUE)
+    idarm$arm <- with(idarm, factor(as.character(arm), levels = arm_lev, exclude = NULL))
+  }
 
   ## add aetype of "Any selected AE" & format aetype
   ae_any <- ae_data; ae_any[, aetype.var] <- "Any selected adverse event"
