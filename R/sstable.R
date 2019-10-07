@@ -153,6 +153,9 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE, k
   ## get information from formula
   info <- sstable.formula(formula)
 
+  ## strip the tibble class which causes issue - trinhdhk
+  data <- as.data.frame(data)
+
   ## get data
   dat <- model.frame(info$formula0, data = data, na.action = NULL)
   x <- xlabel <- dat[, info$index$x, drop = FALSE]
@@ -610,6 +613,10 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
       stop('Sorting can only apply to `pt`, `ep`, and `p`')
   }
 
+  # strip the tibble class which causes issues - trinhdhk
+  ae_data <- as.data.frame(ae_data)
+  fullid_data <- as.data.frame(fullid_data)
+  group_data <- as.data.frame(group_data)
   is.grouped <- !missing(group.var)
 
   ## format study arms
@@ -1000,6 +1007,9 @@ sstable.survcomp <- function(model, data, add.risk = TRUE, add.prop.haz.test = T
                              digits = 2, pdigits = 3, pcutoff = 0.001, footer = NULL, flextable = TRUE, bg = "#F2EFEE"){
   requireNamespace("survival")
 
+  ## strip the tibble class which causes issue - trinhdhk
+  data <- as.data.frame(data)
+
   arm.var <- if (length(model[[3]]) > 1) {deparse(model[[3]][[2]])} else {deparse(model[[3]])}
   arm.names <- levels(data[, arm.var])
 
@@ -1162,6 +1172,9 @@ sstable.survcomp <- function(model, data, add.risk = TRUE, add.prop.haz.test = T
 #' @export
 sstable.survcomp.subgroup <- function(base.model, subgroup.model, data, digits = 2, pdigits = 3, pcutoff = 0.001, footer = NULL, flextable = TRUE, bg = "#F2EFEE", ...){
   requireNamespace("survival")
+
+  ## strip the tibble class which causes issue - trinhdhk
+  data <- as.data.frame(data)
 
   # result in entire population
   result <- sstable.survcomp(model = base.model, data = data, medsum = FALSE, digits = digits,
