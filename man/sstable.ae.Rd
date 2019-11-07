@@ -4,10 +4,11 @@
 \alias{sstable.ae}
 \title{Create an adverse event summary table}
 \usage{
-sstable.ae(ae_data, fullid_data, id.var, aetype.var, grade.var = NULL,
-  arm.var, digits = 0, test = TRUE, pdigits = 3, pcutoff = 0.001,
-  chisq.test = FALSE, correct = FALSE, simulate.p.value = FALSE,
-  B = 2000, workspace = 1e+06, hybrid = FALSE, footer = NULL,
+sstable.ae(ae_data, fullid_data, group_data = NULL, id.var, aetype.var,
+  grade.var = NULL, group.var = NULL, arm.var, sort.by, digits = 0,
+  test = TRUE, pdigits = 3, pcutoff = 0.001, chisq.test = FALSE,
+  correct = FALSE, simulate.p.value = FALSE, B = 2000,
+  workspace = 1e+06, hybrid = FALSE, footer = NULL,
   flextable = TRUE, bg = "#F2EFEE")
 }
 \arguments{
@@ -15,13 +16,22 @@ sstable.ae(ae_data, fullid_data, id.var, aetype.var, grade.var = NULL,
 
 \item{fullid_data}{a data frame contains treatment arm data of all participants (not just those had adverse event).}
 
+\item{group_data}{a reference data frame contains the group name of each ae.}
+
 \item{id.var}{a character specifies name of study id variable (exists in both adverse event data and treatment arm data).}
 
 \item{aetype.var}{a character specifies name of adverse event type variable (exists in adverse event data).}
 
 \item{grade.var}{a character specifies name of adverse event grade variable (exists in adverse event data).}
 
+\item{group.var}{a character specifies group (exists in adverse event data if group_data = NULL or group_data otherwise).}
+
 \item{arm.var}{a character specifies name of treatment arm variable (exists in treatment arm data).}
+
+\item{sort.by}{An unquoted formula of sorting options.
+
+Available options are `ep`, `pt`, `p`, or a combination of them (eg ep+pt-p);
+A minus sign indicates a descending order.}
 
 \item{digits}{a number specifies number of significant digits for numeric statistics.}
 
@@ -31,7 +41,9 @@ sstable.ae(ae_data, fullid_data, id.var, aetype.var, grade.var = NULL,
 
 \item{pcutoff}{a number specifies threshold value of p value to be displayed as "< pcutoff".}
 
-\item{chisq.test}{a logical value specifies whether Chi-squared test or Fisher's exact test will be used to compare between treatment arms.}
+\item{chisq.test}{a logical value specifies whether Chi-squared test or Fisher's exact test will be used to compare between treatment arms.
+
+Be aware that even when chisq.test==TRUE, if expected values are < 1, the later test will take over.}
 
 \item{correct}{a parameter for chisq.test().}
 

@@ -48,7 +48,7 @@ If input is a vector, return a vector of the same length.
 If input is a data frame, return a data frame with relevant variables recoded.
 }
 \description{
-A function to re-encode data by using a map. Patterns are accepted. unmentioned data are left intact.
+A function to re-encode data by using a map. Patterns are accepted. Unmentioned data are left intact.
 
 Method for class data.frame supports a robust replacement for data by providing relevant map in the form of var = map.
 }

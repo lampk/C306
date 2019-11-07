@@ -1,7 +1,7 @@
 Package: C306
 Type: Package
 Title: Collection of useful R codes for data analysis from the Biostatistics group at OUCRU
-Version: 0.1.2
+Version: 0.1.3
 Author: Lam Phung Khanh
 Maintainer: Lam Phung Khanh <phungkhanhlam@gmail.com>
 Description: Collection of useful R codes for data analysis from the Biostatistics group at OUCRU
@@ -19,5 +19,6 @@ Imports: lubridate,
     tidyr
 RoxygenNote: 6.1.1
 Suggests: knitr,
-    rmarkdown
+    rmarkdown,
+    huxtable
 VignetteBuilder: knitr

@@ -1,7 +1,7 @@
 #' Do a simple recode via pattern for data
 #'
 #' @description
-#' A function to re-encode data by using a map. Patterns are accepted. unmentioned data are left intact.
+#' A function to re-encode data by using a map. Patterns are accepted. Unmentioned data are left intact.
 #'
 #' Method for class data.frame supports a robust replacement for data by providing relevant map in the form of var = map.
 #'
