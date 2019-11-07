@@ -13,6 +13,20 @@ getvar <- function(formula) {
   }
 }
 
+# extract the sign from quo/formula for sstable - trinhdhk ----------------
+
+getsign <- function(fml){
+  fml <- unclass(fml)[[2]]
+  .getsign = function(x){
+    c(x[[1]],
+      unlist(lapply(x[-1],
+                    function(.x) if(is.call(.x)) .getsign(.x))))
+  }
+
+  out <- .getsign(fml)
+  out[length(out):1]
+}
+
 # extract information from formula for sstable ----------------------------
 
 sstable.formula <- function(formula) {
@@ -110,6 +124,7 @@ contSummary <- function(x, statistics = c("med.IQR", "med.90", "med.range", "mea
 #' @param data a data frame to derive baseline table from.
 #' @param bycol a logical value specifies whether the summary will be by column or by row.
 #' @param pooledGroup a logical value specifies whether to pool all subgroups of column variable.
+#' @param keepEmptyGroup a logical value specifying whether should keep empty groups
 #' @param statistics a character specifies summary statistics for continuous row variables.
 #' @param continuous a logical vector specifies whether each row variables is continuous or categorical.
 #' @param digits a number specifies number of significant digits for numeric statistics.
@@ -128,7 +143,7 @@ contSummary <- function(x, statistics = c("med.IQR", "med.90", "med.range", "mea
 #'
 #' @return a flextable-type table or a list with values/headers/footers
 #' @export
-sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
+sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE, keepEmptyGroup = FALSE,
                              statistics = "med.IQR", continuous = NA, fullfreq = TRUE, digits = 1,
                              test = FALSE, pdigits = 3, pcutoff = 0.0001,
                              chisq.test = FALSE, correct = FALSE, simulate.p.value = FALSE, B = 2000,
@@ -148,9 +163,14 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
   if (!is.null(y)) {
     if (all(!c("character", "factor", "logical") %in% class(y)) |
         (any(c("numeric", "integer") %in% class(y)) & length(unique(na.omit(y))) > 5)) {
-      stop("Colum-wise variable must be categorical !!!")
+      stop("Column-wise variable must be categorical !!!")
     }
-    y <- factor(as.character(y), levels = sort(unique(as.character(y)), na.last = TRUE), exclude = NULL)
+    if (is.factor(y)){
+      if (!keepEmptyGroup) y <- droplevels(y)
+      y <- addNA(y, ifany = TRUE)
+    } else {
+      y <- factor(as.character(y), levels = sort(unique(as.character(y)), na.last = TRUE), exclude = NULL)
+    }
   } else {
     y <- factor(rep("Total", nrow(dat)))
   }
@@ -186,11 +206,12 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
 
   ## determine type of z
   if (!is.null(z)) {
-    zcontinuous <- ifelse(any(c("factor", "character", "logical") %in% class(z)) |
-                            (any(c("numeric", "integer") %in% class(z)) & length(unique(na.omit(z))) <= 5), FALSE, TRUE)
-    if (zcontinuous == FALSE & !is.factor(z)) z <- factor(z, levels = unique(na.omit(z)))
+    zdiscrete <- any(c("factor", "character", "logical") %in% class(unclass(z))) |
+                            (any(c("numeric", "integer") %in% class(unclass(z))) & length(unique(na.omit(z))) <= 5)
+    # if (zcontinuous == FALSE & !is.factor(z)) z <- factor(z, levels = unique(na.omit(z)))
+    if (zdiscrete) z <- factor(z, levels = unique(na.omit(z)))
   }
-
+  # browser()
   ## digits
   if (length(digits) == 1) {
     digits <- rep(digits, ncol(x))
@@ -204,9 +225,10 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
     ypool <- ifelse("total" %in% tolower(levels(y)), "pooledGroup", "Total")
     y <- factor(c(as.character(y), rep(ypool, nrow(dat))), levels = c(levels(y), ypool), exclude = NULL)
     z <- if (!is.null(z)) factor(c(z, z), levels = unique(na.omit(z))) else NULL
-  } else{
-    z <- if (!is.null(z)) factor(z, levels = unique(na.omit(z))) else NULL
   }
+  # else{
+  #   z <- if (!is.null(z)) factor(z, levels = unique(na.omit(z))) else NULL
+  # }
 
   ## get variable name
   varname <- if (ncol(xlabel) == 1) getlabel(xlabel[, 1]) else getlabel(xlabel)
@@ -335,6 +357,7 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE,
   } else {
     tab <- list(table = rbind(header1, header2, value),
                 footer = footer)
+    class(tab$table) <- c('baseline_tbl', 'ss_tbl', class(tab$table))
   }
   ## output
   return(tab)
@@ -522,15 +545,25 @@ sstable.baseline.each <- function(varname, x, y, z, bycol = TRUE, pooledGroup = 
 #'
 #' @param ae_data a data frame contains adverse event data.
 #' @param fullid_data a data frame contains treatment arm data of all participants (not just those had adverse event).
+#' @param group_data a reference data frame contains the group name of each ae.
 #' @param id.var a character specifies name of study id variable (exists in both adverse event data and treatment arm data).
 #' @param aetype.var a character specifies name of adverse event type variable (exists in adverse event data).
 #' @param grade.var a character specifies name of adverse event grade variable (exists in adverse event data).
+#' @param group.var a character specifies group (exists in adverse event data if group_data = NULL or group_data otherwise).
 #' @param arm.var a character specifies name of treatment arm variable (exists in treatment arm data).
+#' @param sort.by
+#' An unquoted formula of sorting options.
+#'
+#' Available options are `ep`, `pt`, `p`, or a combination of them (eg ep+pt-p);
+#' A minus sign indicates a descending order.
 #' @param digits a number specifies number of significant digits for numeric statistics.
 #' @param test a logical value specifies whether a statistical test will be performed to compare between treatment arms.
 #' @param pdigits a number specifies number of significant digits for p value.
 #' @param pcutoff a number specifies threshold value of p value to be displayed as "< pcutoff".
-#' @param chisq.test a logical value specifies whether Chi-squared test or Fisher's exact test will be used to compare between treatment arms.
+#' @param chisq.test
+#' a logical value specifies whether Chi-squared test or Fisher's exact test will be used to compare between treatment arms.
+#'
+#' Be aware that even when chisq.test==TRUE, if expected values are < 1, the later test will take over.
 #' @param correct a parameter for chisq.test().
 #' @param simulate.p.value a parameter for chisq.test() and fisher.test().
 #' @param B a parameter for chisq.test() and fisher.test().
@@ -544,7 +577,8 @@ sstable.baseline.each <- function(varname, x, y, z, bycol = TRUE, pooledGroup = 
 #' @import dplyr
 #' @import tidyr
 #' @export
-sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, grade.var = NULL, arm.var, digits = 0,
+sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.var, grade.var = NULL,
+                       group.var = NULL, arm.var, sort.by, digits = 0,
                        test = TRUE, pdigits = 3, pcutoff = 0.001, chisq.test = FALSE, correct = FALSE,
                        simulate.p.value = FALSE, B = 2000, workspace = 1000000, hybrid = FALSE,
                        footer = NULL, flextable = TRUE, bg = "#F2EFEE"){
@@ -557,21 +591,44 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, grade.var = NUL
   if (!id.var %in% names(fullid_data)){stop(paste(tmp[[4]], "does not exist in", deparse(tmp[[3]]), "!!!"))}
   if (!aetype.var %in% names(ae_data)){stop(paste(tmp[[5]], "does not exist in", deparse(tmp[[2]]), "!!!"))}
   if (!is.null(grade.var)) {
-    if (!grade.var %in% names(ae_data)){stop(paste(tmp[[6]], "does not exist in", deparse(tmp[[2]]), "!!!"))}
+    if (!grade.var %in% names(ae_data)){stop(paste(tmp[[7]], "does not exist in", deparse(tmp[[2]]), "!!!"))}
   }
-  if (!arm.var %in% names(fullid_data)){stop(paste(tmp[[7]], "does not exist in", deparse(tmp[[3]]), "!!!"))}
+  if (!is.null(group.var)){
+    if (!is.null(group_data)){
+      if (!group.var %in% names(group_data)) stop(paste(tmp[[8]], 'does not exist in', deparse(tmp[[4]]), '!!!'))
+      if (!aetype.var %in% names(group_data)){stop(paste(tmp[[5]], "does not exist in", deparse(tmp[[4]]), "!!!"))}
+    } else
+      if (!group.var %in% names(ae_data)) stop(paste(tmp[[8]], 'does not exist in', deparse(tmp[[2]]), '!!!'))
+  }
+  if (!arm.var %in% names(fullid_data)){stop(paste(tmp[[9]], "does not exist in", deparse(tmp[[3]]), "!!!"))}
+  if (!missing(sort.by)){
+    sort.by <- rlang::enquo(sort.by)
+    sort.vars <- all.vars(sort.by)
+    sort.signs <- getsign(sort.by)
+    if (length(sort.signs) < length(sort.vars)) sort.signs <- purrr::prepend(sort.signs, quote(`+`))
+    if (length(setdiff(sort.vars, c('pt','ep','p'))))
+      stop('Sorting can only apply to `pt`, `ep`, and `p`')
+  }
+
+  is.grouped <- !missing(group.var)
 
   ## format study arms
   idarm <- fullid_data[, c(id.var, arm.var)]; colnames(idarm) <- c("id", "arm")
-  arm_lev <- sort(unique(as.character(idarm$arm)), na.last = TRUE)
-  idarm$arm <- with(idarm, factor(as.character(arm), levels = arm_lev, exclude = NULL))
+  if (is.factor(idarm$arm)){
+    idarm$arm <- addNA(idarm$arm, ifany = TRUE)
+    arm_lev <-levels(idarm$arm)
+  } else {
+    arm_lev <- sort(unique(as.character(idarm$arm)), na.last = TRUE)
+    idarm$arm <- with(idarm, factor(as.character(arm), levels = arm_lev, exclude = NULL))
+  }
 
   ## add aetype of "Any selected AE" & format aetype
   ae_any <- ae_data; ae_any[, aetype.var] <- "Any selected adverse event"
   ae <- rbind(ae_data, ae_any)
-  aetype_lev <- c("Any selected adverse event", unique(as.character(ae_data[, aetype.var])))
+  # aetype_lev <- c("Any selected adverse event", unique(as.character(ae_data[, aetype.var])))
   #browser()
 
+  ## extract grades of ae
   if (!is.null(grade.var)) {
     grade <- sort(unique(na.omit(ae_data[, grade.var])))
     grade2 <- ifelse(grepl(pattern = "grade", ignore.case = TRUE, x = grade), grade, paste("Grade", grade))
@@ -582,10 +639,15 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, grade.var = NUL
                           return(tmpdat)
                         }))
     ae <- rbind(ae, ae_grade)
-    aetype_lev <- c("Any selected adverse event", paste("-", grade2), unique(as.character(ae_data[, aetype.var])))
+    # aetype_lev <- c("Any selected adverse event", paste("-", grade2), unique(as.character(ae_data[, aetype.var])))
   }
   ae <- ae[, c(id.var, aetype.var)]; colnames(ae) <- c("id", "aetype")
   #browser()
+
+  aetype_lev.raw <- unique(as.character(ae_data[[aetype.var]]))
+  aetype_lev <- c("Any selected adverse event",
+                  if (!is.null(grade.var)) paste("-", grade2),
+                  aetype_lev.raw)
 
   ## add randomized arm to AE
   ae_arm <- merge(idarm, ae, by = "id", all.y = TRUE) %>%
@@ -611,33 +673,227 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, grade.var = NUL
 
   ## table
   #browser()
-  value <- matrix(ncol = nlevels(ae_arm$arm) * 2, nrow = nlevels(ae_arm$aetype))
-  value[, seq(from = 1, to = ncol(value), by = 2)] <- episode_n
-  value[, seq(from = 2, to = ncol(value), by = 2)] <- paste0(patient_n, "/", patient_N,
+  value <- matrix(ncol = nlevels(ae_arm$arm)*3, nrow = nlevels(ae_arm$aetype))
+  value[, seq(from = 1, to = nlevels(ae_arm$arm)*2, by = 2)] <- episode_n
+  value[, seq(from = 2, to = nlevels(ae_arm$arm)*2, by = 2)] <- paste0(patient_n, "/", patient_N,
                                                              " (", formatC(100 * patient_p, digits, format = "f"), "%)")
-  ae_value <- cbind(levels(ae_arm$aetype), value)
+  ## add raw values to 2 dummy columns for sorting purpose
+  value[, (nlevels(ae_arm$arm)*2 + 1):(nlevels(ae_arm$arm)*3)] <- patient_n
+  ae_value <- cbind(aename = levels(ae_arm$aetype), value)
+
+  ## get the aehead -trinhdhk
+  ae_value.head <- as.data.frame(ae_value, stringsAsFactors = FALSE) %>% filter(!aename %in% aetype_lev.raw)
+
+  ## categorizing ae into groups
+  ## author: trinhdhk
+  if (!is.null(group.var)) {
+    if (is.null(group_data)) {
+      group_data <- unique(ae_data[,c(aetype.var, group.var)])
+    }
+    group_data[[group.var]] <- replace_na(group_data[[group.var]], 'Uncategorised')
+    if (!is.factor(group_data[, group.var])) group_data[, group.var] <- as.factor(group_data[, group.var])
+    group_data <- group_data[, c(aetype.var, group.var)]
+    group_data[,aetype.var] <- as.character(group_data[,aetype.var])
+    names(group_data) <- c(aetype.var, '.tmp.group')
+  # } else {
+  #   ## - create a fake grouping
+  #   group_data <- data.frame(ae = aetype_lev.raw, group=1, stringsAsFactors = FALSE)
+  #   names(group_data) <- c(aetype.var, '.tmp.group')
+  # }
+
+  # browser()
+
+    ### bind group back to summary table -trinhdhk
+    ae_value.headless <-
+      as.data.frame(ae_value, stringsAsFactors = FALSE) %>%
+      filter(aename %in% aetype_lev.raw) %>%
+      rename({{aetype.var}} := aename) %>%
+      right_join(group_data, by = aetype.var) %>%
+      group_by(.tmp.group) %>%
+      group_modify(~ rbind(c(as.character(.y$.tmp.group),
+                             unlist(lapply(seq_along(arm_lev),
+                                           function(i){
+                                             return(c(
+                                               sum(as.numeric(unlist(.x[, 2*i]))),
+                                               ''))
+                                             # paste(sum(as.numeric(unlist(.x[, length(arm_lev)*2+i+1])))))
+                                           })),
+                             rep('',ncol(ae_value)-1-2*length(arm_lev))
+      ),.x))
+    # browser()
+
+    grouptitle_index <- ae_value.headless %>% group_rows() %>% sapply(., function(x) head(x, 1))
+
+    ae_value.headless <-
+      ae_value.headless %>%
+      ungroup %>%
+      select(-.tmp.group)
+
+    #adjust the row number of group title by combining with the head
+    grouptitle_index <- grouptitle_index + nrow(ae_value.head)
+    ae_value <-
+      ae_value.head %>%
+      `names<-`(names(ae_value.headless)) %>%
+      rbind(ae_value.headless)
+  } else ae_value <- as.data.frame(ae_value, stringsAsFactors = FALSE)
+  # browser()
 
   ## test
   if (test) {
+    ## <trinhdhk:
+    ## - requested by Ronald, add the ability to override the chisq.test with fisher.test when the expected var is <1.
+    ## - this should work even when chisq.test == T
+    ## >
+
+    do_fisher <- function(mat, workspace = workspace, hybrid = hybrid,
+                          simulate.p.value = simulate.p.value, B = B){
+      tryCatch(format.pval(fisher.test(x = mat, workspace = workspace, hybrid = hybrid,
+                                       simulate.p.value = simulate.p.value, B = B)$p.value,
+                           eps = pcutoff, digits = pdigits, scientific = FALSE),
+               error = function(e) NA)
+    }
+
+    do_chisq <- function(mat, correct = correct,
+                         simulate.p.value = simulate.p.value, B = B,
+                         workspace = workspace, hybrid = hybrid){
+      chi.out <- tryCatch(suppressWarnings(chisq.test(x = mat, correct = correct,
+                                     simulate.p.value = simulate.p.value, B = B)),
+                          error = function(e) NA)
+      if (length(chi.out) == 1) # that implicits the NA value, so no more NA check here
+        return(chi.out)
+
+      if (any(chi.out$expected<1))
+        return(do_fisher(mat=mat, workspace = workspace, hybrid = hybrid,
+                         simulate.p.value = simulate.p.value, B = B))
+      #else
+      return(format.pval(chi.out$p.value,eps = pcutoff, digits = pdigits, scientific = FALSE))
+    }
+
     pval <- sapply(1:nrow(value), function(i) {
       idx <- seq(from = i, to = length(patient_n), by = nrow(value))
       mat <- matrix(c(patient_n[idx], patient_N[idx] - patient_n[idx]), nrow = 2, byrow = TRUE)
       out <- if (chisq.test) {
-        tryCatch(format.pval(chisq.test(x = mat, correct = correct,
-                                        simulate.p.value = simulate.p.value, B = B)$p.value,
-                             eps = pcutoff, digits = pdigits, scientific = FALSE),
-                 error = function(c) NA)
+        # tryCatch(format.pval(chisq.test(x = mat, correct = correct,
+        #                                 simulate.p.value = simulate.p.value, B = B)$p.value,
+        #                      eps = pcutoff, digits = pdigits, scientific = FALSE),
+        #          error = function(c) NA)
+        do_chisq(mat, correct = correct,
+                 simulate.p.value = simulate.p.value, B = B,
+                 workspace = workspace, hybrid = hybrid)
       } else {
-        tryCatch(format.pval(fisher.test(x = mat, workspace = workspace, hybrid = hybrid,
-                                         simulate.p.value = simulate.p.value, B = B)$p.value,
-                             eps = pcutoff, digits = pdigits, scientific = FALSE),
-                 error = function(c) NA)
+        # tryCatch(format.pval(fisher.test(x = mat, workspace = workspace, hybrid = hybrid,
+        #                                  simulate.p.value = simulate.p.value, B = B)$p.value,
+        #                      eps = pcutoff, digits = pdigits, scientific = FALSE),
+        #          error = function(c) NA)
+        do_fisher(mat, workspace = workspace, hybrid = hybrid,
+                  simulate.p.value = simulate.p.value, B = B)
       }
       return(out)
     })
     pval[is.na(pval)] <- "-"
-    ae_value <- cbind(ae_value, pval)
+
+    ## add grouping row - trinhdhk
+    # browser()
+      ae_value <-
+        left_join(
+          ae_value,
+          cbind(aetype=aetype_lev, pval) %>%
+            as.data.frame(stringsAsFactors = FALSE) %>%
+            rename({{aetype.var}} := aetype),
+          by = aetype.var
+        ) %>%
+        mutate(pval = replace_na(pval, ''))
   }
+
+  ae_value <- as.matrix(ae_value)
+  # browser()
+
+  ## sorting - trinhdhk
+  ## - the head will not be sorted.
+  split.parts <- c(1, if(is.null(group.var)) (nrow(ae_value.head)+1) else grouptitle_index)
+  col.name <- arrange(mutate(expand.grid(c('ep', 'n.pt'), 1:nlevels(ae_arm$arm)), out = paste(Var1, Var2, sep='.')), Var2)$out
+  dummy.col.name <- paste('pt', 1:nlevels(ae_arm$arm), sep='.')
+  colnames(ae_value) <- c('aetype', col.name, dummy.col.name, if (test) 'p')
+  ae_value <- mutate_at(as.data.frame(ae_value, stringsAsFactors = FALSE),
+                        vars(matches('(^pt.\\d)|(^ep.\\d)'), dummy.col.name), as.numeric)
+
+  ae_value.group <- lapply(seq_along(split.parts),
+                           function(i){
+                             return(ae_value[split.parts[i]:(c(split.parts, nrow(ae_value) + 1)[i+1]-1),])
+                           })
+  ## - remove the head
+  ae_value.head <- ae_value.group[[1]]
+  ae_value.group.headless <- ae_value.group[-1]
+
+  ## - convert the sign and var into arrange-friendly quosures.
+  arrange.params <- rlang::as_quosures(
+    unlist(lapply(seq_along(sort.vars),
+           function(i){
+             sort.var <- sort.vars[[i]]
+             sort.sign <- sort.signs[[i]]
+             if (identical(sort.sign, quote(`+`)))
+                 lapply(paste0('~', sort.var, if (sort.var != 'p') c('.1', '.2')), env = parent.frame(), as.formula)
+             else
+               lapply(paste0('~desc(', sort.var,if (sort.var != 'p') c('.1', '.2'), ')'), env = parent.frame(), as.formula)
+           })
+    ))
+
+  ae_value.sorted <- do.call(rbind,
+                             lapply(ae_value.group.headless,
+                                    function(grouped_ae){
+                                      if (is.grouped){
+                                        rbind(
+                                          grouped_ae[1, ],
+                                          do.call(arrange, rlang::flatten(list(
+                                            .data=as.data.frame(grouped_ae, stringsAsFactors = FALSE)[-1, ],
+                                            unlist(arrange.params))))
+                                        )
+                                      } else {
+                                        do.call(arrange, rlang::flatten(list(
+                                          .data=as.data.frame(grouped_ae, stringsAsFactors = FALSE),
+                                          unlist(arrange.params))))
+                                      }
+                                    }))
+
+  # The code below is experimental. I'm not really sure which perfoms faster?
+  # ae_value.sorted <-
+  #   do.call(rbind,
+  #           lapply(ae_value.group.headless,
+  #                  function(grouped_ae){
+  #                    sort.params <-
+  #                      lapply(seq_along(sort.vars),
+  #                             function(i){
+  #                               sort.var <- sort.vars[[i]]
+  #                               sort.sign <- sort.signs[[i]]
+  #                               sort.cols <- if (sort.var != 'p') paste0(sort.var, c('.1', '.2')) else sort.var
+  #
+  #                               if (identical(sort.sign, quote(`+`))){
+  #                                 if (is.grouped) lapply(sort.cols, function(sort.col) grouped_ae[-1, sort.col])
+  #                                 else lapply(sort.cols, function(sort.col) grouped_ae[, sort.col])
+  #                               }
+  #                               else{
+  #                                 if (is.grouped) lapply(sort.cols, function(sort.col) desc(grouped_ae[-1, sort.col]))
+  #                                 else lapply(sort.cols, function(sort.col) desc(grouped_ae[, sort.col]))
+  #                               }
+  #                             })
+  #                    if (is.grouped)
+  #                      rbind(
+  #                        grouped_ae[1,],
+  #                        do.call(arrange, append(list(.data=as.data.frame(grouped_ae, stringsAsFactors = FALSE)[-1, ]),
+  #                                                flatten(sort.params)))
+  #                      )
+  #                    else
+  #                      do.call(arrange, append(list(.data=as.data.frame(grouped_ae, stringsAsFactors = FALSE)),
+  #                                              flatten(sort.params)))
+  #                  }))
+
+  ## - bind the head again
+  ae_value <- rbind(ae_value.head, ae_value.sorted) %>% mutate_all(replace_na, '')
+
+  ## remove the dummy col -trinhdhk
+  ae_value <- ae_value[,-(nlevels(ae_arm$arm)*2 + 2):-(nlevels(ae_arm$arm)*3+1)]
+  ae_value <- as.matrix(ae_value) #convert back to matrix to avoid conflicts
+  colnames(ae_value) <- NULL
 
   ## output
   ### header
@@ -654,7 +910,7 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, grade.var = NUL
               "n patient refer to the number of patients with at least one event in each study arm.",
               if (any(value == "-")) "- : value cannot be estimated." else NULL,
               if (test) {paste("p-values were based on",
-                               ifelse(chisq.test == FALSE, "Fisher's exact test", "Chi-squared test"),
+                               ifelse(chisq.test == FALSE, "Fisher's exact test", "Chi-squared test if applicable and Fisher's exact test otherwise "),
                                "comparing n patient between study arms for each type of adverse event.")} else NULL,
               footer)
 
@@ -706,10 +962,13 @@ sstable.ae <- function(ae_data, fullid_data, id.var, aetype.var, grade.var = NUL
     tab <- hline(tab, border = tabbd, part = "header")
     tab <- hline_top(tab, border = tabbd, part = "all")
     tab <- hline_bottom(tab, border = tabbd, part = "body")
+    ### group-name rows-trinhdhk
+    tab <- flextable::merge_h_range(tab, grouptitle_index, 1, ncol(ae_value))
 
   } else {
     tab <- list(table = rbind(header1, header2, ae_value),
                 footer = footer)
+    class(tab$table) <- c('ae_tbl', 'ss_tbl', class(tab$table))
   }
   return(tab)
 }
@@ -876,6 +1135,7 @@ sstable.survcomp <- function(model, data, add.risk = TRUE, add.prop.haz.test = T
   } else {
     tab <- list(table = output,
                 footer = footer)
+    class(tab$table) <- c('survcomp_tbl', 'ss_tbl', class(tab$table))
   }
   return(tab)
 }
@@ -989,6 +1249,13 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, data, digits =
   } else {
     tab <- list(table = result,
                 footer = footer)
+    class(tab$table) <- c('survcomp_tbl', 'ss_tbl', class(tab$table))
   }
   return(tab)
+}
+
+#' @export
+print.ss_tbl <- function(sstable){
+  class(sstable) <- 'matrix'
+  print(sstable)
 }

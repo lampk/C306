@@ -5,11 +5,11 @@
 \title{Create baseline table}
 \usage{
 sstable.baseline(formula, data, bycol = TRUE, pooledGroup = FALSE,
-  statistics = "med.IQR", continuous = NA, fullfreq = TRUE,
-  digits = 1, test = FALSE, pdigits = 3, pcutoff = 1e-04,
-  chisq.test = FALSE, correct = FALSE, simulate.p.value = FALSE,
-  B = 2000, workspace = 1e+06, hybrid = FALSE, footer = NULL,
-  flextable = FALSE, bg = "#F2EFEE")
+  keepEmptyGroup = FALSE, statistics = "med.IQR", continuous = NA,
+  fullfreq = TRUE, digits = 1, test = FALSE, pdigits = 3,
+  pcutoff = 1e-04, chisq.test = FALSE, correct = FALSE,
+  simulate.p.value = FALSE, B = 2000, workspace = 1e+06,
+  hybrid = FALSE, footer = NULL, flextable = FALSE, bg = "#F2EFEE")
 }
 \arguments{
 \item{formula}{a formula specifies variables for rows, variable for column and third-dimension variable.}
@@ -19,6 +19,8 @@ sstable.baseline(formula, data, bycol = TRUE, pooledGroup = FALSE,
 \item{bycol}{a logical value specifies whether the summary will be by column or by row.}
 
 \item{pooledGroup}{a logical value specifies whether to pool all subgroups of column variable.}
+
+\item{keepEmptyGroup}{a logical value specifying whether should keep empty groups}
 
 \item{statistics}{a character specifies summary statistics for continuous row variables.}
 
