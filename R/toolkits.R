@@ -40,11 +40,11 @@ simple_recode <- function(...){
 #' @aliases recode_var var_recode
 #' @method simple_recode data.frame
 #' @export
-simple_recode.data.frame <- function(.data, ..., ignore.case = FALSE, perl = TRUE){
+simple_recode.data.frame <- function(.data, ..., ignore.case = FALSE, fixed = FALSE, perl = TRUE){
   .maps <- list(...)
   .vars <- names(.maps)
   for (.var in .vars){
-    .data[[.var]] <- simple_recode.default(x = .data[[.var]], map = .maps[[.var]], ignore.case = ignore.case, perl = perl)
+    .data[[.var]] <- simple_recode.default(x = .data[[.var]], map = .maps[[.var]], ignore.case = ignore.case, fixed = fixed, perl = perl)
   }
   return(.data)
 }
@@ -52,7 +52,7 @@ simple_recode.data.frame <- function(.data, ..., ignore.case = FALSE, perl = TRU
 #' @rdname simple_recode
 #' @method simple_recode default
 #' @export
-simple_recode.default <- function(x, map, as = c('as_is', 'numeric', 'factor', 'character', 'logical'), ignore.case = FALSE, perl = TRUE, ...){
+simple_recode.default <- function(x, map, as = c('as_is', 'numeric', 'factor', 'character', 'logical'), ignore.case = FALSE, fixed = FALSE, perl = TRUE, ...){
   requireNamespace('tidyr')
   as <- match.arg(as)
   if (missing(map)) stop ('A conversion map should be provided!')
@@ -71,7 +71,7 @@ simple_recode.default <- function(x, map, as = c('as_is', 'numeric', 'factor', '
   x.recoded <- x
   for (i in 1:nrow(Map)){
     if (is.na(Map$from[i])) x.recoded <- tidyr::replace_na(x.recoded, Map$to[i])
-    else x.recoded <- gsub(Map$from[i], Map$to[i], x.recoded, ignore.case = ignore.case, perl=perl)
+    else x.recoded <- gsub(Map$from[i], Map$to[i], x.recoded, ignore.case = ignore.case, fixed = fixed, perl=perl)
   }
 
 
@@ -100,4 +100,3 @@ simple_recode.default <- function(x, map, as = c('as_is', 'numeric', 'factor', '
 `do_to<-` <- function(x, value){
   match.fun(value)(x)
 }
-

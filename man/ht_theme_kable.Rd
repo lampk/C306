@@ -4,9 +4,14 @@
 \alias{ht_theme_kable}
 \title{A kable-esque theme for huxtable object}
 \usage{
-ht_theme_kable(ht, header_rows = 1:2, header_cols = NULL,
-  border_width = 1, border_color = "#dddddd", bg = c("white",
-  "#f9f9f9"))
+ht_theme_kable(
+  ht,
+  header_rows = 1:2,
+  header_cols = NULL,
+  border_width = 1,
+  border_color = "#dddddd",
+  bg = c("white", "#f9f9f9")
+)
 }
 \arguments{
 \item{ht}{an object of class huxtable}

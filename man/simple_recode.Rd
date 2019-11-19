@@ -10,12 +10,17 @@
 \usage{
 simple_recode(...)
 
-\method{simple_recode}{data.frame}(.data, ..., ignore.case = FALSE,
-  perl = TRUE)
+\method{simple_recode}{data.frame}(.data, ..., ignore.case = FALSE, fixed = FALSE, perl = TRUE)
 
-\method{simple_recode}{default}(x, map, as = c("as_is", "numeric",
-  "factor", "character", "logical"), ignore.case = FALSE, perl = TRUE,
-  ...)
+\method{simple_recode}{default}(
+  x,
+  map,
+  as = c("as_is", "numeric", "factor", "character", "logical"),
+  ignore.case = FALSE,
+  fixed = FALSE,
+  perl = TRUE,
+  ...
+)
 }
 \arguments{
 \item{...}{For data.frame: Replacement in the form of var = map. Maps must follow the syntax stipulated in the map parameter.

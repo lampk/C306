@@ -352,10 +352,10 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE, k
     tab <- flextable::bg(tab, i = seq(from = 1, to = nrow(value), by = 2), j = 1:length(header1), bg = bg, part = "body")
     ### border
     tabbd <- officer::fp_border(color="black", width = 1.5)
-    tab <- border_remove(tab)
-    tab <- hline(tab, border = tabbd, part = "header")
-    tab <- hline_top(tab, border = tabbd, part = "all")
-    tab <- hline_bottom(tab, border = tabbd, part = "body")
+    tab <- flextable::border_remove(tab)
+    tab <- flextable::hline(tab, border = tabbd, part = "header")
+    tab <- flextable::hline_top(tab, border = tabbd, part = "all")
+    tab <- flextable::hline_bottom(tab, border = tabbd, part = "body")
 
   } else {
     tab <- list(table = rbind(header1, header2, value),
@@ -633,7 +633,7 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
   ae_any <- ae_data; ae_any[, aetype.var] <- "Any selected adverse event"
   ae <- rbind(ae_data, ae_any)
   # aetype_lev <- c("Any selected adverse event", unique(as.character(ae_data[, aetype.var])))
-  #browser()
+  # browser()
 
   ## extract grades of ae
   if (!is.null(grade.var)) {
@@ -649,7 +649,7 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
     # aetype_lev <- c("Any selected adverse event", paste("-", grade2), unique(as.character(ae_data[, aetype.var])))
   }
   ae <- ae[, c(id.var, aetype.var)]; colnames(ae) <- c("id", "aetype")
-  #browser()
+  # browser()
 
   aetype_lev.raw <- unique(as.character(ae_data[[aetype.var]]))
   aetype_lev <- c("Any selected adverse event",
@@ -742,7 +742,7 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
       ae_value.head %>%
       `names<-`(names(ae_value.headless)) %>%
       rbind(ae_value.headless)
-  } else ae_value <- as.data.frame(ae_value, stringsAsFactors = FALSE)
+  } else ae_value <- as.data.frame(ae_value, stringsAsFactors = FALSE) %>% rename({{aetype.var}} := aename)
   # browser()
 
   ## test
@@ -812,96 +812,72 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
         mutate(pval = replace_na(pval, ''))
   }
 
-  ae_value <- as.matrix(ae_value)
   # browser()
 
   ## sorting - trinhdhk
-  ## - the head will not be sorted.
-  split.parts <- c(1, if(is.null(group.var)) (nrow(ae_value.head)+1) else grouptitle_index)
-  col.name <- arrange(mutate(expand.grid(c('ep', 'n.pt'), 1:nlevels(ae_arm$arm)), out = paste(Var1, Var2, sep='.')), Var2)$out
-  dummy.col.name <- paste('pt', 1:nlevels(ae_arm$arm), sep='.')
-  colnames(ae_value) <- c('aetype', col.name, dummy.col.name, if (test) 'p')
-  ae_value <- mutate_at(as.data.frame(ae_value, stringsAsFactors = FALSE),
-                        vars(matches('(^pt.\\d)|(^ep.\\d)'), dummy.col.name), as.numeric)
+  if (!missing(sort.by)){
+    ## - the head will not be sorted.
+    split.parts <- c(1, if(is.null(group.var)) (nrow(ae_value.head)+1) else grouptitle_index)
+    col.name <- arrange(mutate(expand.grid(c('ep', 'n.pt'), 1:nlevels(ae_arm$arm)), out = paste(Var1, Var2, sep='.')), Var2)$out
+    dummy.col.name <- paste('pt', 1:nlevels(ae_arm$arm), sep='.')
+    colnames(ae_value) <- c('aetype', col.name, dummy.col.name, if (test) 'p')
+    ae_value <-
+      mutate_at(as.data.frame(ae_value, stringsAsFactors = FALSE),
+                vars(matches('(^pt.\\d)|(^ep.\\d)'), dummy.col.name), as.numeric) %>%
+      mutate(
+        pt.all = by(select(., starts_with('pt.')), 1:nrow(.), sum),
+        ep.all = by(select(., starts_with('ep.')), 1:nrow(.), sum)
+      )
 
-  ae_value.group <- lapply(seq_along(split.parts),
-                           function(i){
-                             return(ae_value[split.parts[i]:(c(split.parts, nrow(ae_value) + 1)[i+1]-1),])
-                           })
-  ## - remove the head
-  ae_value.head <- ae_value.group[[1]]
-  ae_value.group.headless <- ae_value.group[-1]
+    ae_value.group <- lapply(seq_along(split.parts),
+                             function(i){
+                               return(ae_value[split.parts[i]:(c(split.parts, nrow(ae_value) + 1)[i+1]-1),])
+                             })
+    ## - remove the head
+    ae_value.head <- ae_value.group[[1]]
+    ae_value.group.headless <- ae_value.group[-1]
 
-  ## - convert the sign and var into arrange-friendly quosures.
-  arrange.params <- rlang::as_quosures(
-    unlist(lapply(seq_along(sort.vars),
-           function(i){
-             sort.var <- sort.vars[[i]]
-             sort.sign <- sort.signs[[i]]
-             if (identical(sort.sign, quote(`+`)))
-                 lapply(paste0('~', sort.var, if (sort.var != 'p') c('.1', '.2')), env = parent.frame(), as.formula)
-             else
-               lapply(paste0('~desc(', sort.var,if (sort.var != 'p') c('.1', '.2'), ')'), env = parent.frame(), as.formula)
-           })
-    ))
+    ## - convert the sign and var into arrange-friendly quosures.
 
-  ae_value.sorted <- do.call(rbind,
-                             lapply(ae_value.group.headless,
-                                    function(grouped_ae){
-                                      if (is.grouped){
-                                        rbind(
-                                          grouped_ae[1, ],
+    arrange.params <- rlang::as_quosures(
+      unlist(lapply(seq_along(sort.vars),
+                    function(i){
+                      sort.var <- sort.vars[[i]]
+                      sort.sign <- sort.signs[[i]]
+                      if (identical(sort.sign, quote(`+`)))
+                        lapply(paste0('~', sort.var, if (sort.var != 'p') paste0('.', c('all',seq_along(arm_lev)))), env = parent.frame(), as.formula)
+                      else
+                        lapply(paste0('~desc(', sort.var,if (sort.var != 'p') paste0('.', c('all',seq_along(arm_lev))), ')'), env = parent.frame(), as.formula)
+                    })
+      ))
+
+
+    ae_value.sorted <- do.call(rbind,
+                               lapply(ae_value.group.headless,
+                                      function(grouped_ae){
+                                        if (is.grouped){
+                                          rbind(
+                                            grouped_ae[1, ],
+                                            do.call(arrange, rlang::flatten(list(
+                                              .data=as.data.frame(grouped_ae, stringsAsFactors = FALSE)[-1, ],
+                                              unlist(arrange.params))))
+                                          )
+                                        } else {
                                           do.call(arrange, rlang::flatten(list(
-                                            .data=as.data.frame(grouped_ae, stringsAsFactors = FALSE)[-1, ],
+                                            .data=as.data.frame(grouped_ae, stringsAsFactors = FALSE),
                                             unlist(arrange.params))))
-                                        )
-                                      } else {
-                                        do.call(arrange, rlang::flatten(list(
-                                          .data=as.data.frame(grouped_ae, stringsAsFactors = FALSE),
-                                          unlist(arrange.params))))
-                                      }
-                                    }))
+                                        }
+                                      }))
+    ## - bind the head again
+    ae_value <- rbind(ae_value.head, ae_value.sorted) %>% mutate_all(replace_na, '') %>% select(-pt.all, -ep.all)
 
-  # The code below is experimental. I'm not really sure which perfoms faster?
-  # ae_value.sorted <-
-  #   do.call(rbind,
-  #           lapply(ae_value.group.headless,
-  #                  function(grouped_ae){
-  #                    sort.params <-
-  #                      lapply(seq_along(sort.vars),
-  #                             function(i){
-  #                               sort.var <- sort.vars[[i]]
-  #                               sort.sign <- sort.signs[[i]]
-  #                               sort.cols <- if (sort.var != 'p') paste0(sort.var, c('.1', '.2')) else sort.var
-  #
-  #                               if (identical(sort.sign, quote(`+`))){
-  #                                 if (is.grouped) lapply(sort.cols, function(sort.col) grouped_ae[-1, sort.col])
-  #                                 else lapply(sort.cols, function(sort.col) grouped_ae[, sort.col])
-  #                               }
-  #                               else{
-  #                                 if (is.grouped) lapply(sort.cols, function(sort.col) desc(grouped_ae[-1, sort.col]))
-  #                                 else lapply(sort.cols, function(sort.col) desc(grouped_ae[, sort.col]))
-  #                               }
-  #                             })
-  #                    if (is.grouped)
-  #                      rbind(
-  #                        grouped_ae[1,],
-  #                        do.call(arrange, append(list(.data=as.data.frame(grouped_ae, stringsAsFactors = FALSE)[-1, ]),
-  #                                                flatten(sort.params)))
-  #                      )
-  #                    else
-  #                      do.call(arrange, append(list(.data=as.data.frame(grouped_ae, stringsAsFactors = FALSE)),
-  #                                              flatten(sort.params)))
-  #                  }))
-
-  ## - bind the head again
-  ae_value <- rbind(ae_value.head, ae_value.sorted) %>% mutate_all(replace_na, '')
+    # browser()
+  }
 
   ## remove the dummy col -trinhdhk
   ae_value <- ae_value[,-(nlevels(ae_arm$arm)*2 + 2):-(nlevels(ae_arm$arm)*3+1)]
   ae_value <- as.matrix(ae_value) #convert back to matrix to avoid conflicts
   colnames(ae_value) <- NULL
-
   ## output
   ### header
   gr.lev <- levels(ae_arm$arm)
@@ -965,12 +941,12 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
     tab <- flextable::bg(tab, i = seq(from = 1, to = nrow(value), by = 2), j = 1:length(header1), bg = bg, part = "body")
     ### border
     tabbd <- officer::fp_border(color="black", width = 1.5)
-    tab <- border_remove(tab)
-    tab <- hline(tab, border = tabbd, part = "header")
-    tab <- hline_top(tab, border = tabbd, part = "all")
-    tab <- hline_bottom(tab, border = tabbd, part = "body")
+    tab <- flextable::border_remove(tab)
+    tab <- flextable::hline(tab, border = tabbd, part = "header")
+    tab <- flextable::hline_top(tab, border = tabbd, part = "all")
+    tab <- flextable::hline_bottom(tab, border = tabbd, part = "body")
     ### group-name rows-trinhdhk
-    tab <- flextable::merge_h_range(tab, grouptitle_index, 1, ncol(ae_value))
+    if (is.grouped) tab <- flextable::merge_h_range(tab, grouptitle_index, 1, ncol(ae_value))
 
   } else {
     tab <- list(table = rbind(header1, header2, ae_value),
@@ -1137,10 +1113,10 @@ sstable.survcomp <- function(model, data, add.risk = TRUE, add.prop.haz.test = T
     tab <- flextable::bg(tab, i = seq(from = 1, to = nrow(value), by = 2), j = 1:length(header1), bg = bg, part = "body")
     ### border
     tabbd <- officer::fp_border(color="black", width = 1.5)
-    tab <- border_remove(tab)
-    tab <- hline(tab, border = tabbd, part = "header")
-    tab <- hline_top(tab, border = tabbd, part = "all")
-    tab <- hline_bottom(tab, border = tabbd, part = "body")
+    tab <- flextable::border_remove(tab)
+    tab <- flextable::hline(tab, border = tabbd, part = "header")
+    tab <- flextable::hline_top(tab, border = tabbd, part = "all")
+    tab <- flextable::hline_bottom(tab, border = tabbd, part = "body")
 
   } else {
     tab <- list(table = output,
@@ -1254,10 +1230,10 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, data, digits =
     tab <- flextable::bg(tab, i = seq(from = 1, to = nrow(result[-c(1:2), ]), by = 2), j = 1:length(header1), bg = bg, part = "body")
     ### border
     tabbd <- officer::fp_border(color="black", width = 1.5)
-    tab <- border_remove(tab)
-    tab <- hline(tab, border = tabbd, part = "header")
-    tab <- hline_top(tab, border = tabbd, part = "all")
-    tab <- hline_bottom(tab, border = tabbd, part = "body")
+    tab <- flextable::border_remove(tab)
+    tab <- flextable::hline(tab, border = tabbd, part = "header")
+    tab <- flextable::hline_top(tab, border = tabbd, part = "all")
+    tab <- flextable::hline_bottom(tab, border = tabbd, part = "body")
 
   } else {
     tab <- list(table = result,

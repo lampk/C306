@@ -4,8 +4,14 @@
 \alias{ss_format}
 \title{Quick format a sstable in preparation for create flextable/huxtable}
 \usage{
-ss_format(sstable, header = c(), section = c(), body = c(),
-  template = c("baseline", "survcomp", "ae"), .guess = TRUE)
+ss_format(
+  sstable,
+  header = c(),
+  section = c(),
+  body = c(),
+  template = c("baseline", "survcomp", "ae"),
+  .guess = TRUE
+)
 }
 \arguments{
 \item{sstable}{a data frame following sstable's grammar}
