@@ -100,3 +100,95 @@ simple_recode.default <- function(x, map, as = c('as_is', 'numeric', 'factor', '
 `do_to<-` <- function(x, value){
   match.fun(value)(x)
 }
+
+#' Get or set the reference level
+#' @description A function to quickly get or set the reference level of a factor
+#' @export
+ref_lv <- function(x){
+  UseMethod('ref_lv')
+}
+
+#' @rdname ref_lv
+#' @param x A factor
+#' @return A character object the represents the reference level
+#' @export
+ref_lv.factor <- function(x){
+  levels(x)[[1]]
+}
+
+#' @rdname ref_lv
+#' @export
+`ref_lv<-` <- function(x, value){
+  UseMethod('ref_lv<-')
+}
+
+#' @rdname ref_lv
+#' @param value An existing level to be set as reference
+#' @export
+`ref_lv<-.factor` <- function(x, value){
+  relevel(x, value)
+}
+
+#' Get the proportion for each level or range of a vector
+#' @description A function to calculate the proportion of each value range
+#' @param x An object
+#' @param method
+#' A method to calculate the percentage.
+#' Default is 'auto' which will attempt to choose the most fit method.
+#' 'bin' is only meaningful for vector that only has to values.
+#' 'fct' is meaningful for descrete variable
+#' 'cont' is used for continuous variables. This will break the variable into several ranges
+#' depended on the breaks specified in ...
+#' @param na.rm A logical value deciding whether NA should be removed
+#' @param ... Break points to cut the continuous variables into ranges. These are passed to function cut.
+#' See \link{cut}
+#' @return
+#' If method == 'bin': the percentage of non-reference level
+#'
+#' If method == 'fct': the percentages of all levels
+#'
+#' If method == 'cont': the percentages of all ranges based on specified breaks
+#' @export
+pct <- function(x, method = c('auto', 'bin', 'cont', 'fct'), na.rm = TRUE, ...){
+  method <- match.arg(method)
+  if (method == 'auto') method <- ._pct_get_method(unlist(x))
+
+  if (method == 'bin' & !is.logical(x)){
+    if (length(unique(x)) > 2) stop('Forcing binary method for factor variable is meaningless.')
+    if (length(unique(x)) == 1) return(100)
+    warning('Binary method apply to non logical variable. This will calculate the pct of x != ref_lv')
+    x <- x == levels(as.factor(x))[2]
+  }
+
+  res <- switch(method,
+                bin = ._pct_bin(x, na.rm),
+                cont = ._pct_cont(x, na.rm, ...),
+                fct = ._pct_fct(x, na.rm))
+
+  return(res)
+}
+
+._pct_get_method <- function(x){
+  if (is.logical(x) | length(unique(x)) <= 2) return('bin')
+  if (is.factor(x) | is.character(x) | (is.numeric(x) & length(unique(x)) <= 5)) return('fct')
+  return('cont')
+}
+
+._pct_bin <- function(x, na.rm = TRUE){
+  n <- if (na.rm) sum(!is.na(x)) else length(x)
+  return(sum(x)/n*100)
+}
+
+._pct_fct <- function(x, na.rm = TRUE){
+  n <- if (na.rm) sum(!is.na(x)) else length(x)
+  lvs <- if (na.rm) levels(x) else levels(addNA(x, ifany = TRUE))
+  sapply(lvs,
+         function(lv){
+           sum(x == lv)/n*100
+         })
+}
+
+._pct_cont <- function(x, na.rm = TRUE, ...){
+  x <- cut(x, ...)
+  pct(x, method = 'auto', na.rm = na.rm)
+}
