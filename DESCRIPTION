@@ -1,9 +1,9 @@
 Package: C306
 Type: Package
 Title: Collection of useful R codes for data analysis from the Biostatistics group at OUCRU
-Version: 0.1.3
+Version: 0.1.4
 Author: Lam Phung Khanh
-Maintainer: R: 
+Maintainer@R: 
     c(
         person(
             given = "Khanh Lam",
@@ -11,7 +11,7 @@ Maintainer: R:
             role = c("author", "maintainer"),
             email = "phungkhanhlam@gmail.com"),
         person(
-            given = "Trinh",
+            given = "Huu Khanh Trinh",
             family = "Dong"
             role = "maintainer",
             email = "trindhk@oucru.org"),
