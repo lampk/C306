@@ -16,7 +16,7 @@ logist_summary(
 \item{fit}{a logistic regression model of class "glm"}
 
 \item{method}{a string whose value is either
-"likelihood.ratio" for CI and tests based on likelihood ratio statistics (preferred)
+"lik.ratio" for CI and tests based on likelihood ratio statistics (preferred)
 or "wald" for CI and tests based on Wald statistics}
 
 \item{stat_digits}{Number of decimal digits for statistics}

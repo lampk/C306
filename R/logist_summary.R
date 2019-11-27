@@ -3,7 +3,7 @@
 #' @param fit a logistic regression model of class "glm"
 #' @param method
 #' a string whose value is either
-#' "likelihood.ratio" for CI and tests based on likelihood ratio statistics (preferred)
+#' "lik.ratio" for CI and tests based on likelihood ratio statistics (preferred)
 #' or "wald" for CI and tests based on Wald statistics
 #' @param stat_digits  Number of decimal digits for statistics
 #' @param p_digits Number of decimal digits for the p-values
