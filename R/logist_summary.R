@@ -19,7 +19,7 @@ logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, 
   method <- match.arg(method)
 
   summary_method <- switch(method, lik.ratio = ._lik.ratio_summary, wald = ._wald_summary)
-  result_obj <- summary_method(fit, stat_digits = stat_digits, p_digits = p_digits, verbose = FALSE)
+  result_obj <- summary_method(fit, stat_digits = stat_digits, p_digits = p_digits, verbose = verbose)
 
   return(structure(result_obj, class = c('logist_summary', 'data.frame')))
 }

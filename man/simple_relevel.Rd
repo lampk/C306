@@ -25,10 +25,8 @@ simple_relevel(x, ...)
 or a data.frame with two columns "from" and "to" serving the same purpose.}
 }
 \value{
-A vector or a data.frame
-
-A data.frame
+An object of the same class as the input
 }
 \description{
-Function to releve a variable based on a another variable of class "factor".
+Function to relevel a variable in accordance to a another variable of class "factor".
 }

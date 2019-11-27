@@ -1,8 +1,7 @@
 #' Relevel in correspondence to another factor
 #'
-#' @description Function to releve a variable based on a another variable of class "factor".
-#' @param x A vector
-#' @return A vector or a data.frame
+#' @description Function to relevel a variable in accordance to a another variable of class "factor".
+#' @return An object of the same class as the input
 #' @export
 simple_relevel <- function(x, ...){
   UseMethod('simple_relevel')
@@ -13,7 +12,6 @@ simple_relevel <- function(x, ...){
 #' @param data A data.frame
 #' @param by A vector or unquoted variable name the relevelling process will base on
 #' @param ... Unquoted variable names that will be relevelled
-#' @return A data.frame
 #' @export
 simple_relevel.data.frame <- function(data, ..., by){
   #... variables to relevel
