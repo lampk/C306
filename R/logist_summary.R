@@ -97,26 +97,18 @@ explicit.lm <- function(fit){
   ia.vars <- ia$ia.vars
   ia.terms <- ia$ia.terms
   fit.term_labels <- attr(terms(formula(fit)),"term.labels")
-  fit_data <- model.frame(fit)
+  # fit_data <- model.frame(fit)
+  fit_data <- as.data.frame(fit$data)
 
   nonia.vars <- unique(fit.term_labels[!fit.term_labels %in% unlist(c(ia.vars, ia.terms))])
-  nonia.classes <- attr(terms(fit), 'dataClasses')[unique(unlist(nonia.vars))]
-  nonia.vars2 <-
-    sapply(nonia.vars,
-           function(nonia.var){
-             if (!nonia.classes[nonia.var] %in% c('numeric', 'other')
-                 & length(levels(fit_data[[nonia.var]])) == 2)
-               return(paste0(nonia.var, levels(fit_data[[nonia.var]])[-1]))
-             return(nonia.var)
-           }, simplify = FALSE)
-  names(fit_data)[names(fit_data) %in% nonia.vars] <- nonia.vars2
 
   # browser()
-  ia.classes <- attr(terms(fit), 'dataClasses')[unique(unlist(ia.vars))]
-  dummy_vars <- ._create_dummy(fit_data, names(ia.classes)[!ia.classes %in% c('numeric', 'other')])
+  var.classes <- attr(terms(fit), 'dataClasses')
+  ia.classes <- var.classes[unique(unlist(ia.vars))]
+  dummy_vars <- ._create_dummy(fit_data, names(var.classes)[!var.classes %in% c('numeric', 'other')])
   dummy_cols <- purrr::flatten(dummy_vars)
   dummy_cols.names <- sapply(dummy_vars, names, simplify = FALSE)
-  new_fit_data <- if (length(dummy_cols)) cbind(fit_data, dummy_cols) else fit_data
+  explicit_data <- if (length(dummy_cols)) cbind(fit_data, dummy_cols) else fit_data
 
   # browser()
   ia.vars_dummy <-
@@ -128,6 +120,18 @@ explicit.lm <- function(fit){
                         dummy_cols.names[[iv]]
                       else
                         iv
+                    }, simplify = FALSE)
+           }, simplify = FALSE)
+
+  nonia.vars_dummy <-
+    sapply(nonia.vars,
+           function(nonia.var){
+             sapply(nonia.var,
+                    function(niv){
+                      if (niv %in% names(dummy_cols.names))
+                        dummy_cols.names[[niv]]
+                      else
+                        niv
                     }, simplify = FALSE)
            }, simplify = FALSE)
 
@@ -143,15 +147,16 @@ explicit.lm <- function(fit){
            function(i) c(ia.vars_dummy[[i]], interaction = ia.vars_dummy.interactTerms[[i]]),
            simplify = FALSE)
 
-  all_terms.fml <- as.formula(
-    sprintf('~ %s',
-            paste(
-              paste(nonia.vars2, collapse = '+'),
-              paste(unique(unlist(ia.vars_dummy.allTerms)), collapse = ' + '),
-              sep = '+'
-            )))
+  vars_dummy.allTerms <- c(nonia.vars_dummy, ia.vars_dummy.allTerms)
 
-  explicit_model <- update(fit, all_terms.fml, data = new_fit_data)
+  # browser()
+  all_terms.fml <- as.formula(
+    paste0('~',
+           paste(unique(unlist(vars_dummy.allTerms)), collapse = '+'))
+  )
+  # browser()
+
+  explicit_model <- update(fit, all_terms.fml, data = explicit_data)
   return(explicit_model)
 }
 
