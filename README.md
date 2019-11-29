@@ -12,7 +12,7 @@ You can install C306 from github with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("lampk/C306")
+devtools::install_github("oucru-biostats/C306")
 ```
 
 ## Website
