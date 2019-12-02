@@ -2,9 +2,15 @@
 % Please edit documentation in R/ssformat.R
 \name{ss_huxtable}
 \alias{ss_huxtable}
+\alias{ss_huxtable.list}
+\alias{ss_huxtable.default}
 \title{Create summary table using huxtable package.}
 \usage{
-ss_huxtable(
+ss_huxtable(sstable, ...)
+
+\method{ss_huxtable}{list}(sstable, add_footer = NULL, ...)
+
+\method{ss_huxtable}{default}(
   sstable,
   footer = NULL,
   caption = NULL,
@@ -19,6 +25,10 @@ ss_huxtable(
 }
 \arguments{
 \item{sstable}{a data frame following sstable's grammar}
+
+\item{...}{additional parameters that will be passed to ss_format if the sstable has yet to be formatted.}
+
+\item{add_footer}{additional footer lines to be appended to object footers}
 
 \item{footer}{a character vector each of which is the footnote of the flextable}
 
@@ -39,8 +49,6 @@ See also \link[huxtable]{caption_pos}}
 \item{wrap}{a logical value. Default is FALSE. If TRUE, long texts would be wrapped, long lines would be broken.
 This applies to the whole table. Please use huxtable::set_wrap instead if you want a cell-wise approach.
 See also \link[huxtable]{wrap}}
-
-\item{...}{additional parameters that will be passed to ss_format if the sstable has yet to be formatted.}
 }
 \value{
 an object of class huxtable

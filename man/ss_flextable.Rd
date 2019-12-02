@@ -2,18 +2,26 @@
 % Please edit documentation in R/ssformat.R
 \name{ss_flextable}
 \alias{ss_flextable}
+\alias{ss_flextable.list}
+\alias{ss_flextable.default}
 \title{Create summary table using flextable package.}
 \usage{
-ss_flextable(sstable, footer = NULL, bg = "#F2EFEE", ...)
+ss_flextable(sstable, ...)
+
+\method{ss_flextable}{list}(sstable, add_footer = NULL, ...)
+
+\method{ss_flextable}{default}(sstable, footer = NULL, bg = "#F2EFEE", ...)
 }
 \arguments{
 \item{sstable}{a data frame following sstable's grammar}
 
+\item{...}{additional parameters that will be passed to ss_format if the sstable has yet to be formatted.}
+
+\item{add_footer}{additional footer lines to be appended to object footers}
+
 \item{footer}{a character vector each of which is the footnote of the flextable}
 
 \item{bg}{a character string that defines stripped background color of the flextable}
-
-\item{...}{additional parameters that will be passed to ss_format if the sstable has yet to be formatted.}
 }
 \value{
 an object of class flextable

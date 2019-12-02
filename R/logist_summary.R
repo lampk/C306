@@ -7,10 +7,16 @@
 #' or "wald" for CI and tests based on Wald statistics
 #' @param stat_digits  Number of decimal digits for statistics
 #' @param p_digits Number of decimal digits for the p-values
+#' @param verbose logical value specifying whether to print out result and notation. Default is FALSE
+#' @param sstable logical value specifying whether to return in sstable format. Default is FALSE. Set to TRUE forces verbose to FALSE
+#' @param flextable logical value specifying whether to build flextable object. Default it FALSE. Set to TRUE forces sstable to TRUE and verbose to FALSE.
+#' Like other sstable objects, you can still create flextable or huxtable afterwards by using \link{ss_flextable} or \link{ss_huxtable}
 #' @author Marcel Wolbers, Lam Phung Khanh, and Trinh Dong Huu Khanh
+#' @seealso \link{ss_format}, \link{ss_huxtable}, \link{ss_flextable}
 #' @return A data.frame of additional class "logist_summary"
 #' @export
-logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, p_digits=4, verbose = FALSE){
+logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, p_digits=4, verbose = FALSE,
+                           sstable = FALSE, flextable = FALSE){
   compatible <- FALSE
   if (length(fit$family)) {
     if ((fit$family$family=='binomial')|(fit$family$link=='logit')) compatible <- TRUE
@@ -18,16 +24,34 @@ logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, 
   # browser()
   if (!compatible) stop("This function only works for logistic regression.")
   method <- match.arg(method)
+  if (flextable) sstable <- TRUE
+  if (sstable) verbose <- FALSE
 
   summary_method <- switch(method, lik.ratio = ._lik.ratio_summary, wald = ._wald_summary)
-  result_obj <- summary_method(fit, stat_digits = stat_digits, p_digits = p_digits, verbose = verbose)
+  result_obj <- summary_method(fit, stat_digits = stat_digits, p_digits = p_digits, verbose = verbose, sstable = sstable)
 
-  out <- structure(result_obj, class = c('logist_summary', 'data.frame'))
+
+  if (sstable) {
+    out <- result_obj
+    out$table <- as.matrix(out$table)
+    out$table <- rbind(colnames(out$table), out$table)
+    out$table <- cbind(rownames(out$table), out$table)
+    class(out$table) <- c('summary_tbl', 'ss_tbl', 'matrix')
+
+    if (flextable){
+      logist_summary.sstable <- ss_flextable(out$table, footer = out$footer)
+      return(logist_summary.sstable)
+    }
+
+    return(out)
+  }
+
+  out <- structure(result_obj, class = c('logist_summary','data.frame'))
   if (verbose) return(invisible(print(out)))
   return(out)
 }
 
-._wald_summary <- function(fit, stat_digits=2, p_digits=4, verbose = FALSE){
+._wald_summary <- function(fit, stat_digits=2, p_digits=4, verbose = FALSE, sstable = FALSE){
   est <- coef(fit)
   ci <- suppressMessages(confint.default(fit))
   result <- data.frame(log.OR = est, OR = exp(est),
@@ -39,25 +63,40 @@ logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, 
     cat("\nNote: 95% confidence intervals and p-values are based on Wald statistics.\n\n",
         "\n(Inference based on likelihood ratio statistics can be obtained with logist.summary(",deparse(substitute(obj)),") and is usually more accurate.\n)",sep="")
   }
+  if (sstable) return(list(table = result,
+                           footer = "Note: 95% confidence intervals and p-values are based on Wald statistics."))
   return(result)
 }
 
-._lik.ratio_summary <- function(fit, stat_digits=2, p_digits=4, verbose = FALSE){
-  any.ia <- any(attr(terms(formula(fit)),"order")>1)
-  if (any.ia){
-    message('Interaction terms detected. Using the explicit form.')
-    return(._lik.ratio_summary(explicit(fit), stat_digits = stat_digits, p_digits = p_digits, verbose = verbose))
-  }
-
+._lik.ratio_summary <- function(fit, stat_digits=2, p_digits=4, verbose = FALSE, sstable = FALSE){
   est <- coef(fit)
   ci <- suppressMessages(confint(fit))
   result <- data.frame(log.OR = est, OR = exp(est),
                        lower.CI = exp(ci[,1]), upper.CI = exp(ci[,2]))
 
   has.intercept <- (names(coef(fit))[1]=="(Intercept)")
-  lr.test <- data.frame(drop1(fit,test="Chisq"))[-1,c("Df","Pr..Chi.")]
+  any.ia <- any(attr(terms(formula(fit)),"order")>1)
+  # browser()
 
-  if (has.intercept) result$p.value <- c(NA,lr.test[,"Pr..Chi."])
+  if (has.intercept)
+    if (any.ia){
+    explicit_form <- ._explicit_lm(fit, meta = TRUE)
+    explicit_model <- explicit_form$model
+    explicit_meta <- explicit_form$meta
+    lr.test <- data.frame(drop1(explicit_model, test='Chisq'))[-1,c("Df","Pr..Chi.")]
+    rownames(lr.test) <- recode(rownames(lr.test), !!!explicit_meta$names)
+    p.value <-  lr.test[,"Pr..Chi.", drop = FALSE]
+    names(p.value) <- 'p.value'
+    row_order <- factor(rownames(result), levels = rownames(result))
+    result <- merge(result, p.value, all.x = TRUE, by='row.names')
+    result$Row.names <- factor(result$Row.names, levels = row_order)
+    result <- dplyr::arrange(result, Row.names)
+    rownames(result) <- result$Row.names
+    result <- result[, -1]
+  } else {
+    lr.test <- data.frame(drop1(fit,test="Chisq"))[-1,c("Df","Pr..Chi.")]
+    result$p.value <- c(NA,lr.test[,"Pr..Chi."])
+  }
 
   for (i in 1:4) result[,i] <- formatC(result[,i], digits = stat_digits, format = 'f')
   if (length(result$p.value)) result$p.value <- formatC(result$p.value, p_digits, format = 'f')
@@ -67,6 +106,12 @@ logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, 
     cat("\nNote: 95% confidence intervals and p-values are based on likelihood ratio statistics.\n\n")
     if (!has.intercept) cat("\nNote: p-values of LR-tests not calculated because model has no intercept.\n\n")
   }
+
+  if (sstable) return(list(table = result,
+                           footer = c(
+                             "Note: 95% confidence intervals and p-values are based on likelihood ratio statistics.",
+                             if (!has.intercept)
+                               "p-values of LR-tests not calculated because model has no intercept.")))
   return(result)
 }
 
@@ -90,6 +135,11 @@ explicit <- function(x){
 #' @return A model with explicit formula
 #' @export
 explicit.lm <- function(fit){
+  ._explicit_lm(fit, meta = FALSE)
+}
+
+
+._explicit_lm <- function(fit, meta = FALSE){
   ia <- ._get_interaction_terms(fit)
   ia.vars <- ia$ia.vars
   ia.terms <- ia$ia.terms
@@ -136,7 +186,7 @@ explicit.lm <- function(fit){
     sapply(ia.vars_dummy,
            function(ia.var){
              expand_matrix <- expand.grid(ia.var)
-             return(paste0('I(', paste(expand_matrix[,1], expand_matrix[,2], sep = '*'), ')'))
+             return(paste0('I(', paste(expand_matrix[,1], expand_matrix[,2], sep = ' * '), ')'))
            }, simplify = FALSE)
 
   ia.vars_dummy.allTerms <-
@@ -146,6 +196,25 @@ explicit.lm <- function(fit){
 
   vars_dummy.allTerms <- c(nonia.vars_dummy, ia.vars_dummy.allTerms)
 
+  if (meta){
+    # browser()
+    ia.vars_dummy.interactTerms.beautified <-
+      sapply(ia.vars_dummy,
+             function(ia.var){
+               expand_matrix <- expand.grid(ia.var)
+               return(paste(expand_matrix[,1], expand_matrix[,2], sep = ':'))
+             }, simplify = FALSE)
+
+    ia_vars.names <-
+      unlist(lapply(names(ia.vars_dummy),
+                    function(i) c(ia.vars_dummy[[i]], interaction = ia.vars_dummy.interactTerms.beautified[[i]])
+      ))
+
+    all_var.names <- unlist(c(nonia.vars_dummy, ia_vars.names))
+    names(all_var.names) <- unlist(vars_dummy.allTerms)
+  }
+
+
   # browser()
   all_terms.fml <- as.formula(
     paste0('~',
@@ -154,6 +223,7 @@ explicit.lm <- function(fit){
   # browser()
 
   explicit_model <- update(fit, all_terms.fml, data = explicit_data)
+  if (meta) return(list(model = explicit_model, meta = list(names = all_var.names)))
   return(explicit_model)
 }
 

@@ -110,6 +110,7 @@ ss_format <- function(sstable, header = c(), section = c(), body = c(), template
     b <- which(guess == 'body')
     # filling the undecided row with auto guess
     header <- unique(c(h[!h %in% no.guess], header))
+    # if (length(colnames(sstable))) header <- c('colnames', header)
     section <- unique(c(s[!s %in% no.guess], section))
     body <- unique(c(b[!b %in% no.guess], body))
   }
@@ -149,10 +150,17 @@ ss_guess_format.ae_tbl <- function(sstable){
 
 ss_guess_format.baseline_tbl <- function(sstable){
   guess <- c(rep('header',2), rep('body', nrow(sstable)-2))
+  return(guess)
 }
 
 ss_guess_format.survcomp_tbl <- function(sstable){
   guess <- c(rep('header',2), rep('body', nrow(sstable)-2))
+  return(guess)
+}
+
+ss_guess_format.summary_tbl <- function(sstable){
+  guess <- c('header', rep('body', nrow(sstable)-1))
+  return(guess)
 }
 
 #' Create summary table using flextable package.
@@ -165,7 +173,20 @@ ss_guess_format.survcomp_tbl <- function(sstable){
 #' @seealso \link[flextable]{flextable}
 #' @return an object of class flextable
 #' @export
-ss_flextable <- function(sstable, footer = NULL, bg = "#F2EFEE", ...){
+ss_flextable <- function(sstable, ...){
+  UseMethod('ss_flextable')
+}
+
+#' @rdname ss_flextable
+#' @param add_footer additional footer lines to be appended to object footers
+#' @export
+ss_flextable.list <- function(sstable, add_footer = NULL,...){
+  ss_flextable(sstable$table, footer = c(sstable$footer, add_footer), ...)
+}
+
+#' @rdname ss_flextable
+#' @export
+ss_flextable.default <- function(sstable, footer = NULL, bg = "#F2EFEE", ...){
   requireNamespace("flextable")
   requireNamespace("officer")
   sstable <- ss_format(sstable, ..., .guess = TRUE)
@@ -215,7 +236,10 @@ ss_flextable <- function(sstable, footer = NULL, bg = "#F2EFEE", ...){
 
   ## header format
   ft <- flextable::set_header_labels(ft, values = ss.header2[[1]])
-  ft <- flextable::add_header_row(ft, values = ss.header2[[2]], top = F)
+  if (length(ss.header2) > 1)
+    for (i in seq_along(ss.header2)[-1])
+      ft <- flextable::add_header_row(ft, values = ss.header2[[i]], top = F)
+
   ft <- flextable::merge_h(ft, part = "header")
   ft <- flextable::merge_v(ft, part = "header")
 
@@ -274,7 +298,20 @@ ss_flextable <- function(sstable, footer = NULL, bg = "#F2EFEE", ...){
 #' @return an object of class huxtable
 #' @seealso \link[huxtable]{huxtable}
 #' @export
-ss_huxtable <- function(sstable, footer = NULL,
+ss_huxtable <- function(sstable,...){
+  UseMethod('ss_huxtable')
+}
+
+#' @rdname ss_huxtable
+#' @param add_footer additional footer lines to be appended to object footers
+#' @export
+ss_huxtable.list <- function(sstable, add_footer = NULL,...){
+  ss_huxtable(sstable$table, footer = c(sstable$footer, add_footer), ...)
+}
+
+#' @rdname ss_huxtable
+#' @export
+ss_huxtable.default <- function(sstable, footer = NULL,
                         caption = NULL, caption_pos = c("top", "bottom", "topleft", "topcenter", "topright",
                                                         "bottomleft", "bottomcenter", "bottomright"),
                         bg = c(grey(.95), 'white'), border_width=0.8, border_color = grey(.75), wrap = FALSE,...){

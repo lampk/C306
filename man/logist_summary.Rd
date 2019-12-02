@@ -9,7 +9,9 @@ logist_summary(
   method = c("lik.ratio", "wald"),
   stat_digits = 2,
   p_digits = 4,
-  verbose = FALSE
+  verbose = FALSE,
+  sstable = FALSE,
+  flextable = FALSE
 )
 }
 \arguments{
@@ -22,12 +24,22 @@ or "wald" for CI and tests based on Wald statistics}
 \item{stat_digits}{Number of decimal digits for statistics}
 
 \item{p_digits}{Number of decimal digits for the p-values}
+
+\item{verbose}{logical value specifying whether to print out result and notation. Default is FALSE}
+
+\item{sstable}{logical value specifying whether to return in sstable format. Default is FALSE. Set to TRUE forces verbose to FALSE}
+
+\item{flextable}{logical value specifying whether to build flextable object. Default it FALSE. Set to TRUE forces sstable to TRUE and verbose to FALSE.
+Like other sstable objects, you can still create flextable or huxtable afterwards by using \link{ss_flextable} or \link{ss_huxtable}}
 }
 \value{
 A data.frame of additional class "logist_summary"
 }
 \description{
 a function to create summary table for glm logistic model
+}
+\seealso{
+\link{ss_format}, \link{ss_huxtable}, \link{ss_flextable}
 }
 \author{
 Marcel Wolbers, Lam Phung Khanh, and Trinh Dong Huu Khanh
