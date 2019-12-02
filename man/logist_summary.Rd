@@ -11,7 +11,8 @@ logist_summary(
   p_digits = 4,
   verbose = FALSE,
   sstable = FALSE,
-  flextable = FALSE
+  flextable = FALSE,
+  ...
 )
 }
 \arguments{
@@ -31,9 +32,11 @@ or "wald" for CI and tests based on Wald statistics}
 
 \item{flextable}{logical value specifying whether to build flextable object. Default it FALSE. Set to TRUE forces sstable to TRUE and verbose to FALSE.
 Like other sstable objects, you can still create flextable or huxtable afterwards by using \link{ss_flextable} or \link{ss_huxtable}}
+
+\item{...}{additional params passed to \link{ss_flextable}}
 }
 \value{
-A data.frame of additional class "logist_summary"
+A data frame of additional class "logist_summary" (if sstable == FALSE), a matrix of class c("summary_tbl", "ss_tbl") otherwise
 }
 \description{
 a function to create summary table for glm logistic model

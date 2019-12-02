@@ -11,12 +11,13 @@
 #' @param sstable logical value specifying whether to return in sstable format. Default is FALSE. Set to TRUE forces verbose to FALSE
 #' @param flextable logical value specifying whether to build flextable object. Default it FALSE. Set to TRUE forces sstable to TRUE and verbose to FALSE.
 #' Like other sstable objects, you can still create flextable or huxtable afterwards by using \link{ss_flextable} or \link{ss_huxtable}
+#' @param ... additional params passed to \link{ss_flextable}
 #' @author Marcel Wolbers, Lam Phung Khanh, and Trinh Dong Huu Khanh
 #' @seealso \link{ss_format}, \link{ss_huxtable}, \link{ss_flextable}
-#' @return A data.frame of additional class "logist_summary"
+#' @return A data frame of additional class "logist_summary" (if sstable == FALSE), a matrix of class c("summary_tbl", "ss_tbl") otherwise
 #' @export
 logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, p_digits=4, verbose = FALSE,
-                           sstable = FALSE, flextable = FALSE){
+                           sstable = FALSE, flextable = FALSE, ...){
   compatible <- FALSE
   if (length(fit$family)) {
     if ((fit$family$family=='binomial')|(fit$family$link=='logit')) compatible <- TRUE
@@ -28,30 +29,15 @@ logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, 
   if (sstable) verbose <- FALSE
 
   summary_method <- switch(method, lik.ratio = ._lik.ratio_summary, wald = ._wald_summary)
-  result_obj <- summary_method(fit, stat_digits = stat_digits, p_digits = p_digits, verbose = verbose, sstable = sstable)
+  result_obj <- summary_method(fit, stat_digits = stat_digits, p_digits = p_digits, verbose = verbose)
 
-
-  if (sstable) {
-    out <- result_obj
-    out$table <- as.matrix(out$table)
-    out$table <- rbind(colnames(out$table), out$table)
-    out$table <- cbind(rownames(out$table), out$table)
-    class(out$table) <- c('summary_tbl', 'ss_tbl', 'matrix')
-
-    if (flextable){
-      logist_summary.sstable <- ss_flextable(out$table, footer = out$footer)
-      return(logist_summary.sstable)
-    }
-
-    return(out)
-  }
-
-  out <- structure(result_obj, class = c('logist_summary','data.frame'))
+  out <- structure(result_obj$table, footer = result_obj$footer, class = c('logist_summary','data.frame'))
+  if (sstable) return(as_sstable.logist_summary(out))
   if (verbose) return(invisible(print(out)))
   return(out)
 }
 
-._wald_summary <- function(fit, stat_digits=2, p_digits=4, verbose = FALSE, sstable = FALSE){
+._wald_summary <- function(fit, stat_digits=2, p_digits=4, verbose = FALSE){
   est <- coef(fit)
   ci <- suppressMessages(confint.default(fit))
   result <- data.frame(log.OR = est, OR = exp(est),
@@ -63,9 +49,8 @@ logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, 
     cat("\nNote: 95% confidence intervals and p-values are based on Wald statistics.\n\n",
         "\n(Inference based on likelihood ratio statistics can be obtained with logist.summary(",deparse(substitute(obj)),") and is usually more accurate.\n)",sep="")
   }
-  if (sstable) return(list(table = result,
-                           footer = "Note: 95% confidence intervals and p-values are based on Wald statistics."))
-  return(result)
+  return(list(table = result,
+              footer = "Note: 95% confidence intervals and p-values are based on Wald statistics."))
 }
 
 ._lik.ratio_summary <- function(fit, stat_digits=2, p_digits=4, verbose = FALSE, sstable = FALSE){
@@ -107,12 +92,12 @@ logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, 
     if (!has.intercept) cat("\nNote: p-values of LR-tests not calculated because model has no intercept.\n\n")
   }
 
-  if (sstable) return(list(table = result,
-                           footer = c(
-                             "Note: 95% confidence intervals and p-values are based on likelihood ratio statistics.",
-                             if (!has.intercept)
-                               "p-values of LR-tests not calculated because model has no intercept.")))
-  return(result)
+  return(list(table = result,
+              footer = c(
+                "Note: 95% confidence intervals and p-values are based on likelihood ratio statistics.",
+                if (!has.intercept)
+                  "p-values of LR-tests not calculated because model has no intercept.")))
+  # return(result)
 }
 
 #' Transform an object to its explicit form

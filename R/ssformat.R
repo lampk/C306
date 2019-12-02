@@ -512,3 +512,70 @@ ht_theme_kable <- function(ht, header_rows = 1:2, header_cols = NULL,
   } else huxtable::background_color(ht) <- bg
   ht
 }
+
+#' Coerce an object to sstable
+#' @description A function to coerce objects to a sstable
+#' @param x An object, usually a named list of length 2 whose names are 'table' and 'footer', or a data.frame/matrix (optionally with attribute "footer")
+#' @param flextable logical value specifying whether to return a flextable. Default is FALSE
+#' @param ... additional param passed to \link{ss_flextable}
+#' @return A matrix of class ss_tbl if flextable == FALSE or a flextable
+#' @export
+#'
+as_sstable <- function(x,...){
+  UseMethod('as_sstable')
+}
+
+#' @rdname as_sstable
+#' @export
+as_sstable.default <- function(x, flextable = FALSE, ...){
+  out <- list()
+  out$table <- as.matrix(x$table)
+  out$table <- rbind(colnames(out$table), out$table)
+  out$table <- cbind(rownames(out$table), out$table)
+  colnames(out$table) <- rownames(out$table) <- NULL
+  if (length(attr(x, 'footer'))) out$footer <- attr(x, 'footer')
+
+  class(out) <- c('ss_tbl', 'matrix')
+  if (flextable) ss_flextable(out, ...)
+  return(out)
+}
+
+#' @rdname as_sstable
+#' @export
+as_sstable.list <- function(x, flextable = FALSE, ...){
+  out <- list()
+  out$table <- as.matrix(x$table)
+  out$table <- rbind(colnames(out$table), out$table)
+  out$table <- cbind(rownames(out$table), out$table)
+  colnames(out$table) <- rownames(out$table) <- NULL
+  out$footer <- x$footer
+  class(out$table) <- c('ss_tbl', 'matrix')
+
+  if (flextable){
+    logist_summary.sstable <- ss_flextable(out$table, footer = out$footer, ...)
+    return(logist_summary.sstable)
+  }
+
+  out
+}
+
+#' @rdname as_sstable
+#' @param include_footnote logical value specifying whether to include footnote in the output. Default is FALSE
+#' @export
+as_sstable.logist_summary <- function(x, include_footnote = TRUE, flextable = FALSE, ...){
+  out <- list()
+  out$table <- as.matrix(x)
+  out$table <- rbind(colnames(out$table), out$table)
+  out$table <- cbind(rownames(out$table), out$table)
+  colnames(out$table) <- rownames(out$table) <- NULL
+  out$footer <- attr(x, 'footer')
+  class(out$table) <- c('summary_tbl', 'ss_tbl', 'matrix')
+
+  if (flextable){
+    logist_summary.sstable <- ss_flextable(out$table, footer = out$footer, ...)
+    return(logist_summary.sstable)
+  }
+
+  if (include_footnote) return(out)
+  out$table
+}
