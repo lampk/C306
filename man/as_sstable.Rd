@@ -5,6 +5,7 @@
 \alias{as_sstable.default}
 \alias{as_sstable.list}
 \alias{as_sstable.logist_summary}
+\alias{as_sstable.overlap_summary}
 \title{Coerce an object to sstable}
 \usage{
 as_sstable(x, ...)
@@ -14,6 +15,8 @@ as_sstable(x, ...)
 \method{as_sstable}{list}(x, flextable = FALSE, ...)
 
 \method{as_sstable}{logist_summary}(x, include_footnote = TRUE, flextable = FALSE, ...)
+
+\method{as_sstable}{overlap_summary}(x, include_footnote = TRUE, flextable = FALSE, ...)
 }
 \arguments{
 \item{x}{An object, usually a named list of length 2 whose names are 'table' and 'footer', or a data.frame/matrix (optionally with attribute "footer")}

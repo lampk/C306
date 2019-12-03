@@ -2,7 +2,7 @@
 % Please edit documentation in R/overlap_join.R
 \name{overlap_join}
 \alias{overlap_join}
-\title{Overlap join of 2 data frames.}
+\title{Overlap join of 2 data frames}
 \usage{
 overlap_join(
   x,
@@ -20,10 +20,13 @@ overlap_join(
 \arguments{
 \item{x, y}{data.frames}
 
-\item{by, by.x, by.y}{a character vector of variables to join by.
+\item{by, by.x, by.y}{a character vector of variables to join by, passed to \link[data.table]{foverlaps}' by.x ad by.y.
+
 If NULL, the default,  will do a natural join, using all variables with common names across the two tables.
 A message lists the variables so that you can check they're right
-(to suppress the message, simply explicitly list the variables that you want to join)}
+(to suppress the message, simply explicitly list the variables that you want to join).
+
+Otherwise, the last two columns must be the start and end time of the event specified.}
 
 \item{type}{character-typed value, either 'left' (default), right, or 'inner',
 representing left_join, right_join, and inner_join}
@@ -64,7 +67,7 @@ then these two intervals are considered to be overlapping.}
 a tibble with relevant columns from x, y
 }
 \description{
-This function is a wrapper of data.table's foverlaps, following the dplyr's _join grammar
+This function is a wrapper of data.table's foverlaps, following the dplyr's _join grammar.
 }
 \seealso{
 \link[data.table]{foverlaps}

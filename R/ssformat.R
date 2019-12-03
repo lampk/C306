@@ -579,3 +579,24 @@ as_sstable.logist_summary <- function(x, include_footnote = TRUE, flextable = FA
   if (include_footnote) return(out)
   out$table
 }
+
+#' @rdname as_sstable
+#' @param include_footnote logical value specifying whether to include footnote in the output. Default is FALSE
+#' @export
+as_sstable.overlap_summary <- function(x, include_footnote = TRUE, flextable = FALSE, ...){
+  out <- list()
+  out$table <- as.matrix(x)
+  out$table <- rbind(colnames(out$table), out$table)
+  out$table <- cbind(rownames(out$table), out$table)
+  colnames(out$table) <- rownames(out$table) <- NULL
+  out$footer <- attr(x, 'footer')
+  class(out$table) <- c('summary_tbl', 'ss_tbl', 'matrix')
+
+  if (flextable){
+    overlap_summary.sstable <- ss_flextable(out$table, footer = out$footer, ...)
+    return(overlap_summary.sstable)
+  }
+
+  if (include_footnote) return(out)
+  out$table
+}
