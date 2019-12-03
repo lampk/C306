@@ -32,7 +32,7 @@ logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, 
   result_obj <- summary_method(fit, stat_digits = stat_digits, p_digits = p_digits, verbose = verbose)
 
   out <- structure(result_obj$table, footer = result_obj$footer, method = method, class = c('logist_summary','data.frame'))
-  if (sstable) return(as_sstable.logist_summary(out))
+  if (sstable) return(as_sstable.logist_summary(out, flextable = flextable))
   if (verbose) return(invisible(print(out)))
   return(out)
 }
