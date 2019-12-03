@@ -14,9 +14,12 @@ A model with explicit formula
 }
 \description{
 A function to transform an lm model formula to its explicit form.
-This is useful when you want to use \link[stats]{drop1} to drop additional terms in interaction models.
+This is useful when you want to use stats::drop1 to drop additional terms in interaction models.
 }
 \examples{
 iris.model <- lm(Sepal.Width ~ Sepal.Length*Petal.Width, data=iris)
 explicit(iris.model)
+}
+\seealso{
+\link[stats]{add1}
 }

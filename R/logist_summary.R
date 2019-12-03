@@ -31,7 +31,7 @@ logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, 
   summary_method <- switch(method, lik.ratio = ._lik.ratio_summary, wald = ._wald_summary)
   result_obj <- summary_method(fit, stat_digits = stat_digits, p_digits = p_digits, verbose = verbose)
 
-  out <- structure(result_obj$table, footer = result_obj$footer, class = c('logist_summary','data.frame'))
+  out <- structure(result_obj$table, footer = result_obj$footer, method = method, class = c('logist_summary','data.frame'))
   if (sstable) return(as_sstable.logist_summary(out))
   if (verbose) return(invisible(print(out)))
   return(out)
@@ -112,12 +112,13 @@ explicit <- function(x){
 #' Transform a model to its explicit form
 #' @description
 #' A function to transform an lm model formula to its explicit form.
-#' This is useful when you want to use \link[stats]{drop1} to drop additional terms in interaction models.
+#' This is useful when you want to use stats::drop1 to drop additional terms in interaction models.
 #' @param fit An object of class "lm"
 #' @examples
 #' iris.model <- lm(Sepal.Width ~ Sepal.Length*Petal.Width, data=iris)
 #' explicit(iris.model)
 #' @return A model with explicit formula
+#' @seealso \link[stats]{add1}
 #' @export
 explicit.lm <- function(fit){
   ._explicit_lm(fit, meta = FALSE)
