@@ -10,7 +10,7 @@ simple_relevel(x, ...)
 
 \method{simple_relevel}{data.frame}(data, ..., by)
 
-\method{simple_relevel}{default}(x, by, map)
+\method{simple_relevel}{default}(x, by, map, value = c("unsorted", "sorted", "levels"))
 }
 \arguments{
 \item{x}{a vector that will be relevelled}
@@ -23,9 +23,19 @@ simple_relevel(x, ...)
 
 \item{map}{a list that links by to x in the form of list(by.1 = c(x1.1, x1.2...), by.2 = c(x2.1, x2.2...))
 or a data.frame with two columns "from" and "to" serving the same purpose.}
+
+\item{value}{a string: whether to return
+
+- "levels": new levels only
+
+- "unsorted" (default): an unsorted, relevelled factor
+
+- "sorted": a sorted, relevelled factor}
 }
 \value{
 An object of the same class as the input
+
+A factor or a numeric vector of order
 }
 \description{
 Function to relevel a variable in accordance to a another variable of class "factor".

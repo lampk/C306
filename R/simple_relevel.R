@@ -45,10 +45,19 @@ simple_relevel.data.frame <- function(data, ..., by){
 #' @param by a vector that the relevelling process will base on
 #' @param map a list that links by to x in the form of list(by.1 = c(x1.1, x1.2...), by.2 = c(x2.1, x2.2...))
 #' or a data.frame with two columns "from" and "to" serving the same purpose.
+#' @param value a string: whether to return
+#'
+#' - "levels": new levels only
+#'
+#' - "unsorted" (default): an unsorted, relevelled factor
+#'
+#' - "sorted": a sorted, relevelled factor
+#' @return A factor or a numeric vector of order
 #' @export
-simple_relevel.default <- function(x, by, map){
+simple_relevel.default <- function(x, by, map, value = c('unsorted', 'sorted', 'levels')){
   requireNamespace('dplyr')
-  if (is.list(map)){
+  value <- match.arg(value)
+  if (!is.data.frame(map)){
     map <- do.call(rbind,
                    lapply(seq_along(map),
                           function(i){
@@ -63,5 +72,24 @@ simple_relevel.default <- function(x, by, map){
   map$from <- factor(map$from, levels = levels(by))
   X <- data.frame(to = x)
   data <- merge(X, map, by = 'to', all.x = TRUE)
-  simple_relevel.data.frame(data, to, by = from)$to
+  to <- simple_relevel.data.frame(data, to, by = from)$to
+  if (value == 'sorted') return(to)
+  lv <- levels(to)
+  if (value == 'levels') return(lv)
+  factor(x, levels = lv)
+}
+
+#' Sort a vector in a user-defined order
+#' @description A function to sort a vector i an user-defined order
+#' @param x A vector to be sorted
+#' @param order A manually defined order vector
+#' @return A vector
+#' @export
+simple_sort <- function(x, order = levels(as.factor(x))){
+  stopifnot(length(order) == length(unique(x)))
+  x_factor <- factor(x, levels = order)
+  x_sort <- sort(x_factor)
+  x_retrieve <- as(levels(x_sort), typeof(x))[x_sort]
+  attributes(x_retrieve) <- attributes(x)
+  x_retrieve
 }
