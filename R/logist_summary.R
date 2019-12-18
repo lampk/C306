@@ -69,7 +69,7 @@ logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, 
     explicit_model <- explicit_form$model
     explicit_meta <- explicit_form$meta
     lr.test <- data.frame(drop1(explicit_model, test='Chisq'))[-1,c("Df","Pr..Chi.")]
-    rownames(lr.test) <- recode(rownames(lr.test), !!!explicit_meta$names)
+    rownames(lr.test) <- dplyr::recode(rownames(lr.test), !!!explicit_meta$names)
     p.value <-  lr.test[,"Pr..Chi.", drop = FALSE]
     names(p.value) <- 'p.value'
     row_order <- factor(rownames(result), levels = rownames(result))
@@ -126,12 +126,21 @@ explicit.lm <- function(fit){
 
 
 ._explicit_lm <- function(fit, meta = FALSE){
+  # browser()
   ia <- ._get_interaction_terms(fit)
   ia.vars <- ia$ia.vars
   ia.terms <- ia$ia.terms
   fit.term_labels <- attr(terms(formula(fit)),"term.labels")
   # fit_data <- model.frame(fit)
-  fit_data <- as.data.frame(fit$data)
+  # fit_data <- merge(as.data.frame(eval(attr(terms(fit), 'variables'))), as.data.frame(fit$model), all.x = TRUE, all.y = TRUE)
+  # fit_data <- merge(as.data.frame(fit$data), as.data.frame(fit$model), all.x = TRUE, all.y = TRUE)
+  fit_data <-
+    if (is.environment(fit$data)){
+      as.environment(c(as.list(fit$data), as.list(fit$model)))
+    } else {
+      as.environment(merge(as.data.frame(fit$data), as.data.frame(fit$model), all.x = TRUE, all.y = TRUE))
+    }
+
 
   nonia.vars <- unique(fit.term_labels[!fit.term_labels %in% unlist(c(ia.vars, ia.terms))])
 
@@ -141,8 +150,17 @@ explicit.lm <- function(fit){
   dummy_vars <- ._create_dummy(fit_data, names(var.classes)[!var.classes %in% c('numeric', 'other')])
   dummy_cols <- purrr::flatten(dummy_vars)
   dummy_cols.names <- sapply(dummy_vars, names, simplify = FALSE)
-  explicit_data <- if (length(dummy_cols)) cbind(fit_data, dummy_cols) else fit_data
+  explicit_data <- if (length(dummy_cols)) as.environment(c(as.list(fit_data), as.list(dummy_cols))) else fit_data
 
+  ._quote_vars <- function(vars){
+    sapply(vars,
+           function(.vars){
+             sapply(.vars,
+                    function(.var){
+                      paste0('`',.var,'`')
+                    }, simplify = FALSE)
+           }, simplify = FALSE)
+  }
   # browser()
   ia.vars_dummy <-
     sapply(ia.vars,
@@ -156,17 +174,21 @@ explicit.lm <- function(fit){
                     }, simplify = FALSE)
            }, simplify = FALSE)
 
+  ia.vars_dummy.quoted <- ._quote_vars(ia.vars_dummy)
+
   nonia.vars_dummy <-
     sapply(nonia.vars,
            function(nonia.var){
              sapply(nonia.var,
                     function(niv){
                       if (niv %in% names(dummy_cols.names))
-                        dummy_cols.names[[niv]]
+                       dummy_cols.names[[niv]]
                       else
                         niv
                     }, simplify = FALSE)
            }, simplify = FALSE)
+
+  nonia.vars_dummy.quoted <- ._quote_vars(nonia.vars_dummy)
 
   ia.vars_dummy.interactTerms <-
     sapply(ia.vars_dummy,
@@ -175,12 +197,31 @@ explicit.lm <- function(fit){
              return(paste0('I(', paste(expand_matrix[,1], expand_matrix[,2], sep = ' * '), ')'))
            }, simplify = FALSE)
 
+  ia.vars_dummy.interactTerms.quoted <-
+    sapply(ia.vars_dummy.quoted,
+           function(ia.var){
+             expand_matrix <- expand.grid(ia.var)
+             return(paste0('I(', paste(expand_matrix[,1], expand_matrix[,2], sep = ' * '), ')'))
+           }, simplify = FALSE)
+
   ia.vars_dummy.allTerms <-
-    sapply(names(ia.vars_dummy),
-           function(i) c(ia.vars_dummy[[i]], interaction = ia.vars_dummy.interactTerms[[i]]),
+    sapply(names(ia.vars_dummy.quoted),
+           function(i) c(ia.vars_dummy.quoted[[i]], interaction = ia.vars_dummy.interactTerms.quoted[[i]]),
            simplify = FALSE)
 
-  vars_dummy.allTerms <- c(nonia.vars_dummy, ia.vars_dummy.allTerms)
+  vars_dummy.allTerms <- c(nonia.vars_dummy.quoted, ia.vars_dummy.allTerms)
+
+  # browser()
+  all_terms.fml <- as.formula(
+    paste0('~',
+           paste(unique(unlist(vars_dummy.allTerms)), collapse = '+'))
+  )
+
+  parent.env(explicit_data) <- parent.frame()
+  # assign(deparse(fit$call$data), explicit_data)
+  # explicit_model <- get(deparse(fit$call$data)) %>% update(fit, all_terms.fml, data = .)
+  explicit_model <- update(fit, all_terms.fml, data = explicit_data)
+  explicit_model$call$data <- fit$call$data
 
   if (meta){
     # browser()
@@ -197,18 +238,11 @@ explicit.lm <- function(fit){
       ))
 
     all_var.names <- unlist(c(nonia.vars_dummy, ia_vars.names))
-    names(all_var.names) <- unlist(vars_dummy.allTerms)
+    names(all_var.names) <- unlist(attr(terms(all_terms.fml), 'term.labels'))
   }
 
-
-  # browser()
-  all_terms.fml <- as.formula(
-    paste0('~',
-           paste(unique(unlist(vars_dummy.allTerms)), collapse = '+'))
-  )
   # browser()
 
-  explicit_model <- update(fit, all_terms.fml, data = explicit_data)
   if (meta) return(list(model = explicit_model, meta = list(names = all_var.names)))
   return(explicit_model)
 }
@@ -224,6 +258,7 @@ explicit.lm <- function(fit){
 }
 
 ._create_dummy <- function(data, cols){
+  # browser()
   sapply(
     cols,
     function(.col){
