@@ -105,7 +105,7 @@ logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, 
 #' @param x An object
 #' @seealso \link{explicit.lm}
 #' @export
-explicit <- function(x){
+explicit <- function(x, ...){
   UseMethod('explicit')
 }
 
@@ -120,26 +120,31 @@ explicit <- function(x){
 #' @return A model with explicit formula
 #' @seealso \link[stats]{add1}
 #' @export
-explicit.lm <- function(fit){
-  ._explicit_lm(fit, meta = FALSE)
+explicit.lm <- function(fit, data = NULL){
+  new_fit <- ._explicit_lm(fit, data = data, meta = FALSE)
+  if (length(data)) new_fit$call$data <- rlang::sym(deparse(substitute(data)))
+  new_fit
 }
 
 
-._explicit_lm <- function(fit, meta = FALSE){
+._explicit_lm <- function(fit, data = NULL,  meta = FALSE){
   # browser()
   ia <- ._get_interaction_terms(fit)
   ia.vars <- ia$ia.vars
   ia.terms <- ia$ia.terms
   fit.term_labels <- attr(terms(formula(fit)),"term.labels")
+  if (!length(fit$data) & !length(fit$model) & !length(data))
+    stop('No data found within fit. Please specify data!')
   # fit_data <- model.frame(fit)
   # fit_data <- merge(as.data.frame(eval(attr(terms(fit), 'variables'))), as.data.frame(fit$model), all.x = TRUE, all.y = TRUE)
   # fit_data <- merge(as.data.frame(fit$data), as.data.frame(fit$model), all.x = TRUE, all.y = TRUE)
   fit_data <-
-    if (is.environment(fit$data)){
+    if (length(data))
+      as.environment(merge(as.data.frame(data), as.data.frame(fit$model), all.x = TRUE, all.y = TRUE))
+    else if (is.environment(fit$data))
       as.environment(c(as.list(fit$data), as.list(fit$model)))
-    } else {
+    else
       as.environment(merge(as.data.frame(fit$data), as.data.frame(fit$model), all.x = TRUE, all.y = TRUE))
-    }
 
 
   nonia.vars <- unique(fit.term_labels[!fit.term_labels %in% unlist(c(ia.vars, ia.terms))])

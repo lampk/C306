@@ -4,7 +4,7 @@
 \alias{explicit.lm}
 \title{Transform a model to its explicit form}
 \usage{
-\method{explicit}{lm}(fit)
+\method{explicit}{lm}(fit, data = NULL)
 }
 \arguments{
 \item{fit}{An object of class "lm"}
