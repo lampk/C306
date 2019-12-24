@@ -62,26 +62,18 @@ logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, 
   has.intercept <- (names(coef(fit))[1]=="(Intercept)")
   any.ia <- any(attr(terms(formula(fit)),"order")>1)
   # browser()
-
-  if (has.intercept)
-    if (any.ia){
-    explicit_form <- ._explicit_lm(fit, meta = TRUE)
-    explicit_model <- explicit_form$model
-    explicit_meta <- explicit_form$meta
-    lr.test <- data.frame(drop1(explicit_model, test='Chisq'))[-1,c("Df","Pr..Chi.")]
-    rownames(lr.test) <- dplyr::recode(rownames(lr.test), !!!explicit_meta$names)
-    p.value <-  lr.test[,"Pr..Chi.", drop = FALSE]
-    names(p.value) <- 'p.value'
-    row_order <- factor(rownames(result), levels = rownames(result))
-    result <- merge(result, p.value, all.x = TRUE, by='row.names')
-    result$Row.names <- factor(result$Row.names, levels = row_order)
-    result <- dplyr::arrange(result, Row.names)
-    rownames(result) <- result$Row.names
-    result <- result[, -1]
-  } else {
-    lr.test <- data.frame(drop1(fit,test="Chisq"))[-1,c("Df","Pr..Chi.")]
-    result$p.value <- c(NA,lr.test[,"Pr..Chi."])
-  }
+  logLik.full <- logLik(structure(fit, class = 'glm'))
+  x <- names(coef(fit))
+  y <- model.response(model.frame(fit, drop.unused.levels = TRUE))
+  p <- sapply(seq_along(x), function(i){
+    fit.i <- glm.fit(x = model.matrix(fit)[,-i], y = y, family = binomial())
+    logLik.i <-logLik(structure(fit.i, class = 'glm'))
+    1 - pchisq(2 * (logLik.full - logLik.i), 1)
+  })
+  names(p) <- x
+  result <- merge(result, data.frame(p.value = p), all.x = TRUE, by='row.names')
+  rownames(result) <- result[,'Row.names']
+  result <- result[, -1]
 
   for (i in 1:4) result[,i] <- formatC(result[,i], digits = stat_digits, format = 'f')
   if (length(result$p.value)) result$p.value <- formatC(result$p.value, p_digits, format = 'f')
@@ -100,183 +92,5 @@ logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, 
   # return(result)
 }
 
-#' Transform an object to its explicit form
-#' @description A function to transform an object to its explicit form if possible
-#' @param x An object
-#' @seealso \link{explicit.lm}
-#' @export
-explicit <- function(x, ...){
-  UseMethod('explicit')
-}
-
-#' Transform a model to its explicit form
-#' @description
-#' A function to transform an lm model formula to its explicit form.
-#' This is useful when you want to use stats::drop1 to drop additional terms in interaction models.
-#' @param fit An object of class "lm"
-#' @examples
-#' iris.model <- lm(Sepal.Width ~ Sepal.Length*Petal.Width, data=iris)
-#' explicit(iris.model)
-#' @return A model with explicit formula
-#' @seealso \link[stats]{add1}
-#' @export
-explicit.lm <- function(fit, data = NULL){
-  new_fit <- ._explicit_lm(fit, data = data, meta = FALSE)
-  if (length(data)) new_fit$call$data <- rlang::sym(deparse(substitute(data)))
-  new_fit
-}
-
-
-._explicit_lm <- function(fit, data = NULL,  meta = FALSE){
-  # browser()
-  ia <- ._get_interaction_terms(fit)
-  ia.vars <- ia$ia.vars
-  ia.terms <- ia$ia.terms
-  fit.term_labels <- attr(terms(formula(fit)),"term.labels")
-  if (!length(fit$data) & !length(fit$model) & !length(data))
-    stop('No data found within fit. Please specify data!')
-  # fit_data <- model.frame(fit)
-  # fit_data <- merge(as.data.frame(eval(attr(terms(fit), 'variables'))), as.data.frame(fit$model), all.x = TRUE, all.y = TRUE)
-  # fit_data <- merge(as.data.frame(fit$data), as.data.frame(fit$model), all.x = TRUE, all.y = TRUE)
-  fit_data <-
-    if (length(data))
-      as.environment(merge(as.data.frame(data), as.data.frame(fit$model), all.x = TRUE, all.y = TRUE))
-    else if (is.environment(fit$data))
-      as.environment(c(as.list(fit$data), as.list(fit$model)))
-    else
-      as.environment(merge(as.data.frame(fit$data), as.data.frame(fit$model), all.x = TRUE, all.y = TRUE))
-
-
-  nonia.vars <- unique(fit.term_labels[!fit.term_labels %in% unlist(c(ia.vars, ia.terms))])
-
-  # browser()
-  var.classes <- attr(terms(fit), 'dataClasses')
-  ia.classes <- var.classes[unique(unlist(ia.vars))]
-  dummy_vars <- ._create_dummy(fit_data, names(var.classes)[!var.classes %in% c('numeric', 'other')])
-  dummy_cols <- purrr::flatten(dummy_vars)
-  dummy_cols.names <- sapply(dummy_vars, names, simplify = FALSE)
-  explicit_data <- if (length(dummy_cols)) as.environment(c(as.list(fit_data), as.list(dummy_cols))) else fit_data
-
-  ._quote_vars <- function(vars){
-    sapply(vars,
-           function(.vars){
-             sapply(.vars,
-                    function(.var){
-                      paste0('`',.var,'`')
-                    }, simplify = FALSE)
-           }, simplify = FALSE)
-  }
-  # browser()
-  ia.vars_dummy <-
-    sapply(ia.vars,
-           function(ia.var){
-             sapply(ia.var,
-                    function(iv){
-                      if (iv %in% names(dummy_cols.names))
-                        dummy_cols.names[[iv]]
-                      else
-                        iv
-                    }, simplify = FALSE)
-           }, simplify = FALSE)
-
-  ia.vars_dummy.quoted <- ._quote_vars(ia.vars_dummy)
-
-  nonia.vars_dummy <-
-    sapply(nonia.vars,
-           function(nonia.var){
-             sapply(nonia.var,
-                    function(niv){
-                      if (niv %in% names(dummy_cols.names))
-                       dummy_cols.names[[niv]]
-                      else
-                        niv
-                    }, simplify = FALSE)
-           }, simplify = FALSE)
-
-  nonia.vars_dummy.quoted <- ._quote_vars(nonia.vars_dummy)
-
-  ia.vars_dummy.interactTerms <-
-    sapply(ia.vars_dummy,
-           function(ia.var){
-             expand_matrix <- expand.grid(ia.var)
-             return(paste0('I(', paste(expand_matrix[,1], expand_matrix[,2], sep = ' * '), ')'))
-           }, simplify = FALSE)
-
-  ia.vars_dummy.interactTerms.quoted <-
-    sapply(ia.vars_dummy.quoted,
-           function(ia.var){
-             expand_matrix <- expand.grid(ia.var)
-             return(paste0('I(', paste(expand_matrix[,1], expand_matrix[,2], sep = ' * '), ')'))
-           }, simplify = FALSE)
-
-  ia.vars_dummy.allTerms <-
-    sapply(names(ia.vars_dummy.quoted),
-           function(i) c(ia.vars_dummy.quoted[[i]], interaction = ia.vars_dummy.interactTerms.quoted[[i]]),
-           simplify = FALSE)
-
-  vars_dummy.allTerms <- c(nonia.vars_dummy.quoted, ia.vars_dummy.allTerms)
-
-  # browser()
-  all_terms.fml <- as.formula(
-    paste0('~',
-           paste(unique(unlist(vars_dummy.allTerms)), collapse = '+'))
-  )
-
-  parent.env(explicit_data) <- parent.frame()
-  # assign(deparse(fit$call$data), explicit_data)
-  # explicit_model <- get(deparse(fit$call$data)) %>% update(fit, all_terms.fml, data = .)
-  explicit_model <- update(fit, all_terms.fml, data = explicit_data)
-  explicit_model$call$data <- fit$call$data
-
-  if (meta){
-    # browser()
-    ia.vars_dummy.interactTerms.beautified <-
-      sapply(ia.vars_dummy,
-             function(ia.var){
-               expand_matrix <- expand.grid(ia.var)
-               return(paste(expand_matrix[,1], expand_matrix[,2], sep = ':'))
-             }, simplify = FALSE)
-
-    ia_vars.names <-
-      unlist(lapply(names(ia.vars_dummy),
-                    function(i) c(ia.vars_dummy[[i]], interaction = ia.vars_dummy.interactTerms.beautified[[i]])
-      ))
-
-    all_var.names <- unlist(c(nonia.vars_dummy, ia_vars.names))
-    names(all_var.names) <- unlist(attr(terms(all_terms.fml), 'term.labels'))
-  }
-
-  # browser()
-
-  if (meta) return(list(model = explicit_model, meta = list(names = all_var.names)))
-  return(explicit_model)
-}
-
-._get_interaction_terms <- function(fit){
-  fml <- formula(fit)
-  ia.terms <- attr(terms(fml),"term.labels")[attr(terms(fml),"order")>1]
-  ia.factors <- attr(terms(fml),"factors")[,ia.terms, drop = FALSE]
-  ia.vars <- sapply(ia.terms,
-                    function(ia.term) rownames(ia.factors)[ia.factors[,ia.term] == 1],
-                    simplify = FALSE)
-  return(list(ia.terms = ia.terms, ia.vars = ia.vars))
-}
-
-._create_dummy <- function(data, cols){
-  # browser()
-  sapply(
-    cols,
-    function(.col){
-      col_data <- as.factor(data[[.col]])
-      col_value <- levels(col_data)[-1]
-      new_cols <-
-        lapply(col_value,
-               function(val){
-                 as.numeric(col_data == val)
-               })
-      names(new_cols) <- paste0(.col, col_value)
-      return(new_cols)
-    }, simplify = FALSE
-  )
-}
-
+# provide a method for family to get the family of glm.fit
+family.list <- function(object,...) object$family
