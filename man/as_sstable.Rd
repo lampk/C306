@@ -6,6 +6,7 @@
 \alias{as_sstable.list}
 \alias{as_sstable.logist_summary}
 \alias{as_sstable.overlap_summary}
+\alias{as_sstable.subgroup_logist_summary}
 \title{Coerce an object to sstable}
 \usage{
 as_sstable(x, ...)
@@ -17,6 +18,8 @@ as_sstable(x, ...)
 \method{as_sstable}{logist_summary}(x, include_footnote = TRUE, flextable = FALSE, ...)
 
 \method{as_sstable}{overlap_summary}(x, include_footnote = TRUE, flextable = FALSE, ...)
+
+\method{as_sstable}{subgroup_logist_summary}(x, include_footnote = TRUE, flextable = FALSE, ...)
 }
 \arguments{
 \item{x}{An object, usually a named list of length 2 whose names are 'table' and 'footer', or a data.frame/matrix (optionally with attribute "footer")}
@@ -28,7 +31,7 @@ as_sstable(x, ...)
 \item{include_footnote}{logical value specifying whether to include footnote in the output. Default is FALSE}
 }
 \value{
-A matrix of class ss_tbl if flextable == FALSE or a flextable
+A matrix of class ss_tbl if flextable == FALSE, otherwise a flextable
 }
 \description{
 A function to coerce objects to a sstable

@@ -117,6 +117,7 @@ ss_format <- function(sstable, header = c(), section = c(), body = c(), template
   if (length(header)) sstable <- ss_header(sstable, rows = header)
   if (length(body)) sstable <- ss_body(sstable, rows = body)
   if (length(section)) sstable <- ss_section(sstable, rows = section)
+  class(sstable) <- c('formatted_sstable', class(sstable))
   sstable
 }
 
@@ -189,7 +190,7 @@ ss_flextable.list <- function(sstable, add_footer = NULL,...){
 ss_flextable.default <- function(sstable, footer = NULL, bg = "#F2EFEE", ...){
   requireNamespace("flextable")
   requireNamespace("officer")
-  sstable <- ss_format(sstable, ..., .guess = TRUE)
+  if (!inherits(sstable, 'formatted_sstable')) sstable <- ss_format(sstable, ..., .guess = TRUE)
   header <- which(grepl("header", rownames(sstable)))
   body <- which(grepl("body", rownames(sstable)))
   section <-  which(grepl("section", rownames(sstable)))
@@ -317,7 +318,7 @@ ss_huxtable.default <- function(sstable, footer = NULL,
                         bg = c(grey(.95), 'white'), border_width=0.8, border_color = grey(.75), wrap = FALSE,...){
   requireNamespace('huxtable')
   if (missing(caption_pos)) caption_pos <- 'bottomcenter' else caption_pos <- match.arg(caption_pos)
-  sstable <- ss_format(sstable, ..., .guess = TRUE)
+  if (!inherits(sstable, 'formatted_sstable')) sstable <- ss_format(sstable, ..., .guess = TRUE)
   header <- which(grepl("header", rownames(sstable)))
   body <- which(grepl("body", rownames(sstable)))
   section <-  which(grepl("section", rownames(sstable)))
@@ -517,8 +518,9 @@ ht_theme_kable <- function(ht, header_rows = 1:2, header_cols = NULL,
 #' @description A function to coerce objects to a sstable
 #' @param x An object, usually a named list of length 2 whose names are 'table' and 'footer', or a data.frame/matrix (optionally with attribute "footer")
 #' @param flextable logical value specifying whether to return a flextable. Default is FALSE
+#' @param include_footnote logical value specifying whether to include footnote in the output. Default is FALSE
 #' @param ... additional param passed to \link{ss_flextable}
-#' @return A matrix of class ss_tbl if flextable == FALSE or a flextable
+#' @return A matrix of class ss_tbl if flextable == FALSE, otherwise a flextable
 #' @export
 #'
 as_sstable <- function(x,...){
@@ -560,7 +562,6 @@ as_sstable.list <- function(x, flextable = FALSE, ...){
 }
 
 #' @rdname as_sstable
-#' @param include_footnote logical value specifying whether to include footnote in the output. Default is FALSE
 #' @export
 as_sstable.logist_summary <- function(x, include_footnote = TRUE, flextable = FALSE, ...){
   out <- list()
@@ -600,3 +601,25 @@ as_sstable.overlap_summary <- function(x, include_footnote = TRUE, flextable = F
   if (include_footnote) return(out)
   out$table
 }
+
+#' @rdname as_sstable
+#' @export
+as_sstable.subgroup_logist_summary <- function(x, include_footnote = TRUE, flextable = FALSE, ...)
+{
+  tables <- sapply(x, as_sstable, include_footnote = FALSE, ..., simplify = FALSE)
+  footer <- attr(x[[1]], 'footer')
+  first_header <- c('', tables[[1]][1,-1])
+  tables <- lapply(tables, `[`, -1,)
+  headers <- matrix(rep('', length(tables) * ncol(tables[[1]])), ncol = ncol(tables[[1]]))
+  headers[,1] <- paste(attr(x, 'base_var'), '=', names(tables))
+  # browser()
+  table <- do.call(rbind,
+                   lapply(seq_along(tables),
+                          function(i) rbind(headers[i,], tables[[i]])))
+  table <- rbind(first_header, table)
+  sstable <- ss_format(table, header = 1, section = (seq_len(length(tables)) - 1)*(nrow(tables[[1]])+1)+2)
+  if (flextable) return(ss_flextable(sstable, footer = footer))
+  if (include_footnote) return(list(table = sstable, footer = footer))
+  sstable
+}
+
