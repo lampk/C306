@@ -1,1 +1,0 @@
-This folder contains all DSMB-related documents (charter, meeting minutes).

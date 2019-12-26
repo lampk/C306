@@ -1,1 +1,0 @@
-This folder contains raw data for final analysis.

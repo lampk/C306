@@ -1,1 +1,0 @@
-This folder contains data imported to R from raw data

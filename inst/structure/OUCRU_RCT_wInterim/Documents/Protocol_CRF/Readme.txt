@@ -1,1 +1,0 @@
-This folder contains all protocol, CRFs of the study.
