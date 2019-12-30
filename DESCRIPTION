@@ -25,16 +25,19 @@ Description: Collection of useful R codes for data analysis from the Biostatisti
 License: The MIT License (MIT)
 Encoding: UTF-8
 LazyData: true
-Depends: data.table
-Imports: lubridate,
+Depends: 
+    data.table,
+    dplyr
+Imports:
+    lubridate,
     car,
     readxl,
-    dplyr,
     flextable,
     officer,
     survival,
     tidyr,
-    rlang
+    rlang,
+    purrr
 RoxygenNote: 7.0.2
 Suggests: knitr,
     rmarkdown,

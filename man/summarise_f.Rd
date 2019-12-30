@@ -32,9 +32,8 @@ a data.frame, data.table, or a tbl
 Create variables summarising exisiting variables, by using summarisation function.
 }
 \examples{
-df <- data.table(baz = 1:10, foo = c(rep(1, 5), rep(2, 5)), bar =4:13)
-
+df <- data.frame(baz = 1:10, foo = c(rep(1, 5), rep(2, 5)), bar =4:13)
 df \%>\%
-dplyr::group_by(foo) \%>\%
-summarise_f((function(baz) list(a = cumsum(baz), b = baz*2))(baz), rangemisc::overlap_collapse(bar, baz))
+   dplyr::group_by(foo) \%>\%
+   summarise_f((function(baz) list(a = cumsum(baz), b = baz*2))(baz), rangemisc::overlap_collapse(bar, baz))
 }

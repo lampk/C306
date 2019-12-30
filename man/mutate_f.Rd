@@ -33,9 +33,8 @@ a data.frame, data.table, or a tbl
 A function to create new variable(s) based on existing ones.
 }
 \examples{
-df <- data.table(baz = 1:10, foo = c(rep(1, 5), rep(2, 5)))
-
+df <- data.frame(baz = 1:10, foo = c(rep(1, 5), rep(2, 5)))
 df \%>\%
-dplyr::group_by(foo) \%>\%
-mutate_f(c('foo', 'bar') := list(a = cumsum(baz), b = baz*2))
+   dplyr::group_by(foo) \%>\%
+   mutate_f(c('foo', 'bar') := list(a = cumsum(baz), b = baz*2))
 }

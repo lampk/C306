@@ -28,5 +28,5 @@ ht_theme_markdown(
 an object of class huxtable
 }
 \description{
-This function provides a stripped theme for huxtable object
+This function provides a markdown stripe theme for huxtable object
 }

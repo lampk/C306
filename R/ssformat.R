@@ -94,7 +94,7 @@ ss_section <- function(sstable, rows){
 #' An accepted template for sstable: must be either 'baseline', 'survcomp', or 'ae'.
 #'
 #' If NA, the existing template in the sstable is kept as-is. It no template built-in, will return a no-template sstable instead.
-#' @param .guess a logical value. If TRUE, the function will try to get each row belongs to which part.
+#' @param .guess a logical value. If TRUE, the function will try to guess to which part each row belongs.
 #' @return a matrix of class ss_tbl
 #' @export
 ss_format <- function(sstable, header = c(), section = c(), body = c(), template =  c('baseline', 'survcomp', 'ae'), .guess= TRUE){
@@ -445,7 +445,7 @@ ss_huxtable.default <- function(sstable, footer = NULL,
 
 #' A stripe theme for huxtable object
 #'
-#' @description This function provides a stripped theme for huxtable object
+#' @description This function provides a markdown stripe theme for huxtable object
 #' @param ht an object of class huxtable
 #' @param header_rows a numeric vector that delimits the header zone.
 #' @param bg a character vector that defines background color of the flextable. If length(bg) >= 2, the table will have stripe background, otherwise plain.

@@ -26,7 +26,7 @@ ss_format(
 
 If NA, the existing template in the sstable is kept as-is. It no template built-in, will return a no-template sstable instead.}
 
-\item{.guess}{a logical value. If TRUE, the function will try to get each row belongs to which part.}
+\item{.guess}{a logical value. If TRUE, the function will try to guess to which part each row belongs.}
 }
 \value{
 a matrix of class ss_tbl

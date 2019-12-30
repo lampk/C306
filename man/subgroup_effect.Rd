@@ -8,11 +8,13 @@ subgroup_effect(
   formula,
   model,
   method = c("lik.ratio", "wald"),
+  transpose = FALSE,
   stat_digits = 2,
   p_digits = 4,
   sstable = FALSE,
   flextable = FALSE,
-  simplify = TRUE
+  simplify = TRUE,
+  ...
 )
 }
 \arguments{
@@ -22,11 +24,13 @@ subgroup_effect(
 - A, B are the covarables having interaction with X whose effects will be calculated.
 If . or blank. All covariables having interaction with X would be included.}
 
-\item{model}{A fitted glm model}
+\item{model}{A fitted glm model or a formula}
 
 \item{method}{a string whose value is either
 "lik.ratio" for CI and tests based on likelihood ratio statistics (preferred)
 or "wald" for CI and tests based on Wald statistics}
+
+\item{transpose}{logical value, default is FALSE, whether to return a transposed summary. See also \link{t.subgroup_logist_summary}}
 
 \item{stat_digits}{Number of decimal digits for statistics}
 
@@ -39,6 +43,8 @@ or "wald" for CI and tests based on Wald statistics}
 \item{simplify}{by default, if there is only one variable on each side of the formula and
 no LHS is a binary, then the function will combine tables in each state of X to one.
 Set to FALSE to avoid this behaviour.}
+
+\item{...}{additional params passed to glm to fit "model" (if model is a formula)}
 }
 \value{
 Under certain circumstances defined in param simplify, a flextable, an sstable,
@@ -47,6 +53,18 @@ or a 'subgroup_logist_summary'/list of logist_summary, each represents one state
 }
 \description{
 This function calculate the OR, CI, an p.value within each value of specified covariable.
+}
+\examples{
+y = sample(0:1, 1000, replace = T)
+x1 = sample(1:100, 1000, replace = T)
+x2 = sample(c("A", "B"), 1000, replace = T)
+x3 = sample(c("C", "D", "E"), 1000, replace = T)
+x4 = sample(c("F", "G"), 1000, replace = T)
+fakefit = glm(y ~ x1*x3 + x2*x3 + x2*x4, family = binomial())
+C306::subgroup_effect(~x3, fakefit)
+}
+\seealso{
+\link{logist_summary}, \link{print.subgroup_logist_summary}, \link{t.subgroup_logist_summary}
 }
 \author{
 Trinh Dong Huu Khanh

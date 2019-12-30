@@ -8,11 +8,10 @@
 #' If unnamed, names of each list elements will be used
 #' @return a data.frame, data.table, or a tbl
 #' @examples
-#' df <- data.table(baz = 1:10, foo = c(rep(1, 5), rep(2, 5)))
-#'
+#' df <- data.frame(baz = 1:10, foo = c(rep(1, 5), rep(2, 5)))
 #' df %>%
-#' dplyr::group_by(foo) %>%
-#' mutate_f(c('foo', 'bar') := list(a = cumsum(baz), b = baz*2))
+#'    dplyr::group_by(foo) %>%
+#'    mutate_f(c('foo', 'bar') := list(a = cumsum(baz), b = baz*2))
 #' @importFrom data.table :=
 #' @export
 mutate_f <- function(.data, ...){
@@ -31,7 +30,7 @@ mutate_f.data.table <- function(.data, ...){
 #' @export
 mutate_f.tbl <- function(.data, ...){
   dt_out <- mutate_f.data.frame(.data, ...)
-  dt_out <- tibble::as_tibble(dt_out)
+  dt_out <- dplyr::as_tibble(dt_out)
   dt_out
 }
 
@@ -66,11 +65,10 @@ mutate_f.data.frame <- function(.data, ...){
 #'
 #' @return a data.frame, data.table, or a tbl
 #' @examples
-#' df <- data.table(baz = 1:10, foo = c(rep(1, 5), rep(2, 5)), bar =4:13)
-#'
+#' df <- data.frame(baz = 1:10, foo = c(rep(1, 5), rep(2, 5)), bar =4:13)
 #' df %>%
-#' dplyr::group_by(foo) %>%
-#' summarise_f((function(baz) list(a = cumsum(baz), b = baz*2))(baz), rangemisc::overlap_collapse(bar, baz))
+#'    dplyr::group_by(foo) %>%
+#'    summarise_f((function(baz) list(a = cumsum(baz), b = baz*2))(baz), rangemisc::overlap_collapse(bar, baz))
 #' @importFrom data.table :=
 #' @export
 summarise_f <- summarize_f <- function(.data, ...){
@@ -100,7 +98,7 @@ summarise_f.data.table <- function(.data, ...){
 #' @export
 summarise_f.tbl <- function(.data, ...){
   dt_out <- summarise_f.data.frame(.data, ...)
-  dt_out <- tibble::as_tibble(dt_out)
+  dt_out <- dplyr::as_tibble(dt_out)
   dt_out
 }
 
