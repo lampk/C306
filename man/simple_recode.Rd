@@ -23,7 +23,7 @@ simple_recode(...)
 )
 }
 \arguments{
-\item{...}{For data.frame: Replacement in the form of var = map. Maps must follow the syntax stipulated in the map parameter.
+\item{...}{For method for data.frame: Replacement in the form of var = map. Maps must follow the syntax stipulated in the map parameter.
 
 For default method: Additional parameters passed to factor()}
 

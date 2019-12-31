@@ -19,7 +19,7 @@ Maintainer@R:
             given = 'Biostatistic Group',
             role = "maintainer"
         )
-     )
+    )
 Description: Collection of useful R codes for data analysis from the Biostatistics group at OUCRU
     Use four spaces when indenting paragraphs within the Description.
 License: The MIT License (MIT)

@@ -24,7 +24,7 @@ as_sstable(x, ...)
 \arguments{
 \item{x}{An object, usually a named list of length 2 whose names are 'table' and 'footer', or a data.frame/matrix (optionally with attribute "footer")}
 
-\item{...}{additional param passed to \link{ss_flextable}}
+\item{...}{additional parameters passed to \link{ss_flextable}}
 
 \item{flextable}{logical value specifying whether to return a flextable. Default is FALSE}
 

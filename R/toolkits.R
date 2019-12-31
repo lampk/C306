@@ -17,7 +17,7 @@
 #' @param ignore.case,perl Parameters passed to gsub().
 #' @param .data A data frame to modify
 #' @param ...
-#' For data.frame: Replacement in the form of var = map. Maps must follow the syntax stipulated in the map parameter.
+#' For method for data.frame: Replacement in the form of var = map. Maps must follow the syntax stipulated in the map parameter.
 #'
 #' For default method: Additional parameters passed to factor()
 #'
@@ -140,7 +140,7 @@ ref_lv.factor <- function(x){
 #' 'cont' is used for continuous variables. This will break the variable into several ranges
 #' depended on the breaks specified in ...
 #' @param na.rm A logical value deciding whether NA should be removed
-#' @param ... Break points to cut the continuous variables into ranges. These are passed to function cut.
+#' @param ... Additional parameters passed to \link{cut}. Only work if method = 'cont'
 #' See \link{cut}
 #' @return
 #' If method == 'bin': the percentage of non-reference level
@@ -153,11 +153,13 @@ pct <- function(x, method = c('auto', 'bin', 'cont', 'fct'), na.rm = TRUE, ...){
   method <- match.arg(method)
   if (method == 'auto') method <- ._pct_get_method(unlist(x))
 
-  if (method == 'bin' & !is.logical(x)){
+  if (method == 'bin' & !is.logical(x) & !setequal(unique(x), c(0,1))){
     if (length(unique(x)) > 2) stop('Forcing binary method for factor variable is meaningless.')
     if (length(unique(x)) == 1) return(100)
-    warning('Binary method apply to non logical variable. This will calculate the pct of x != ref_lv')
-    x <- x == levels(as.factor(x))[2]
+    if (length(unique(x)) != length(levels(x))) x <- factor(x, levels = unique(x), exclude=NULL)
+    if (all(!is.na(levels(x))))
+      warning('Binary method apply to non logical variable. This will calculate the pct of x != ref_lv')
+    x <- x == levels(x)[2]
   }
 
   res <- switch(method,
@@ -176,7 +178,7 @@ pct <- function(x, method = c('auto', 'bin', 'cont', 'fct'), na.rm = TRUE, ...){
 
 ._pct_bin <- function(x, na.rm = TRUE){
   n <- if (na.rm) sum(!is.na(x)) else length(x)
-  return(sum(x)/n*100)
+  return(sum(x, na.rm = TRUE)/n*100)
 }
 
 ._pct_fct <- function(x, na.rm = TRUE){
@@ -189,6 +191,11 @@ pct <- function(x, method = c('auto', 'bin', 'cont', 'fct'), na.rm = TRUE, ...){
 }
 
 ._pct_cont <- function(x, na.rm = TRUE, ...){
+  if (na.rm) x <- na.omit(x)
   x <- cut(x, ...)
-  pct(x, method = 'auto', na.rm = na.rm)
+  lv <- levels(addNA(as.factor(x), ifany = TRUE))
+  if (any(is.na(lv))) lv <- c(NA, lv[!is.na(lv)])
+  x2 <- factor(x, levels = lv, exclude = NULL)
+  # browser()
+  pct(x2, method = 'auto', na.rm = FALSE)
 }

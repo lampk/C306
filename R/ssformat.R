@@ -519,7 +519,7 @@ ht_theme_kable <- function(ht, header_rows = 1:2, header_cols = NULL,
 #' @param x An object, usually a named list of length 2 whose names are 'table' and 'footer', or a data.frame/matrix (optionally with attribute "footer")
 #' @param flextable logical value specifying whether to return a flextable. Default is FALSE
 #' @param include_footnote logical value specifying whether to include footnote in the output. Default is FALSE
-#' @param ... additional param passed to \link{ss_flextable}
+#' @param ... additional parameters passed to \link{ss_flextable}
 #' @return A matrix of class ss_tbl if flextable == FALSE, otherwise a flextable
 #' @export
 #'

@@ -18,7 +18,7 @@ depended on the breaks specified in ...}
 
 \item{na.rm}{A logical value deciding whether NA should be removed}
 
-\item{...}{Break points to cut the continuous variables into ranges. These are passed to function cut.
+\item{...}{Additional parameters passed to \link{cut}. Only work if method = 'cont'
 See \link{cut}}
 }
 \value{

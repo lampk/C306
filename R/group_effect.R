@@ -20,7 +20,7 @@
 #' Set to FALSE to avoid this behaviour.
 #' @param sstable logical value specifying whether to return in sstable format. Default is FALSE. Set to TRUE forces verbose to FALSE
 #' @param flextable logical value specifying whether to build flextable object. Default it FALSE. Set to TRUE forces sstable to TRUE.
-#' @param ... additional params passed to glm to fit "model" (if model is a formula)
+#' @param ... additional parameters passed to glm to fit "model" (if model is a formula)
 #' @return Under certain circumstances defined in param simplify, a flextable, an sstable,
 #' a data.frame of class 'subgroup_logist_summary',
 #' or a 'subgroup_logist_summary'/list of logist_summary, each represents one state of X.

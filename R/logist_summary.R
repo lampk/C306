@@ -11,7 +11,7 @@
 #' @param sstable logical value specifying whether to return in sstable format. Default is FALSE. Set to TRUE forces verbose to FALSE
 #' @param flextable logical value specifying whether to build flextable object. Default it FALSE. Set to TRUE forces sstable to TRUE and verbose to FALSE.
 #' Like other sstable objects, you can still create flextable or huxtable afterwards by using \link{ss_flextable} or \link{ss_huxtable}
-#' @param ... additional params passed to \link{ss_flextable}
+#' @param ... additional parameters passed to \link{ss_flextable}
 #' @author Marcel Wolbers, Lam Phung Khanh, and Trinh Dong Huu Khanh
 #' @seealso \link{ss_format}, \link{ss_huxtable}, \link{ss_flextable}
 #' @return A data frame of additional class "logist_summary" (if sstable == FALSE), a matrix of class c("summary_tbl", "ss_tbl") otherwise

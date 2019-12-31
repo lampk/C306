@@ -44,7 +44,7 @@ or "wald" for CI and tests based on Wald statistics}
 no LHS is a binary, then the function will combine tables in each state of X to one.
 Set to FALSE to avoid this behaviour.}
 
-\item{...}{additional params passed to glm to fit "model" (if model is a formula)}
+\item{...}{additional parameters passed to glm to fit "model" (if model is a formula)}
 }
 \value{
 Under certain circumstances defined in param simplify, a flextable, an sstable,

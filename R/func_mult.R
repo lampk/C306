@@ -46,8 +46,13 @@ mutate_f.grouped_df <- function(.data, ...){
 #' @export
 mutate_f.data.frame <- function(.data, ...){
   group_names <- dplyr::group_vars(.data)
-  if (!data.table::is.data.table(.data)) data_tbl <- data.table::as.data.table(.data) else data_tbl <- .data
-  data_tbl <- data_tbl[, ..., by = group_names]
+  data_tbl <- if (!data.table::is.data.table(.data))data.table::as.data.table(.data) else .data
+  # browser()
+  .dots <- rlang::enexprs(..., .unquote_names = FALSE)
+  for (.dot in .dots){
+    .expr <- rlang::expr(data_tbl[, !!.dot, by = group_names])
+    data_tbl <- rlang::eval_tidy(.expr)
+  }
   new_cols <- names(data_tbl)[!names(data_tbl) %in% union(group_names, names(.data))]
   data_tbl <- cbind(as.data.frame(.data), as.data.frame(data_tbl)[,new_cols])
   data_tbl
@@ -79,7 +84,8 @@ summarise_f <- summarize_f <- function(.data, ...){
 #' @export
 summarise_f.data.frame <- function(.data, ...){
   # browser()
-  .fun <- lapply(rlang::enquos(...), rlang::quo_get_expr)
+  # .fun <- lapply(rlang::enquos(...), rlang::quo_get_expr)
+  .fun <- rlang::enexprs(...)
   group_names <- dplyr::group_vars(.data)
   if (!data.table::is.data.table(.data)) data_tbl <- data.table::as.data.table(.data) else data_tbl <- .data
   expr <- rlang::quo_get_expr(rlang::quo(data_tbl[, c(!!!.fun), by = group_names]))

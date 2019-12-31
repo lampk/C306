@@ -33,7 +33,7 @@ or "wald" for CI and tests based on Wald statistics}
 \item{flextable}{logical value specifying whether to build flextable object. Default it FALSE. Set to TRUE forces sstable to TRUE and verbose to FALSE.
 Like other sstable objects, you can still create flextable or huxtable afterwards by using \link{ss_flextable} or \link{ss_huxtable}}
 
-\item{...}{additional params passed to \link{ss_flextable}}
+\item{...}{additional parameters passed to \link{ss_flextable}}
 }
 \value{
 A data frame of additional class "logist_summary" (if sstable == FALSE), a matrix of class c("summary_tbl", "ss_tbl") otherwise
