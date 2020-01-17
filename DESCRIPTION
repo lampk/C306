@@ -37,7 +37,8 @@ Imports:
     survival,
     tidyr,
     rlang,
-    purrr
+    purrr,
+    formula.tools
 RoxygenNote: 7.0.2
 Suggests: knitr,
     rmarkdown,
