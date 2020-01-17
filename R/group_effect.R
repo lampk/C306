@@ -241,3 +241,9 @@ t.subgroup_logist_summary <- function(x){
   v <- rownames(x[[1]])
   structure(sapply(v, function(.v) do.call(rbind, lapply(x,`[`,.v,)), simplify = FALSE), class = 'subgroup_logist_summary')
 }
+
+#' @export
+`[.subgroup_logist_summary` <- function(x,...){
+  class(x) <- 'data.frame'
+  NextMethod('[')
+}
