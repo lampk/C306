@@ -1,7 +1,7 @@
 Package: C306
 Type: Package
 Title: Collection of useful R codes for data analysis from the Biostatistics group at OUCRU
-Version: 0.1.5-202011
+Version: 0.1.5-202001
 Author: Lam Phung Khanh
 Maintainer@R: 
     c(
