@@ -72,8 +72,6 @@ gg_boxcox.default <- function (object, lambda = seq(-2, 2, 1/10),
   mx <- (1L:m)[loglik == max(loglik)][1L]
   Lmax <- loglik[mx]
   lim <- Lmax - qchisq(19/20, 1)/2
-  plims <- par("usr")
-  y0 <- plims[3L]
   plt <-
     ggplot2::ggplot()+
     ggplot2::geom_line(mapping = ggplot2::aes(x = xl, y = loglik), size=.5, color = grey(0.1))+
@@ -83,25 +81,30 @@ gg_boxcox.default <- function (object, lambda = seq(-2, 2, 1/10),
     ggplot2::ylim(min(loglik, lim), max(loglik, lim))
   la <- xl[mx]
   # browser()
-  if (mx > 1 && mx < m)
+  if (mx > 1 && mx < m){
     plt <- plt+
-    ggplot2::geom_segment(ggplot2::aes(x=la, y=min(loglik), xend=la, yend=Lmax), linetype='dashed', color='red', size=.5)+
-    ggplot2::geom_text(ggplot2::aes(x=la,y=min(loglik),label=round(la,digits = 2)),color='red',vjust='top',
-              hjust='center')
+      ggplot2::geom_segment(ggplot2::aes(x=la, y=min(loglik), xend=la, yend=Lmax),
+                            linetype='dashed', color='red', size=.5)+
+      ggplot2::geom_text(ggplot2::aes(x=la,y=min(loglik),label=round(la,digits = 2)),color='red',vjust='top',
+                         hjust='center')
+  }
+  # browser()
   ind <- range((1L:m)[loglik > lim])
   if (loglik[1L] < lim) {
     i <- ind[1L]
     x <- xl[i - 1] + ((lim - loglik[i - 1]) * (xl[i] -
                                                  xl[i - 1]))/(loglik[i] - loglik[i - 1])
-    plt <- plt+
-      ggplot2::geom_segment(ggplot2::aes(x=x, y=min(loglik), xend=x, yend=lim), linetype='dashed', color=grey(.5), size=.5)
+    plt <- plt +
+      ggplot2::geom_segment(ggplot2::aes(x=x, y=min(loglik), xend=x, yend=lim),
+                            linetype='dashed', color=grey(.5), size=.5, inherit.aes = FALSE)
   }
   if (loglik[m] < lim) {
-    i <- ind[2L] + 1
-    x <- xl[i - 1] + ((lim - loglik[i - 1]) * (xl[i] -
-                                                 xl[i - 1]))/(loglik[i] - loglik[i - 1])
-    plt <- plt+
-      ggplot2::geom_segment(ggplot2::aes(x=x, y=min(loglik), xend=x, yend=lim), linetype='dashed', color=grey(.5), size=.5)
+    i2 <- ind[2L] + 1
+    x2 <- xl[i2 - 1] + ((lim - loglik[i2 - 1]) * (xl[i2] -
+                                                 xl[i2 - 1]))/(loglik[i2] - loglik[i2 - 1])
+    plt <- plt +
+      ggplot2::geom_segment(ggplot2::aes(x=x2, y=min(loglik), xend=x2, yend=lim),
+                            linetype='dashed', color=grey(.5), size=.5, inherit.aes = FALSE)
   }
   plt
 }
