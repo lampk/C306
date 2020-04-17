@@ -16,8 +16,9 @@ Maintainer@R:
             role = "maintainer",
             email = "trindhk@oucru.org"),
         person(
-            given = 'Biostatistic Group',
-            role = "maintainer"
+            given = "Biostatistic Group",
+            role = "maintainer",
+            email = "biostatistics@oucru.org"
         )
     )
 Description: Collection of useful R codes for data analysis from the Biostatistics group at OUCRU
