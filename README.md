@@ -11,8 +11,13 @@ from the Biostatistics group at OUCRU-HCM.
 You can install C306 from github with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("lampk/C306")
+# install.packages("remotes")
+remotes::install_githubs("oucru-biostats/C306")
+```
+And for the cutting-edge version:
+
+``` r
+remotes::install_githubs("oucru-biostats/C306@experimental")
 ```
 
 ## Website
