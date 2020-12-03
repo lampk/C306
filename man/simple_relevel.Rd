@@ -13,20 +13,16 @@ simple_relevel(x, ...)
 \method{simple_relevel}{default}(x, by, map)
 }
 \arguments{
-\item{x}{A vector}
+\item{x}{a vector that will be relevelled}
 
 \item{...}{Unquoted variable names that will be relevelled}
 
 \item{data}{A data.frame}
 
-\item{by}{A vector or unquoted variable name the relevelling process will base on}
+\item{by}{a vector that the relevelling process will base on}
 
 \item{map}{a list that links by to x in the form of list(by.1 = c(x1.1, x1.2...), by.2 = c(x2.1, x2.2...))
 or a data.frame with two columns "from" and "to" serving the same purpose.}
-
-\item{x}{a vector that will be relevelled}
-
-\item{by}{a vector that the relevelling process will base on}
 }
 \value{
 A vector or a data.frame

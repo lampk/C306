@@ -4,9 +4,19 @@
 \alias{sstable.survcomp}
 \title{Summarize results for a Cox survival model with the treatment arm as the main covariate}
 \usage{
-sstable.survcomp(model, data, add.risk = TRUE,
-  add.prop.haz.test = TRUE, medsum = TRUE, digits = 2, pdigits = 3,
-  pcutoff = 0.001, footer = NULL, flextable = TRUE, bg = "#F2EFEE")
+sstable.survcomp(
+  model,
+  data,
+  add.risk = TRUE,
+  add.prop.haz.test = TRUE,
+  medsum = TRUE,
+  digits = 2,
+  pdigits = 3,
+  pcutoff = 0.001,
+  footer = NULL,
+  flextable = TRUE,
+  bg = "#F2EFEE"
+)
 }
 \arguments{
 \item{model}{a formula which can be used to fit the Cox survival model. This formula can include other covariates than arm BUT arm must be the first covariate in the model.}

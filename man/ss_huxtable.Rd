@@ -4,11 +4,18 @@
 \alias{ss_huxtable}
 \title{Create summary table using huxtable package.}
 \usage{
-ss_huxtable(sstable, footer = NULL, caption = NULL,
-  caption_pos = c("top", "bottom", "topleft", "topcenter", "topright",
-  "bottomleft", "bottomcenter", "bottomright"), bg = c(grey(0.95),
-  "white"), border_width = 0.8, border_color = grey(0.75),
-  wrap = FALSE, ...)
+ss_huxtable(
+  sstable,
+  footer = NULL,
+  caption = NULL,
+  caption_pos = c("top", "bottom", "topleft", "topcenter", "topright", "bottomleft",
+    "bottomcenter", "bottomright"),
+  bg = c(grey(0.95), "white"),
+  border_width = 0.8,
+  border_color = grey(0.75),
+  wrap = FALSE,
+  ...
+)
 }
 \arguments{
 \item{sstable}{a data frame following sstable's grammar}

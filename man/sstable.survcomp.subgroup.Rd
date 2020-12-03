@@ -4,9 +4,18 @@
 \alias{sstable.survcomp.subgroup}
 \title{Summarize results for a Cox survival model by treatment arm and subgroup}
 \usage{
-sstable.survcomp.subgroup(base.model, subgroup.model, data, digits = 2,
-  pdigits = 3, pcutoff = 0.001, footer = NULL, flextable = TRUE,
-  bg = "#F2EFEE", ...)
+sstable.survcomp.subgroup(
+  base.model,
+  subgroup.model,
+  data,
+  digits = 2,
+  pdigits = 3,
+  pcutoff = 0.001,
+  footer = NULL,
+  flextable = TRUE,
+  bg = "#F2EFEE",
+  ...
+)
 }
 \arguments{
 \item{base.model}{a formula from which sub-group specific estimates are extracted (!! arm must be the first covariate in the model).}

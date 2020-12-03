@@ -4,12 +4,29 @@
 \alias{sstable.baseline}
 \title{Create baseline table}
 \usage{
-sstable.baseline(formula, data, bycol = TRUE, pooledGroup = FALSE,
-  keepEmptyGroup = FALSE, statistics = "med.IQR", continuous = NA,
-  fullfreq = TRUE, digits = 1, test = FALSE, pdigits = 3,
-  pcutoff = 1e-04, chisq.test = FALSE, correct = FALSE,
-  simulate.p.value = FALSE, B = 2000, workspace = 1e+06,
-  hybrid = FALSE, footer = NULL, flextable = FALSE, bg = "#F2EFEE")
+sstable.baseline(
+  formula,
+  data,
+  bycol = TRUE,
+  pooledGroup = FALSE,
+  keepEmptyGroup = FALSE,
+  statistics = "med.IQR",
+  continuous = NA,
+  fullfreq = TRUE,
+  digits = 1,
+  test = FALSE,
+  pdigits = 3,
+  pcutoff = 1e-04,
+  chisq.test = FALSE,
+  correct = FALSE,
+  simulate.p.value = FALSE,
+  B = 2000,
+  workspace = 1e+06,
+  hybrid = FALSE,
+  footer = NULL,
+  flextable = FALSE,
+  bg = "#F2EFEE"
+)
 }
 \arguments{
 \item{formula}{a formula specifies variables for rows, variable for column and third-dimension variable.}
