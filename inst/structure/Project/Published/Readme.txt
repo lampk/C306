@@ -1,0 +1,1 @@
+This folder contains information to publish on GitHub.
