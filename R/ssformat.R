@@ -6,7 +6,7 @@
 
 ## Check legitibility
 ss_legit <- function(sstable){
-  requireNamespace('tibble')
+  # requireNamespace('tibble')
   if (!is.matrix(sstable) & !is.data.frame(sstable)) stop('sstable must be of type matrix or data frame.')
   return(as.matrix(sstable))
 }

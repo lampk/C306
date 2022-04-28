@@ -697,7 +697,7 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
     if (is.null(group_data)) {
       group_data <- unique(ae_data[,c(aetype.var, group.var)])
     }
-    group_data[[group.var]] <- replace_na(group_data[[group.var]], 'Uncategorised')
+    group_data[[group.var]] <- replace_na(as.character(group_data[[group.var]]), 'Uncategorised')
     if (!is.factor(group_data[, group.var])) group_data[, group.var] <- as.factor(group_data[, group.var])
     group_data <- group_data[, c(aetype.var, group.var)]
     group_data[,aetype.var] <- as.character(group_data[,aetype.var])
@@ -809,7 +809,7 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
             rename({{aetype.var}} := aetype),
           by = aetype.var
         ) %>%
-        mutate(pval = replace_na(pval, ''))
+        mutate(pval = replace_na(as.character(pval), ''))
   }
 
   # browser()
@@ -869,7 +869,7 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var, aetype.v
                                         }
                                       }))
     ## - bind the head again
-    ae_value <- rbind(ae_value.head, ae_value.sorted) %>% mutate_all(replace_na, '') %>% select(-pt.all, -ep.all)
+    ae_value <- rbind(ae_value.head, ae_value.sorted) %>% mutate_all(as.character) %>% mutate_all(replace_na, '') %>% select(-pt.all, -ep.all)
 
     # browser()
   }
