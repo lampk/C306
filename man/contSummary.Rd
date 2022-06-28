@@ -4,8 +4,12 @@
 \alias{contSummary}
 \title{Calculate summary statistics for continuous variable}
 \usage{
-contSummary(x, statistics = c("med.IQR", "med.90", "med.range",
-  "mean.sd"), digits = 1, n = TRUE)
+contSummary(
+  x,
+  statistics = c("med.IQR", "med.90", "med.range", "mean.sd"),
+  digits = 1,
+  n = TRUE
+)
 }
 \arguments{
 \item{x}{a numeric vector to be summarised.}
