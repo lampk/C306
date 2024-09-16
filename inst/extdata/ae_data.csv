@@ -1,0 +1,535 @@
+usubjid,ctcaename,ctcaegrade,original_ctcaegrade,posrelunrel,unexp
+003-001,Nausea,I,I,POSREL,N
+003-003,Back pain,I,I,POSREL,N
+003-004,Viral infection,I,NA,UNREL,Y
+003-006,Headache,I,I,POSREL,N
+003-007,Phlebitis,I,I,UNREL,N
+003-029,Gastritis,II,II,UNREL,Y
+003-034,Constipation,II,II,UNREL,N
+003-035,Constipation,II,II,UNREL,N
+003-044,Gastritis,II,NA,UNREL,Y
+003-073,Hemorrhoids,I,I,UNREL,N
+003-087,Skin allergy,II,NA,REL,N
+003-095,Phlebitis,I,I,UNREL,N
+003-105,Pharyngitis,II,II,UNREL,Y
+003-109,Hospital acquired pneumonia,II,NA,UNREL,N
+003-122,Headache,I,I,POSREL,N
+003-135,Phlebitis,I,I,UNREL,N
+003-141,Headache,I,I,POSREL,N
+003-144,UTI,II,NA,UNREL,N
+003-150,Headache,I,I,POSREL,N
+003-167,Headache,I,I,POSREL,N
+003-184,Hemorrhoids,I,I,UNREL,N
+003-242,Fever,I,I,POSREL,N
+003-244,Fever,I,I,POSREL,N
+003-261,Skin allergy,II,NA,POSREL,N
+003-265,Constipation,II,II,UNREL,N
+003-004,Neuralgia,II,II,UNREL,Y
+003-006,Hiccup,II,II,UNREL,Y
+003-007,Constipation,II,II,UNREL,N
+003-014,Skin allergy,II,NA,POSREL,N
+003-015,Constipation,II,II,UNREL,N
+003-023,Constipation,II,II,UNREL,N
+003-027,Myocardial ischaemia,II,NA,UNREL,Y
+003-036,UTI,II,NA,UNREL,N
+003-037,Oral infection,II,NA,UNREL,Y
+003-072,Upper gastrointestinal hemorrhage,II,II,UNREL,N
+003-074,Skin allergy,II,NA,POSREL,N
+003-076,Hospital acquired pneumonia,II,NA,UNREL,N
+003-081,Otitis,II,NA,UNREL,Y
+003-084,UTI,II,NA,UNREL,N
+003-094,Headache,I,I,REL,N
+003-101,UTI,II,NA,UNREL,N
+003-103,UTI,II,NA,UNREL,N
+003-111,UTI,II,NA,UNREL,N
+003-118,Atrial thrombosis,II,NA,POSREL,N
+003-136,Spinal disc herniation,NA,NA,UNREL,Y
+003-141,Fever,I,I,POSREL,N
+003-159,Phlebitis,I,I,UNREL,N
+003-212,Fever,I,I,POSREL,N
+003-242,Headache,I,I,POSREL,N
+003-255,Sinusitis,II,II,UNREL,Y
+003-258,Oral infection,II,NA,UNREL,Y
+003-261,Facial nerve disorder,II,II,UNREL,N
+003-007,Constipation,II,II,UNREL,N
+003-009,Urinary retention,II,II,UNREL,N
+003-027,UTI,II,NA,UNREL,N
+003-036,Constipation,II,II,UNREL,N
+003-038,Upper gastrointestinal hemorrhage,II,II,UNREL,Y
+003-046,Phlebitis,I,I,UNREL,N
+003-074,Hyperglycaemia,II,II,UNREL,N
+003-081,Constipation,II,II,UNREL,N
+003-094,Chills,I,I,REL,N
+003-101,Arthritis,II,II,UNREL,Y
+003-104,Skin allergy,II,NA,POSREL,N
+003-127,Upper gastrointestinal hemorrhage,II,II,UNREL,N
+003-146,Aspiration pneumonia,II,NA,UNREL,N
+003-173,UTI,II,NA,UNREL,N
+003-255,Viral infection,II,NA,UNREL,Y
+003-258,Constipation,II,II,UNREL,N
+003-267,Skin allergy,II,NA,POSREL,N
+003-001,Constipation,II,II,UNREL,N
+003-005,UTI,II,NA,UNREL,N
+003-007,Arthritis,II,II,UNREL,Y
+003-017,Ventilator associated pneumonia,II,NA,UNREL,N
+003-019,Arthralgia,II,II,UNREL,Y
+003-028,Tracheal hemorrhage,II,II,UNREL,N
+003-038,UTI,II,NA,UNREL,N
+003-042,Ventilator associated pneumonia,II,NA,UNREL,N
+003-053,Hypotension,III,III,UNREL,N
+003-065,Nose bleed,II,NA,UNREL,N
+003-067,Hospital acquired pneumonia,II,NA,UNREL,N
+003-090,Wound infection,II,II,UNREL,N
+003-094,Fever,I,I,REL,N
+003-116,UTI,II,NA,UNREL,N
+003-117,Ventilator associated pneumonia,II,NA,UNREL,N
+003-123,Allergy,II,NA,POSREL,N
+003-127,UTI,II,NA,UNREL,N
+003-131,Hyponatremia,II,II,UNREL,N
+003-146,Cellulitis,I,I,UNREL,N
+003-164,Aspiration pneumonia,II,NA,UNREL,N
+003-168,Upper gastrointestinal hemorrhage,II,II,UNREL,N
+003-172,Hyponatremia,II,II,UNREL,N
+003-173,Blood stream infection,II,NA,UNREL,N
+003-174,Otitis,II,NA,UNREL,Y
+003-176,Upper gastrointestinal hemorrhage,II,II,UNREL,N
+003-177,Nose bleed,II,NA,UNREL,N
+003-178,Hypokalemia,II,II,UNREL,N
+003-179,Hypocalcemia,III,III,UNREL,N
+003-180,Hypokalemia,II,II,UNREL,N
+003-197,Skin allergy,II,NA,POSREL,N
+003-199,Torticolis,II,NA,UNREL,Y
+003-201,Hypokalemia,III,III,UNREL,N
+003-210,Tracheal hemorrhage,II,II,UNREL,N
+003-223,Upper gastrointestinal hemorrhage,II,II,UNREL,N
+003-228,Hospital acquired pneumonia,II,NA,UNREL,N
+003-230,Myocarditis,II,NA,UNREL,Y
+003-247,UTI,II,NA,UNREL,N
+003-253,Hypokalemia,II,II,UNREL,N
+003-255,Constipation,II,II,UNREL,N
+003-264,Hypokalemia,II,II,UNREL,N
+003-267,Gastritis,II,NA,UNREL,Y
+003-001,Insomnia,II,II,UNREL,Y
+003-005,Myocardial ischaemia,II,NA,UNREL,Y
+003-010,Upper gastrointestinal hemorrhage,II,II,UNREL,N
+003-011,Ventilator associated pneumonia,II,NA,UNREL,N
+003-024,Arthritis,II,II,UNREL,Y
+003-028,Constipation,II,II,UNREL,N
+003-031,Ventilator associated pneumonia,II,NA,UNREL,N
+003-032,Constipation,II,II,UNREL,N
+003-037,UTI,II,NA,UNREL,N
+003-040,Conjunctivitis,II,II,UNREL,N
+003-042,Tracheal hemorrhage,II,II,UNREL,N
+003-043,Ventilator associated pneumonia,II,NA,UNREL,N
+003-047,UTI,II,NA,UNREL,N
+003-048,Ventilator associated pneumonia,II,NA,UNREL,N
+003-053,Aspiration pneumonia,II,NA,UNREL,N
+003-056,Cardiac arrest,IV,IV,UNREL,N
+003-057,Ventilator associated pneumonia,II,NA,UNREL,N
+003-082,UTI,II,NA,UNREL,N
+003-083,Ventilator associated pneumonia,II,NA,UNREL,N
+003-090,Phlebitis,I,I,UNREL,N
+003-091,Ventilator associated pneumonia,II,NA,UNREL,N
+003-092,Upper gastrointestinal hemorrhage,II,II,UNREL,N
+003-096,Upper gastrointestinal hemorrhage,II,II,UNREL,N
+003-098,Tracheal hemorrhage,I,I,UNREL,Y
+003-099,UTI,II,NA,UNREL,N
+003-112,Ventilator associated pneumonia,II,NA,UNREL,N
+003-115,UTI,II,NA,UNREL,N
+003-116,Skin allergy,II,NA,POSREL,N
+003-119,Voice alteration,I,I,UNREL,N
+003-131,Hypokalemia,II,II,UNREL,N
+003-133,UTI,II,NA,UNREL,N
+003-137,UTI,II,NA,UNREL,N
+003-139,Blood stream infection,II,NA,UNREL,N
+003-146,Arthritis,II,II,UNREL,Y
+003-152,Upper gastrointestinal hemorrhage,II,II,UNREL,N
+003-153,Cardiac arrest,IV,IV,UNREL,N
+003-154,UTI,II,NA,UNREL,N
+003-161,Upper gastrointestinal hemorrhage,II,II,UNREL,N
+003-163,Constipation,II,II,UNREL,N
+003-171,Hypokalemia,II,II,UNREL,N
+003-172,Hypokalemia,II,II,UNREL,N
+003-173,Hypokalemia,II,II,UNREL,N
+003-174,Hyponatremia,II,II,UNREL,N
+003-176,Ventilator associated pneumonia,II,NA,UNREL,N
+003-178,Necrotic wound,II,NA,UNREL,N
+003-180,Hypomagnesemia,I,I,UNREL,N
+003-186,Ventilator associated pneumonia,II,NA,UNREL,N
+003-187,Hypokalemia,II,II,UNREL,N
+003-191,Ventilator associated pneumonia,II,NA,UNREL,N
+003-192,Ventilator associated pneumonia,II,NA,UNREL,N
+003-201,Hypocalcemia,III,III,UNREL,N
+003-202,UTI,II,NA,UNREL,N
+003-203,Headache,I,I,POSREL,N
+003-210,Hypokalemia,II,II,UNREL,N
+003-213,Hypokalemia,II,II,UNREL,N
+003-214,Hypokalemia,II,II,UNREL,N
+003-217,Hypokalemia,II,II,UNREL,N
+003-218,Tracheal hemorrhage,I,I,UNREL,N
+003-221,Hypokalemia,II,II,UNREL,N
+003-222,Hypokalemia,II,II,UNREL,N
+003-227,Hypokalemia,II,II,UNREL,N
+003-228,Hypokalemia,II,II,UNREL,N
+003-229,Hypocalcemia,III,III,UNREL,N
+003-232,Hypokalemia,III,III,UNREL,N
+003-233,Hypocalcemia,II,II,UNREL,N
+003-238,Hypokalemia,II,II,UNREL,N
+003-247,Constipation,II,II,UNREL,N
+003-249,Hematuria,II,II,UNREL,Y
+003-250,Upper gastrointestinal hemorrhage,II,II,UNREL,N
+003-252,Hypokalemia,II,II,UNREL,N
+003-259,Subcutaneous emphysema,I,I,UNREL,N
+003-263,Upper gastrointestinal hemorrhage,II,II,UNREL,N
+003-264,Hypocalcemia,III,III,UNREL,N
+003-268,Hypokalemia,II,II,UNREL,N
+003-269,Heat stroke,NA,NA,UNREL,N
+003-270,Hypokalemia,II,II,UNREL,N
+003-272,Hypomagnesemia,I,I,UNREL,N
+003-001,UTI,II,NA,UNREL,N
+003-010,Upper gastrointestinal hemorrhage,II,II,UNREL,N
+003-011,Ventilator associated pneumonia,II,NA,UNREL,N
+003-013,Skin allergy,I,NA,POSREL,N
+003-018,UTI,II,NA,UNREL,N
+003-021,Constipation,II,II,UNREL,N
+003-024,Ventilator associated pneumonia,II,NA,UNREL,N
+003-025,Myocardial ischaemia,IV,NA,UNREL,N
+003-026,Atrial fibrillation,II,II,UNREL,Y
+003-027,Constipation,II,II,UNREL,N
+003-028,Dizziness,II,II,UNREL,Y
+003-032,Tracheal hemorrhage,II,II,UNREL,N
+003-040,Ventilator associated pneumonia,II,NA,UNREL,N
+003-042,Ventilator associated pneumonia,II,NA,UNREL,N
+003-050,Failed extubation,NA,NA,UNREL,Y
+003-061,Ventilator associated pneumonia,II,NA,UNREL,N
+003-062,Blood stream infection,II,NA,UNREL,N
+003-063,Ventilator associated pneumonia,II,NA,UNREL,N
+003-068,Blood stream infection,II,NA,UNREL,N
+003-072,Appendicitis,III,III,UNREL,N
+003-077,UTI,II,NA,UNREL,N
+003-079,UTI,II,NA,UNREL,Y
+003-082,Constipation,II,II,UNREL,N
+003-083,UTI,II,NA,UNREL,N
+003-090,Conjunctivitis,II,II,UNREL,N
+003-091,Tracheal hemorrhage,II,II,UNREL,N
+003-092,Deep vein thrombosis,II,NA,POSREL,N
+003-098,Nose bleed,II,II,UNREL,Y
+003-107,Upper gastrointestinal hemorrhage,II,II,UNREL,N
+003-112,Ventilator associated pneumonia,II,NA,UNREL,N
+003-115,Voice alteration,I,I,UNREL,N
+003-116,Voice alteration,I,I,UNREL,N
+003-128,Hemorrhoids,II,II,UNREL,N
+003-146,Arthritis,II,II,UNREL,N
+003-148,Blood stream infection,II,NA,UNREL,N
+003-152,Atrial fibrillation,II,II,UNREL,Y
+003-154,Ventilator associated pneumonia,II,NA,UNREL,N
+003-157,Blood stream infection,II,NA,UNREL,N
+003-161,Upper gastrointestinal hemorrhage,II,II,UNREL,N
+003-164,Hypokalemia,II,II,UNREL,N
+003-168,Blood stream infection,II,NA,UNREL,N
+003-169,Upper gastrointestinal hemorrhage,II,II,UNREL,N
+003-171,UTI,II,NA,UNREL,N
+003-174,Hypocalcemia,III,III,UNREL,N
+003-176,Hypocalcemia,III,III,UNREL,N
+003-177,Hyponatremia,II,II,UNREL,N
+003-178,Myocarditis,II,NA,UNREL,Y
+003-182,Hypokalemia,II,II,UNREL,N
+003-186,Hypokalemia,II,II,UNREL,N
+003-187,Hypotension,II,II,UNREL,N
+003-191,Hypokalemia,II,II,UNREL,N
+003-192,Hyponatremia,II,II,UNREL,N
+003-198,Hyponatremia,II,II,UNREL,N
+003-201,Ventilator associated pneumonia,II,NA,UNREL,N
+003-202,Blood stream infection,II,NA,UNREL,N
+003-204,Ventilator associated pneumonia,II,NA,UNREL,N
+003-208,Acute renal failure,II,NA,UNREL,N
+003-210,Wound bleed,II,NA,UNREL,N
+003-213,Hypocalcemia,III,III,UNREL,N
+003-214,Hypocalcemia,III,III,UNREL,N
+003-217,Hypomagnesemia,I,I,UNREL,N
+003-218,Nose bleed,II,II,UNREL,N
+003-221,Nose bleed,II,II,UNREL,N
+003-222,UTI,II,NA,UNREL,N
+003-223,Hypocalcemia,III,III,UNREL,N
+003-228,Hyponatremia,II,II,UNREL,N
+003-229,Hypomagnesemia,II,II,UNREL,N
+003-230,Hypokalemia,II,II,UNREL,N
+003-233,Hypokalemia,II,II,UNREL,N
+003-237,Hypokalemia,II,II,UNREL,N
+003-238,UTI,II,NA,UNREL,N
+003-246,Hypokalemia,II,II,UNREL,N
+003-248,Hematuria,II,II,UNREL,N
+003-250,Ventilator associated pneumonia,II,NA,UNREL,N
+003-252,Hypocalcemia,II,II,UNREL,N
+003-253,Skin allergy,II,NA,POSREL,N
+003-256,Hypokalemia,II,II,UNREL,N
+003-257,Ventilator associated pneumonia,II,NA,UNREL,N
+003-259,Constipation,II,II,UNREL,N
+003-262,Hypocalcemia,II,II,UNREL,N
+003-263,Aspiration pneumonia,II,NA,UNREL,N
+003-264,Hyponatremia,II,II,UNREL,N
+003-268,Ventilator associated pneumonia,II,NA,UNREL,N
+003-269,Hypocalcemia,II,II,UNREL,N
+003-270,Hypocalcemia,III,III,UNREL,N
+003-271,Hypokalemia,II,II,UNREL,N
+003-011,UTI,II,NA,UNREL,N
+003-018,arthralgia,II,II,UNREL,Y
+003-021,UTI,II,NA,UNREL,N
+003-026,Anemia,III,III,UNREL,Y
+003-032,Deep vein thrombosis,III,NA,POSREL,N
+003-037,Bruising,I,I,UNREL,Y
+003-040,UTI,II,NA,UNREL,N
+003-043,Otitis,II,NA,UNREL,Y
+003-050,Tracheal hemorrhage,III,III,UNREL,N
+003-057,Pressure ulcer,II,NA,UNREL,N
+003-061,Upper gastrointestinal hemorrhage,II,II,UNREL,N
+003-062,Upper gastrointestinal hemorrhage,II,II,UNREL,N
+003-063,Aspiration pneumonia,II,NA,UNREL,N
+003-068,arthralgia,II,II,UNREL,Y
+003-077,Phlebitis,I,I,UNREL,N
+003-082,Hyponatremia,II,II,UNREL,N
+003-090,Tracheal stenosis,III,III,UNREL,N
+003-097,Ventilator associated pneumonia,II,NA,UNREL,N
+003-112,Conjunctivitis,II,II,UNREL,Y
+003-115,Skin allergy,II,NA,REL,N
+003-128,Upper respiratory infection,II,II,UNREL,N
+003-153,Ventilator associated pneumonia,II,NA,UNREL,N
+003-154,Blood stream infection,II,NA,UNREL,N
+003-157,Ventilator associated pneumonia,II,NA,UNREL,N
+003-164,Ventilator associated pneumonia,II,NA,UNREL,N
+003-168,Ventilator associated pneumonia,II,NA,UNREL,N
+003-169,Ventilator associated pneumonia,II,NA,UNREL,N
+003-171,Recurrent tetanus,III,III,UNREL,N
+003-174,Gastritis,II,II,UNREL,N
+003-176,Constipation,II,II,UNREL,N
+003-177,Hypocalcemia,III,III,UNREL,N
+003-178,Wound bleed,II,II,UNREL,N
+003-180,Nose bleed,II,II,UNREL,N
+003-186,Hypokalemia,II,II,UNREL,N
+003-191,Hypomagnesemia,I,I,UNREL,N
+003-192,Hypocalcemia,III,III,UNREL,N
+003-198,Hypokalemia,II,II,UNREL,N
+003-202,Upper gastrointestinal hemorrhage,II,II,UNREL,N
+003-204,Acute renal failure,II,NA,UNREL,N
+003-217,Hyponatremia,II,II,UNREL,N
+003-221,Hypocalcemia,III,III,UNREL,N
+003-223,Hypokalemia,II,II,UNREL,N
+003-227,UTI,II,NA,UNREL,N
+003-228,Upper respiratory infection,II,II,UNREL,N
+003-229,Gastritis,II,II,UNREL,N
+003-230,Hyponatremia,II,II,UNREL,N
+003-232,Hypocalcemia,II,II,UNREL,N
+003-233,Upper respiratory infection,II,II,UNREL,N
+003-237,Ventilator associated pneumonia,II,NA,UNREL,N
+003-238,Ventilator associated pneumonia,II,NA,UNREL,N
+003-244,Hypokalemia,II,II,UNREL,N
+003-246,Hyponatremia,I,I,UNREL,N
+003-248,Ventilator associated pneumonia,II,NA,UNREL,N
+003-249,Hypokalemia,II,II,UNREL,N
+003-250,UTI,II,NA,UNREL,N
+003-252,Constipation,II,II,UNREL,N
+003-253,Blood stream infection,II,NA,UNREL,N
+003-256,Ventilator associated pneumonia,II,NA,UNREL,N
+003-257,Hypokalemia,II,II,UNREL,N
+003-259,Hypocalcemia,III,III,UNREL,N
+003-262,Hypokalemia,II,II,UNREL,N
+003-266,Gastrointestinal disorder,I,I,UNREL,Y
+003-268,Skin allergy,II,NA,POSREL,N
+003-269,Blood stream infection,II,NA,UNREL,N
+003-270,UTI,II,NA,UNREL,N
+003-272,Hypocalcemia,III,III,UNREL,N
+003-001,Urinary retention,II,II,POSREL,Y
+003-009,UTI,II,NA,UNREL,N
+003-010,Phlebitis,I,I,UNREL,N
+003-021,Hematuria,II,II,UNREL,N
+003-024,Constipation,II,II,UNREL,N
+003-026,Ventilator associated pneumonia,II,NA,UNREL,N
+003-027,Chronic venous insufficiency,II,NA,UNREL,Y
+003-032,Ventilator associated pneumonia,II,NA,UNREL,N
+003-037,Hyponatremia,III,III,UNREL,Y
+003-038,Aspiration pneumonia,II,NA,UNREL,N
+003-043,UTI,II,NA,UNREL,N
+003-050,Anemia,II,II,UNREL,Y
+003-057,Ventilator associated pneumonia,II,NA,UNREL,N
+003-063,Anemia,III,III,UNREL,Y
+003-082,Hypokalemia,II,II,UNREL,N
+003-097,UTI,II,NA,UNREL,N
+003-153,UTI,II,NA,UNREL,N
+003-154,Ventilator associated pneumonia,II,NA,UNREL,N
+003-164,Pneumothorax,II,II,UNREL,N
+003-177,Ventilator associated pneumonia,II,NA,UNREL,N
+003-180,Tracheal hemorrhage,II,II,UNREL,N
+003-182,Wound infection,II,NA,UNREL,N
+003-191,Tracheal hemorrhage,II,II,UNREL,N
+003-192,Tracheal hemorrhage,II,II,UNREL,N
+003-198,Hypocalcemia,III,III,UNREL,N
+003-202,Tracheal hemorrhage,I,I,UNREL,N
+003-204,Pressure ulcer,II,NA,UNREL,N
+003-208,Hypokalemia,II,II,UNREL,Y
+003-210,Hyponatremia,II,II,UNREL,N
+003-218,Hyperpyrexia,NA,NA,UNREL,N
+003-221,Ventilator associated pneumonia,II,NA,UNREL,N
+003-227,Hypocalcemia,II,II,UNREL,N
+003-228,Constipation,II,II,UNREL,N
+003-230,Hypocalcemia,II,II,UNREL,N
+003-232,Hyponatremia,I,I,UNREL,N
+003-237,Aspiration pneumonia,II,NA,UNREL,N
+003-238,Hypocalcemia,II,II,UNREL,N
+003-244,Hyponatremia,I,I,UNREL,N
+003-246,Hypomagnesemia,I,I,UNREL,N
+003-248,UTI,II,NA,UNREL,N
+003-249,Hypocalcemia,III,III,UNREL,N
+003-252,Skin allergy,I,NA,POSREL,N
+003-253,Constipation,II,II,UNREL,N
+003-256,Constipation,II,II,UNREL,N
+003-257,Hyponatremia,I,I,UNREL,N
+003-259,Ventilator associated pneumonia,II,NA,UNREL,N
+003-262,Blood stream infection,II,NA,UNREL,N
+003-263,Hyponatremia,II,II,UNREL,N
+003-264,Ventilator associated pneumonia,II,NA,UNREL,N
+003-266,Constipation,II,II,UNREL,N
+003-268,Hyponatremia,II,II,UNREL,N
+003-269,Hypokalemia,II,II,UNREL,N
+003-270,Ventilator associated pneumonia,II,NA,UNREL,N
+003-272,Hyponatremia,I,I,UNREL,N
+003-009,UTI,II,NA,UNREL,N
+003-010,UTI,II,NA,UNREL,N
+003-021,Tracheal hemorrhage,II,II,UNREL,N
+003-024,arthralgia,II,II,UNREL,Y
+003-025,Anemia,III,III,UNREL,N
+003-037,Tracheal hemorrhage,II,II,UNREL,N
+003-038,UTI,II,NA,UNREL,N
+003-043,Blood stream infection,II,NA,UNREL,Y
+003-050,Ventilator associated pneumonia,II,NA,UNREL,N
+003-057,UTI,II,NA,UNREL,N
+003-153,Blood stream infection,II,NA,UNREL,N
+003-154,Acute renal failure,III,NA,UNREL,N
+003-164,Tracheal hemorrhage,I,I,UNREL,N
+003-177,Acute renal failure,II,NA,UNREL,Y
+003-178,Hypocalcemia,III,III,UNREL,N
+003-180,Arterial thromboembolism,IV,IV,REL,N
+003-182,Hypocalcemia,III,III,UNREL,N
+003-198,Anemia,III,III,UNREL,Y
+003-202,Hypokalemia,II,II,UNREL,N
+003-208,Hypernatremia,I,I,UNREL,Y
+003-210,Hypocalcemia,III,III,UNREL,N
+003-218,Creatinine increase,III,III,UNREL,Y
+003-221,UTI,II,NA,UNREL,N
+003-227,Hyponatremia,I,I,UNREL,N
+003-229,Constipation,II,II,UNREL,N
+003-230,Ventilator associated pneumonia,II,NA,UNREL,N
+003-232,Ventilator associated pneumonia,II,NA,UNREL,N
+003-237,Hypocalcemia,II,II,UNREL,N
+003-244,Dizziness,II,II,UNREL,N
+003-246,Hypocalcemia,III,III,UNREL,N
+003-248,Hypertension,II,II,UNREL,N
+003-249,Ventilator associated pneumonia,II,NA,UNREL,N
+003-250,Hypokalemia,II,II,UNREL,N
+003-256,Conjunctivitis,II,II,UNREL,N
+003-257,Constipation,II,II,UNREL,N
+003-262,Nose bleed,I,I,UNREL,N
+003-263,Hypocalcemia,III,III,UNREL,N
+003-264,Back pain,II,II,UNREL,Y
+003-266,Hypokalemia,II,II,UNREL,N
+003-269,Skin allergy,II,NA,UNREL,N
+003-270,Hyponatremia,II,II,UNREL,N
+003-272,Constipation,II,II,UNREL,N
+003-009,Dysphagia,IV,IV,UNREL,Y
+003-010,UTI,II,NA,UNREL,N
+003-024,Cerebral hemorrhage,II,NA,UNREL,Y
+003-026,Upper gastrointestinal hemorrhage,II,II,UNREL,N
+003-038,Cholangitis,NA,NA,UNREL,Y
+003-043,Anemia,III,III,UNREL,N
+003-057,Ventilator associated pneumonia,II,NA,UNREL,N
+003-153,Anemia,III,III,UNREL,Y
+003-154,Ventilator associated pneumonia,III,NA,UNREL,Y
+003-177,Ventilator associated pneumonia,IV,IV,UNREL,Y
+003-178,Deep vein thrombosis,III,III,POSREL,N
+003-198,Hypomagnesemia,I,I,UNREL,N
+003-204,Hypernatremia,I,I,UNREL,N
+003-208,Blood stream infection,II,NA,UNREL,N
+003-210,Oral infection,II,II,UNREL,N
+003-218,Arterial thromboembolism,IV,IV,POSREL,N
+003-221,Blood stream infection,II,NA,UNREL,N
+003-227,Constipation,II,II,UNREL,N
+003-230,Ventilator associated pneumonia,II,NA,UNREL,N
+003-232,Pleural abscess,NA,NA,UNREL,Y
+003-237,Hypomagnesemia,I,I,UNREL,N
+003-246,Ventilator associated pneumonia,II,NA,UNREL,N
+003-248,Hypokalemia,II,II,UNREL,N
+003-249,UTI,II,NA,UNREL,N
+003-250,Constipation,II,II,UNREL,N
+003-257,Dizziness,II,II,UNREL,N
+003-262,Oral infection,II,II,UNREL,Y
+003-263,Hypokalemia,III,III,UNREL,N
+003-266,Hyponatremia,II,II,UNREL,N
+003-269,Hyponatremia,I,I,UNREL,N
+003-010,Pyloric stenosis,III,III,UNREL,Y
+003-025,Anemia,III,III,UNREL,N
+003-026,UTI,II,NA,UNREL,N
+003-043,UTI,II,NA,UNREL,N
+003-107,Cardiac arrest,IV,IV,UNREL,N
+003-153,Hyponatremia,III,III,UNREL,N
+003-178,Wound infection,II,NA,UNREL,N
+003-204,Hypokalemia,II,II,UNREL,N
+003-208,Anemia,III,III,UNREL,Y
+003-221,Upper respiratory infection,II,II,UNREL,N
+003-230,Sinus bradycardia,I,I,UNREL,Y
+003-237,Hyponatremia,III,III,UNREL,N
+003-246,Pruritus,II,II,POSREL,N
+003-248,Skin allergy,II,NA,POSREL,N
+003-249,Urinary retention,II,II,UNREL,Y
+003-262,Hyponatremia,II,II,UNREL,N
+003-263,Ventilator associated pneumonia,II,NA,UNREL,N
+003-269,Constipation,II,II,UNREL,N
+003-271,Ventilator associated pneumonia,II,NA,UNREL,N
+003-025,Anemia,III,III,UNREL,N
+003-037,Aspiration pneumonia,II,NA,UNREL,N
+003-043,Pressure ulcer,III,NA,UNREL,N
+003-153,Hypokalemia,II,II,UNREL,N
+003-164,Conjunctivitis,II,II,UNREL,Y
+003-178,Blood stream infection,II,NA,UNREL,N
+003-204,Hypocalcemia,III,III,UNREL,N
+003-208,Hypotension,III,III,UNREL,N
+003-230,Dizziness,II,II,UNREL,Y
+003-246,Myalgia,II,II,UNREL,N
+003-248,Constipation,II,II,UNREL,N
+003-262,Constipation,II,II,UNREL,N
+003-263,Deep vein thrombosis,III,NA,POSREL,N
+003-025,UTI,II,NA,UNREL,N
+003-037,Adrenal insufficiency,II,II,UNREL,Y
+003-153,Upper gastrointestinal hemorrhage,II,II,UNREL,N
+003-178,Tracheal hemorrhage,II,II,UNREL,N
+003-204,Rhabdomyolysis,II,II,UNREL,N
+003-208,Platelet count decreased,III,III,UNREL,N
+003-230,Constipation,II,II,UNREL,N
+003-262,Ventilator associated pneumonia,II,NA,UNREL,N
+003-263,"Low weight, muscle wasting",II,NA,UNREL,Y
+003-269,UTI,II,NA,UNREL,N
+003-025,Platelet count decreased,III,III,UNREL,N
+003-153,Pressure ulcer,II,II,UNREL,N
+003-204,Anemia,III,III,UNREL,Y
+003-208,Ventilator associated pneumonia,II,NA,UNREL,N
+003-262,"Low weight, muscle wasting",II,NA,UNREL,Y
+003-269,"Low weight, muscle wasting",II,NA,UNREL,N
+003-271,Postoperative hemorrhage,II,II,UNREL,N
+003-025,Hypokalemia,II,II,UNREL,N
+003-204,UTI,II,NA,UNREL,N
+003-208,Sinus bradycardia,II,II,UNREL,N
+003-262,Failed extubation,III,III,UNREL,N
+003-271,Constipation,II,II,UNREL,N
+003-025,Ventilator associated pneumonia,II,NA,UNREL,N
+003-208,Adrenal insufficiency,II,II,UNREL,Y
+003-271,Hypotension,IV,IV,UNREL,N
+003-025,Hypotension,III,III,UNREL,N
+003-208,Pressure ulcer,II,NA,UNREL,N
+003-269,Ventilator associated pneumonia,II,NA,UNREL,N
+003-025,Hypotension,III,III,UNREL,N
+003-208,Hypoalbuminemia,III,III,UNREL,NA
+003-269,Ventilator associated pneumonia,II,NA,UNREL,N
+003-025,UTI,II,NA,UNREL,N
+003-208,Constipation,II,II,UNREL,N
+003-269,Ventilator associated pneumonia,II,NA,UNREL,N
+003-025,Adrenal insufficiency,II,II,UNREL,N
+003-208,Cerebral infarction,IV,IV,POSREL,Y
+003-269,Hypotension,IV,IV,POSREL,N

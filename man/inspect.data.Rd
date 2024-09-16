@@ -4,8 +4,15 @@
 \alias{inspect.data}
 \title{Check formatted data based on a pre-defined information}
 \usage{
-inspect.data(data, info, id, check_missing = c(TRUE, FALSE),
-  plot = FALSE, prefix = "", outdir)
+inspect.data(
+  data,
+  info,
+  id,
+  check_missing = c(TRUE, FALSE),
+  plot = FALSE,
+  prefix = "",
+  outdir
+)
 }
 \arguments{
 \item{data}{a formatted data frame to be checked.}

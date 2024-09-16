@@ -1,0 +1,1 @@
+This folder contains metadata information of the database.

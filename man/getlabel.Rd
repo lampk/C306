@@ -11,7 +11,7 @@ getlabel(x, meta = NULL, unit = TRUE, fit = FALSE)
 
 \item{meta}{a data frame contains metadata of the dataset. This data frame should have the following variables: varname (character variable specifies name of each variable), label (character variable specifies label of each variables), type (character variable specifies type of each variable [numeric, factor, character, datetime], unit (character variable specifies units of each continuous variable), scale (numeric variable specifies how each variable will be scaled).}
 
-\item{unit}{a logical value specifies whether unit will be appendded in the label of continous variables.}
+\item{unit}{a logical value specifies whether unit will be appended in the label of continuous variables.}
 
 \item{fit}{a logical value specifies whether the label will use presentation as in model fitting.}
 }

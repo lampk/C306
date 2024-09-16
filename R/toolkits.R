@@ -1,7 +1,7 @@
 #' Do a simple recode via pattern for data
 #'
 #' @description
-#' A function to re-encode data by using a map. Patterns are accepted. unmentioned data are left intact.
+#' A function to re-encode data by using a map. Patterns are accepted. Unmentioned data are left intact.
 #'
 #' Method for class data.frame supports a robust replacement for data by providing relevant map in the form of var = map.
 #'
@@ -17,7 +17,7 @@
 #' @param ignore.case,perl Parameters passed to gsub().
 #' @param .data A data frame to modify
 #' @param ...
-#' For data.frame: Replacement in the form of var = map. Maps must follow the syntax stipulated in the map parameter.
+#' For method for data.frame: Replacement in the form of var = map. Maps must follow the syntax stipulated in the map parameter.
 #'
 #' For default method: Additional parameters passed to factor()
 #'
@@ -40,11 +40,11 @@ simple_recode <- function(...){
 #' @aliases recode_var var_recode
 #' @method simple_recode data.frame
 #' @export
-simple_recode.data.frame <- function(.data, ..., ignore.case = FALSE, perl = TRUE){
+simple_recode.data.frame <- function(.data, ..., ignore.case = FALSE, fixed = FALSE, perl = TRUE){
   .maps <- list(...)
   .vars <- names(.maps)
   for (.var in .vars){
-    .data[[.var]] <- simple_recode.default(x = .data[[.var]], map = .maps[[.var]], ignore.case = ignore.case, perl = perl)
+    .data[[.var]] <- simple_recode.default(x = .data[[.var]], map = .maps[[.var]], ignore.case = ignore.case, fixed = fixed, perl = perl)
   }
   return(.data)
 }
@@ -52,7 +52,7 @@ simple_recode.data.frame <- function(.data, ..., ignore.case = FALSE, perl = TRU
 #' @rdname simple_recode
 #' @method simple_recode default
 #' @export
-simple_recode.default <- function(x, map, as = c('as_is', 'numeric', 'factor', 'character', 'logical'), ignore.case = FALSE, perl = TRUE, ...){
+simple_recode.default <- function(x, map, as = c('as_is', 'numeric', 'factor', 'character', 'logical'), ignore.case = FALSE, fixed = FALSE, perl = TRUE, ...){
   requireNamespace('tidyr')
   as <- match.arg(as)
   if (missing(map)) stop ('A conversion map should be provided!')
@@ -71,7 +71,7 @@ simple_recode.default <- function(x, map, as = c('as_is', 'numeric', 'factor', '
   x.recoded <- x
   for (i in 1:nrow(Map)){
     if (is.na(Map$from[i])) x.recoded <- tidyr::replace_na(x.recoded, Map$to[i])
-    else x.recoded <- gsub(Map$from[i], Map$to[i], x.recoded, ignore.case = ignore.case, perl=perl)
+    else x.recoded <- gsub(Map$from[i], Map$to[i], x.recoded, ignore.case = ignore.case, fixed = fixed, perl=perl)
   }
 
 
@@ -101,3 +101,109 @@ simple_recode.default <- function(x, map, as = c('as_is', 'numeric', 'factor', '
   match.fun(value)(x)
 }
 
+#' Get or set the reference level
+#' @description A function to quickly get or set the reference level of a factor
+#' @export
+ref_lv <- function(x){
+  UseMethod('ref_lv')
+}
+
+#' @rdname ref_lv
+#' @param x A factor
+#' @return A character object the represents the reference level
+#' @export
+ref_lv.factor <- function(x){
+  levels(x)[[1]]
+}
+
+#' @rdname ref_lv
+#' @export
+`ref_lv<-` <- function(x, value){
+  UseMethod('ref_lv<-')
+}
+
+#' @rdname ref_lv
+#' @param value An existing level to be set as reference
+#' @export
+`ref_lv<-.factor` <- function(x, value){
+  relevel(x, value)
+}
+
+#' Get the proportion for each level or range of a vector
+#' @description A function to calculate the proportion of each value range
+#' @param x An object
+#' @param method
+#' A method to calculate the percentage.
+#' Default is 'auto' which will attempt to choose the most fit method.
+#' 'bin' is only meaningful for vector that only has to values.
+#' 'fct' is meaningful for descrete variable
+#' 'cont' is used for continuous variables. This will break the variable into several ranges
+#' depended on the breaks specified in ...
+#' @param na.rm A logical value deciding whether NA should be removed
+#' @param ... Additional parameters passed to \link{cut}. Only work if method = 'cont'
+#' See \link{cut}
+#' @return
+#' If method == 'bin': the percentage of non-reference level
+#'
+#' If method == 'fct': the percentages of all levels
+#'
+#' If method == 'cont': the percentages of all ranges based on specified breaks
+#' @export
+pct <- function(x, method = c('auto', 'bin', 'cont', 'fct'), na.rm = TRUE, ...){
+  method <- match.arg(method)
+  if (method == 'auto') method <- ._pct_get_method(unlist(x))
+
+  if (method == 'bin' & !is.logical(x) & !setequal(unique(x), c(0,1))){
+    if (length(unique(x)) > 2) stop('Forcing binary method for factor variable is meaningless.')
+    if (length(unique(x)) == 1) return(100)
+    if (length(unique(x)) != length(levels(x))) x <- factor(x, levels = unique(x), exclude=NULL)
+    if (all(!is.na(levels(x))))
+      warning('Binary method apply to non logical variable. This will calculate the pct of x != ref_lv')
+    x <- x == levels(x)[2]
+  }
+
+  res <- switch(method,
+                bin = ._pct_bin(x, na.rm),
+                cont = ._pct_cont(x, na.rm, ...),
+                fct = ._pct_fct(x, na.rm))
+
+  return(res)
+}
+
+._pct_get_method <- function(x){
+  if (is.logical(x) | length(unique(x)) <= 2) return('bin')
+  if (is.factor(x) | is.character(x) | (is.numeric(x) & length(unique(x)) <= 5)) return('fct')
+  return('cont')
+}
+
+._pct_bin <- function(x, na.rm = TRUE){
+  n <- if (na.rm) sum(!is.na(x)) else length(x)
+  return(sum(x, na.rm = TRUE)/n*100)
+}
+
+._pct_fct <- function(x, na.rm = TRUE){
+  n <- if (na.rm) sum(!is.na(x)) else length(x)
+  lvs <- if (na.rm) levels(x) else levels(addNA(x, ifany = TRUE))
+  sapply(lvs,
+         function(lv){
+           sum(x == lv)/n*100
+         })
+}
+
+._pct_cont <- function(x, na.rm = TRUE, ...){
+  if (na.rm) x <- na.omit(x)
+  x <- cut(x, ...)
+  lv <- levels(addNA(as.factor(x), ifany = TRUE))
+  if (any(is.na(lv))) lv <- c(NA, lv[!is.na(lv)])
+  x2 <- factor(x, levels = lv, exclude = NULL)
+  # browser()
+  pct(x2, method = 'auto', na.rm = FALSE)
+}
+
+# Reverse levels
+# For public use, please use forcats::fct_rev
+._lv_rev_ <- function(x){
+  new_x <- factor(x, levels=rev(levels(x)), exclude=NULL)
+  attributes(new_x) <- utils::modifyList(attributes(x), attributes(new_x))
+  new_x
+}

@@ -24,4 +24,27 @@ createProject <- function(dir, structure = c("OUCRU_RCT_wInterim")){
   # inform
   cat(paste("Project", basename(dir), "was created in", dirname(dir), "\n", sep = " "))
 }
+#' @export
+createProject2 <- function(dir, structure = c("Project")){
+  ## to create project directory
+  ## initial version: 23 July 2015
 
+  if (length(structure) > 1) {structure <- "Project"}
+
+  ## create destination folder
+  dir.create(dir)
+
+  ## copy folder structure into destination folder
+  file.copy(from = file.path(system.file(package = "C306"), "structure", structure, "."),
+            to = dir, recursive = TRUE)
+  file.rename(from = file.path(dir, "Analysis"), to = file.path(dir, paste0(basename(dir), "_Analysis")))
+  file.rename(from = file.path(dir, "Published"), to = file.path(dir, paste0(basename(dir), "_Published")))
+
+  ## populate workflowr
+  if ("workflowr" %in% rownames(installed.packages())) {
+    workflowr::wflow_start(file.path(dir, paste0(basename(dir), "_Published")), existing = TRUE, overwrite = TRUE)
+  }
+
+  # inform
+  cat(paste("Project", basename(dir), "was created in", dirname(dir), "\n", sep = " "))
+}

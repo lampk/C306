@@ -65,14 +65,17 @@ inspect.data <- function (data, info, id, check_missing = c(TRUE, FALSE), plot =
                     lapply(X = 1:ncol(data),
                            FUN = function(x) {
                              tmpdata <- data[, x]
+                             tmprow <- seq_len(nrow(data))
                              if ("condition" %in% names(info)) {
                                if (!is.na(info$condition[x])) {
                                  ## match variable name is condition
                                  tmpcondition <- find_match_correct_var_final(cond = info$condition[x], realvar = names(data))
                                  tmpdata <- eval(parse(text = paste0("subset(data,", tmpcondition, ")[, x]")))
+                                 tmprow <- with(data, which(eval(parse(text=tmpcondition))))
                                }
                              }
                              inspect.each(x = tmpdata,
+                                          id = tmprow,
                                           varname = info$varname[x],
                                           value = info$value[x],
                                           type = info$type[x],
@@ -94,8 +97,11 @@ inspect.data <- function (data, info, id, check_missing = c(TRUE, FALSE), plot =
     N <- nrow(data)
     for (i in (1:length(info$varname))) {
       tmpdata <- data[, names(data)[tolower(names(data)) == tolower(info$varname[i])]]
-      tmplabel <- substr(gsub(pattern = "[\x01-\x1f\x7f-\xff:]", replacement = "",
-                              x = info$label[i]), start = 1, stop = 30)
+      # tmplabel <- substr(gsub(pattern = "[\x01-\x1f\x7f-\xff:]", replacement = "",
+      #                         x = info$label[i]), start = 1, stop = 30)
+      tmplabel <- substr(stringi::stri_trans_general(
+        info$label[i],
+        id="Latin-ASCII"), start=1, stop=30) |> gsub("?", "", x=_, fixed=TRUE)
       if (length(na.omit(tmpdata)) == 0) {
         plot(x = 1:10, y = 1:10,
              main = paste(info$varname[i], "\n (", tmplabel, ")", " \n (", info$type[i], ")", sep = ""),
@@ -109,8 +115,12 @@ inspect.data <- function (data, info, id, check_missing = c(TRUE, FALSE), plot =
           x <- barplot(table(tmpdata),
                        main = paste(info$varname[i], "\n (", tmplabel, ")", " \n (", info$type[i], ", N=", N, ", missing=", nNA, ")", sep = ""),
                        xaxt = "n")
-          labs <- substr(gsub(pattern = "[\x01-\x1f\x7f-\xff:]", replacement = "",
-                              x = names(table(tmpdata))), start = 1, stop = 10)
+          # labs <- substr(gsub(pattern = "[\x01-\x1f\x7f-\xff:]", replacement = "",
+          #                     x = names(table(tmpdata))), start = 1, stop = 10)
+          labs <- substr(gsub(pattern = "?", replacement = "", fixed=TRUE,
+                              x = stringi::stri_trans_general(
+                                names(table(tmpdata)),
+                                id="Latin-ASCII")), start = 1, stop = 10)
           text(cex = 1, x = x, y = 0, labs, xpd = TRUE, srt = 45, adj = 1)
         }
         else {
@@ -137,25 +147,25 @@ inspect.data <- function (data, info, id, check_missing = c(TRUE, FALSE), plot =
   }
 }
 
-inspect.each <- function (x, varname, type, value = NA, check_missing = TRUE) {
+inspect.each <- function (x, id, varname, type, value = NA, check_missing = TRUE) {
   tmp <- NULL
   if (check_missing) {
     if (anyNA(x) | any(as.character(x) == "")) {
-      tmp <- rbind(tmp, data.frame(index = which(is.na(x) |
-                                                   as.character(x) == ""), error = paste("Missing value for",
+      tmp <- rbind(tmp, data.frame(index = id[is.na(x) |
+                                                   as.character(x) == ""], error = paste("Missing value for",
                                                                                          varname)))
     }
   }
   if (type == "numeric" & (!is.na(value) & value != "")) {
     range <- as.numeric(unlist(strsplit(value, split = ";")))
     if (any(x < range[1] & !is.na(x))) {
-      tmp <- rbind(tmp, data.frame(index = which(!is.na(x) &
-                                                   x < range[1]), error = paste("Out of range:",
+      tmp <- rbind(tmp, data.frame(index = id[!is.na(x) &
+                                                   x < range[1]], error = paste("Out of range:",
                                                                                 varname, "<", range[1])))
     }
     if (any(x > range[2] & !is.na(x))) {
-      tmp <- rbind(tmp, data.frame(index = which(!is.na(x) &
-                                                   x > range[2]), error = paste("Out of range:",
+      tmp <- rbind(tmp, data.frame(index = id[!is.na(x) &
+                                                   x > range[2]], error = paste("Out of range:",
                                                                                 varname, ">", range[2])))
     }
   }
@@ -165,8 +175,8 @@ inspect.each <- function (x, varname, type, value = NA, check_missing = TRUE) {
                     USE.NAMES = FALSE)
     if (any(!x %in% range & !is.na(x))) {
       xx <- x[!is.na(x) & !x %in% range]
-      tmp <- rbind(tmp, data.frame(index = which(!is.na(x) &
-                                                   !x %in% range), error = paste("Out of range:",
+      tmp <- rbind(tmp, data.frame(index = id[!is.na(x) &
+                                                   !x %in% range], error = paste("Out of range:",
                                                                                  varname, "=", xx)))
     }
   }

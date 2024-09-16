@@ -4,15 +4,38 @@
 \alias{sstable.baseline}
 \title{Create baseline table}
 \usage{
-sstable.baseline(formula, data, bycol = TRUE, pooledGroup = FALSE,
-  statistics = "med.IQR", continuous = NA, fullfreq = TRUE,
-  digits = 1, test = FALSE, pdigits = 3, pcutoff = 1e-04,
-  chisq.test = FALSE, correct = FALSE, simulate.p.value = FALSE,
-  B = 2000, workspace = 1e+06, hybrid = FALSE, footer = NULL,
-  flextable = FALSE, bg = "#F2EFEE")
+sstable.baseline(
+  formula,
+  data,
+  bycol = TRUE,
+  pooledGroup = FALSE,
+  keepEmptyGroup = FALSE,
+  statistics = "mean, median (Q1-Q3)",
+  cont = NULL,
+  cate = NULL,
+  fullfreq = TRUE,
+  digits = 1,
+  test = FALSE,
+  pdigits = 3,
+  pcutoff = 1e-04,
+  chisq.test = FALSE,
+  correct = FALSE,
+  simulate.p.value = FALSE,
+  B = 2000,
+  workspace = 1e+06,
+  hybrid = FALSE,
+  footer = NULL,
+  flextable = FALSE,
+  bg = "#F2EFEE",
+  df = FALSE
+)
 }
 \arguments{
-\item{formula}{a formula specifies variables for rows, variable for column and third-dimension variable.}
+\item{formula}{a formula specifies variables for rows, variable for column and third-dimension variable.
+
+If formula is in the form of x+y ~ a, the function will summary x and y with respects to each value of a
+
+If formula is in the form of x+y ~ a|z, the function will summary z with respects to each value of {a,x} and {a, y}}
 
 \item{data}{a data frame to derive baseline table from.}
 
@@ -20,9 +43,13 @@ sstable.baseline(formula, data, bycol = TRUE, pooledGroup = FALSE,
 
 \item{pooledGroup}{a logical value specifies whether to pool all subgroups of column variable.}
 
+\item{keepEmptyGroup}{a logical value specifying whether should keep empty groups}
+
 \item{statistics}{a character specifies summary statistics for continuous row variables.}
 
-\item{continuous}{a logical vector specifies whether each row variables is continuous or categorical.}
+\item{cont}{a vector specifies whether each row variables is continuous.}
+
+\item{cate}{a vector specifies whether each row variables is categorical.}
 
 \item{digits}{a number specifies number of significant digits for numeric statistics.}
 
@@ -49,6 +76,8 @@ sstable.baseline(formula, data, bycol = TRUE, pooledGroup = FALSE,
 \item{flextable}{a logical value specifies whether output will be a flextable-type table.}
 
 \item{bg}{a character specifies color of the odd rows in the body of flextable-type table.}
+
+\item{df}{a logical values specifies whether output will be a draw dataframe.}
 }
 \value{
 a flextable-type table or a list with values/headers/footers

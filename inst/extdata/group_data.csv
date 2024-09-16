@@ -1,0 +1,89 @@
+ctcaename,class
+Nausea,Digestive
+Back pain,Musculoskeletal
+Viral infection,Infectious
+Headache,Neurological
+Phlebitis,Cardiovascular
+Gastritis,Digestive
+Constipation,Digestive
+Hemorrhoids,Digestive
+Skin allergy,Allergic
+Pharyngitis,Respiratory
+Hospital acquired pneumonia,Infectious
+UTI,Infectious
+Fever,General
+Neuralgia,Neurological
+Hiccup,Digestive
+Myocardial ischaemia,Cardiovascular
+Oral infection,Infectious
+Upper gastrointestinal hemorrhage,Digestive
+Otitis,Infectious
+Atrial thrombosis,Cardiovascular
+Spinal disc herniation,Musculoskeletal
+Sinusitis,Respiratory
+Facial nerve disorder,Neurological
+Urinary retention,Urinary
+Hyperglycaemia,Metabolic
+Chills,General
+Arthritis,Musculoskeletal
+Aspiration pneumonia,Respiratory
+Ventilator associated pneumonia,Respiratory
+arthralgia,Musculoskeletal
+Tracheal hemorrhage,Respiratory
+Hypotension,Cardiovascular
+Nose bleed,Respiratory
+Wound infection,Infectious
+Allergy,Allergic
+Hyponatremia,Metabolic
+Cellulitis,Infectious
+Blood stream infection,Infectious
+Hypokalemia,Metabolic
+Hypocalcemia,Metabolic
+Torticolis,Musculoskeletal
+Myocarditis,Cardiovascular
+Insomnia,Neurological
+Conjunctivitis,Infectious
+Cardiac arrest,Cardiovascular
+Voice alteration,Neurological
+Necrotic wound,Infectious
+Hypomagnesemia,Metabolic
+Hematuria,Urinary
+Subcutaneous emphysema,Respiratory
+Heat stroke,General
+Atrial fibrillation,Cardiovascular
+Dizziness,Neurological
+Failed extubation,Respiratory
+Appendicitis,Digestive
+Deep vein thrombosis,Cardiovascular
+Acute renal failure,Urinary
+Wound bleed,Digestive
+Arthralgia,Musculoskeletal
+Anemia,Hematologic
+Bruising,Hematologic
+Pressure ulcer,Skin
+Tracheal stenosis,Respiratory
+Upper respiratory infection,Respiratory
+Recurrent tetanus,Neurological
+Gastrointestinal disorder,Digestive
+Chronic venous insufficiency,Cardiovascular
+Pneumothorax,Respiratory
+Hyperpyrexia,General
+Arterial thromboembolism,Cardiovascular
+Hypernatremia,Metabolic
+Creatinine increase,Metabolic
+Hypertension,Cardiovascular
+Dysphagia,Digestive
+Cerebral hemorrhage,Neurological
+Cholangitis,Digestive
+Pleural abscess,Respiratory
+Pyloric stenosis,Cardiovascular
+Sinus bradycardia,Cardiovascular
+Pruritus,Allergic
+Myalgia,Musculoskeletal
+Adrenal insufficiency,Endocrine
+Rhabdomyolysis,Musculoskeletal
+Platelet count decreased,Hematologic
+"Low weight, muscle wasting",General
+Postoperative hemorrhage,Cardiovascular
+Hypoalbuminemia,Metabolic
+Cerebral infarction,Neurological
