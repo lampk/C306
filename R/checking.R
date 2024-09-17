@@ -94,8 +94,9 @@ inspect.data <- function (data, info, id, check_missing = c(TRUE, FALSE), plot =
     N <- nrow(data)
     for (i in (1:length(info$varname))) {
       tmpdata <- data[, names(data)[tolower(names(data)) == tolower(info$varname[i])]]
-      tmplabel <- substr(gsub(pattern = "[\x01-\x1f\x7f-\xff:]", replacement = "",
-                              x = info$label[i]), start = 1, stop = 30)
+      # tmplabel <- substr(gsub(pattern = "[\x01-\x1f\x7f-\xff:]", replacement = "",
+      #                         x = info$label[i]), start = 1, stop = 30)
+      tmplabel <- substr(stringi::iconv(info$label[i], to='ASCII//TRANSLIT'), start=1, stop=30) |> gsub("?", "", x=_, fixed=TRUE)
       if (length(na.omit(tmpdata)) == 0) {
         plot(x = 1:10, y = 1:10,
              main = paste(info$varname[i], "\n (", tmplabel, ")", " \n (", info$type[i], ")", sep = ""),
@@ -109,8 +110,10 @@ inspect.data <- function (data, info, id, check_missing = c(TRUE, FALSE), plot =
           x <- barplot(table(tmpdata),
                        main = paste(info$varname[i], "\n (", tmplabel, ")", " \n (", info$type[i], ", N=", N, ", missing=", nNA, ")", sep = ""),
                        xaxt = "n")
-          labs <- substr(gsub(pattern = "[\x01-\x1f\x7f-\xff:]", replacement = "",
-                              x = names(table(tmpdata))), start = 1, stop = 10)
+          # labs <- substr(gsub(pattern = "[\x01-\x1f\x7f-\xff:]", replacement = "",
+          #                     x = names(table(tmpdata))), start = 1, stop = 10)
+          labs <- substr(gsub(pattern = "?", replacement = "", fixed=TRUE,
+                              x = stringi::iconv(names(table(tmpdata)), to='ASCII//TRANSLIT')), start = 1, stop = 10)                    
           text(cex = 1, x = x, y = 0, labs, xpd = TRUE, srt = 45, adj = 1)
         }
         else {

@@ -10,15 +10,20 @@
 \usage{
 simple_recode(...)
 
-\method{simple_recode}{data.frame}(.data, ..., ignore.case = FALSE,
-  perl = TRUE)
+\method{simple_recode}{data.frame}(.data, ..., ignore.case = FALSE, fixed = FALSE, perl = TRUE)
 
-\method{simple_recode}{default}(x, map, as = c("as_is", "numeric",
-  "factor", "character", "logical"), ignore.case = FALSE, perl = TRUE,
-  ...)
+\method{simple_recode}{default}(
+  x,
+  map,
+  as = c("as_is", "numeric", "factor", "character", "logical"),
+  ignore.case = FALSE,
+  fixed = FALSE,
+  perl = TRUE,
+  ...
+)
 }
 \arguments{
-\item{...}{For data.frame: Replacement in the form of var = map. Maps must follow the syntax stipulated in the map parameter.
+\item{...}{For method for data.frame: Replacement in the form of var = map. Maps must follow the syntax stipulated in the map parameter.
 
 For default method: Additional parameters passed to factor()}
 
@@ -48,7 +53,7 @@ If input is a vector, return a vector of the same length.
 If input is a data frame, return a data frame with relevant variables recoded.
 }
 \description{
-A function to re-encode data by using a map. Patterns are accepted. unmentioned data are left intact.
+A function to re-encode data by using a map. Patterns are accepted. Unmentioned data are left intact.
 
 Method for class data.frame supports a robust replacement for data by providing relevant map in the form of var = map.
 }
